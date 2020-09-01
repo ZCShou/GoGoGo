@@ -25,4 +25,15 @@
         <item name="android:radius">14dp</item>
     </style>
 
+    <!-- 修改tablayout的背景色，提示线的颜色，字体颜色等-->
+    <style name="TabLayout.Bar" parent="AppTheme">
+        <item name="tabBackground">@color/cadetblue</item>
+        <item name="tabTextAppearance">@style/TabLayout.Bar.Txt</item>
+        <item name="tabSelectedTextColor">#3D87FB</item>
+    </style>
+
+    <style name="TabLayout.Bar.Txt" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
 </resources>
