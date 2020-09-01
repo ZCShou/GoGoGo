@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.baidu.mapapi.map.offline.MKOLUpdateElement;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import static com.zcshou.gogogo.FragmentDownMap.mOffline;
 
@@ -136,7 +137,7 @@ public class FragmentLocalMap extends Fragment {
             TextView title = view.findViewById(R.id.title);
             TextView update = view.findViewById(R.id.update);
             TextView ratio = view.findViewById(R.id.ratio);
-            ratio.setText(e.ratio + "%");
+            ratio.setText(String.format(Locale.getDefault(), "%d%%", e.ratio ));
             title.setText(e.cityName);
             
             if (e.update) {

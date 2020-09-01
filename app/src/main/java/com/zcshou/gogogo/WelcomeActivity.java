@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class WelcomeActivity extends AppCompatActivity {
     private Button startBtn;
@@ -39,7 +40,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
         cnt = Integer.parseInt(getResources().getString (R.string.welcome_btn_cnt));
         time = new TimeCount(cnt, 1000);
-        startBtn = (Button)findViewById(R.id.startButton);
+        startBtn = findViewById(R.id.startButton);
         //startBtn.setClickable(false);
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -151,7 +152,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
         @Override
         public void onTick(long millisUntilFinished) { //计时过程显示
-            startBtn.setText(millisUntilFinished / 1000 + "秒");
+            startBtn.setText(String.format(Locale.getDefault(), "%d秒", millisUntilFinished / 1000));
         }
     }
 

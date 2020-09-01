@@ -94,7 +94,7 @@ public class GoGoGoService extends Service {
         handler = new Handler(handlerThread.getLooper()) {
             public void handleMessage(@NonNull Message msg) {
                 try {
-                    Thread.sleep(50);
+                    Thread.sleep(80);
 
                     if (!isStop) {
                         setNetworkLocation();
