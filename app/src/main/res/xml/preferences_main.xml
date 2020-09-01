@@ -1,0 +1,46 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/setting_group_move">
+
+        <EditTextPreference
+            app:key="setting_walk"
+            app:title="@string/setting_walk" 
+            app:defaultValue="3"
+            app:summary="@string/setting_move_summary"/>
+
+        <EditTextPreference
+            app:key="setting_run"
+            app:title="@string/setting_run"
+            app:defaultValue="6"
+            app:summary="@string/setting_move_summary"/>
+
+        <EditTextPreference
+            app:key="setting_bike"
+            app:title="@string/setting_bike"
+            app:defaultValue="9"
+            app:summary="@string/setting_move_summary"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/setting_group_log">
+
+        <EditTextPreference
+            app:key="setting_log_off"
+            app:title="@string/setting_log_off" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/setting_group_about">
+
+        <Preference
+            app:key="setting_version"
+            app:title="@string/setting_version"/>
+
+        <Preference
+            app:key="setting_author"
+            app:title="@string/setting_author"
+            app:defaultValue="s"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

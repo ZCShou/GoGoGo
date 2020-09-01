@@ -1,0 +1,28 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/cadetblue</item>
+        <item name="colorPrimaryDark">@color/darkcyan</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <!-- 参考 https://blog.csdn.net/qq_37299249/article/details/78536772 -->
+    <style name="RippleWhite">
+        <!-- 点击后波纹的颜色 -->
+        <item name="android:colorControlHighlight">#67899B</item>
+        <!-- 效果半径-->
+        <item name="android:radius">14dp</item>
+    </style>
+
+</resources>

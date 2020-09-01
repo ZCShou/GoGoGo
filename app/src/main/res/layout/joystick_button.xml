@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <AbsoluteLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <ImageButton
+            android:id="@+id/btn_north"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_x="32dp"
+            android:layout_y="0dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/map_home"
+            android:src="@drawable/ic_up"
+            android:theme="@style/RippleWhite" />
+
+        <ImageButton
+            android:id="@+id/btn_west"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_x="0dp"
+            android:layout_y="32dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/map_home"
+            android:src="@drawable/ic_left"
+            android:theme="@style/RippleWhite" />
+
+        <ImageButton
+            android:id="@+id/btn_center"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_x="32dp"
+            android:layout_y="32dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/map_home"
+            android:src="@drawable/ic_lock_open"
+            android:theme="@style/RippleWhite" />
+
+        <ImageButton
+            android:id="@+id/btn_east"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_x="64dp"
+            android:layout_y="32dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/map_home"
+            android:src="@drawable/ic_right"
+            android:theme="@style/RippleWhite" />
+
+        <ImageButton
+            android:id="@+id/btn_south"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_x="32dp"
+            android:layout_y="64dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/map_home"
+            android:src="@drawable/ic_down"
+            android:theme="@style/RippleWhite" />
+
+    </AbsoluteLayout>
+
+</LinearLayout>
+

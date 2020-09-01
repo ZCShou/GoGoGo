@@ -1,0 +1,73 @@
+<resources>
+    <string name="app_name">GoGoGo</string>
+    <!-- 欢迎页 -->
+    <string name="welcome_btn_txt">进入应用</string>
+    <string name="welcome_btn_cnt">4000</string>
+    <string name="author">Author: zcsexp@gmail.com</string>
+
+    <string name="fabtn_start">启动定位</string>
+    <string name="fabtn_stop">停止定位</string>
+
+    <string name="label_longitude">经度</string>
+    <string name="label_latitude">纬度</string>
+
+    <string name="offline_map_tips_all">全国</string>
+    <string name="offline_map_tips_hot">热门城市</string>
+    <string name="local_map_city">城市</string>
+    <string name="local_map_update">更新</string>
+    <string name="local_map_delete">删除</string>
+    <string name="local_map_idle">暂无离线地图</string>
+    <string name="history_idle">暂无历史记录</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">世界这么大，我想去看看</string>
+    <string name="nav_header_subtitle">zcsexp@gmail.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="package_name">com.zcshou.gogogo</string>
+    <!-- 导航菜单 -->
+    <string name="welcome_cnt">世界这么大，我想去看看</string>
+    <string name="nav_menu_history">历史记录</string>
+    <string name="nav_menu_offline_map">离线地图</string>
+    <string name="nav_menu_settings">设置</string>
+    <string name="nav_menu_dev">开发人员选项</string>
+    <string name="nav_menu_feedback">问题反馈</string>
+    <string name="nav_menu_us">联系</string>
+
+    <!-- 主菜单 -->
+    <string name="main_menu_action_latlng">经纬度定位</string>
+    <string name="main_menu_action_history">历史记录</string>
+    <string name="main_menu_action_setting">设置</string>
+
+    <!-- 设置界面 -->
+    <string name="title_activity_settings">设置</string>
+    <string name="setting_group_move">移动</string>
+    <string name="setting_move_summary">不建议将速度设置过大</string>
+    <string name="setting_walk">步行速度</string>
+    <string name="setting_run">跑步速度</string>
+    <string name="setting_bike">驾驶速度</string>
+    <string name="setting_group_log">日志</string>
+    <string name="setting_log_off">关闭日志</string>
+    <string name="setting_group_about">关于</string>
+    <string name="setting_version">版本号</string>
+    <string name="setting_author">开发作者</string>
+
+    <!-- 百度地图 -->
+    <string name="map_pic_hot">热力图</string>
+    <string name="map_pic_road">路况图</string>
+    <string name="map_pic_sate">卫星图</string>
+    <string name="map_pic_normal">普通图</string>
+    <string name="map_home">Home</string>
+    <string name="map_compass">罗盘</string>
+    <string name="map_track">跟踪</string>
+    <string name="map_normal">正常</string>
+    <string name="safecode">32:2F:E6:05:6C:2F:11:6D:CD:ED:AC:FF:23:02:5A:29:68:FD:45:D2;com.zcshou.gogogo</string>
+    <string name="ak">fb7YwlKY3ntx8hBDGMGLqX2FhlPkDMvv</string>
+
+    <!-- 菜单项名称 -->
+    <string name="action_delete">删除</string>
+    <string name="action_all">全选</string>
+    <string name="action_cancel">取消</string>
+
+</resources>

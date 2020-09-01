@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group>
+        <item
+            android:id="@+id/nav_history"
+            android:icon="@drawable/ic_menu_history"
+            android:title="@string/nav_menu_history" />
+        <item
+            android:id="@+id/nav_localmap"
+            android:icon="@drawable/ic_menu_map"
+            android:title="@string/nav_menu_offline_map" />
+    </group>
+    
+    <group>
+        <item android:title="@string/nav_menu_settings">
+            <menu>
+                <item
+                    android:id="@+id/nav_settings"
+                    android:icon="@drawable/ic_menu_settings"
+                    android:title="@string/nav_menu_settings" />
+                <item
+                    android:id="@+id/nav_dev"
+                    android:icon="@drawable/ic_menu_dev"
+                    android:title="@string/nav_menu_dev" />
+            </menu>
+        </item>
+    </group>
+
+    <item android:title="@string/nav_menu_us">
+        <menu>
+            <item
+                android:id="@+id/nav_bug_report"
+                android:icon="@drawable/ic_menu_feedback"
+                android:title="@string/nav_menu_feedback" />
+        </menu>
+    </item>
+
+</menu>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:background="@drawable/circle_shape"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/joystick_move"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="false"
+                android:contentDescription="@string/map_home"
+                android:src="@drawable/ic_move"
+                android:theme="@style/RippleWhite" />
+        </LinearLayout>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:background="@drawable/circle_shape"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/joystick_history"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/map_home"
+                android:src="@drawable/ic_history"
+                android:theme="@style/RippleWhite"/>
+        </LinearLayout>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:background="@drawable/circle_shape"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/joystick_input"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/map_home"
+                android:src="@drawable/ic_position"
+                android:theme="@style/RippleWhite"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <com.zcshou.joystick.ButtonView
+        android:id="@+id/joystick_view"
+        android:padding="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:background="@drawable/circle_shape"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/joystick_walk"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/map_home"
+                android:src="@drawable/ic_walk_pressed"
+                android:theme="@style/RippleWhite"/>
+        </LinearLayout>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:background="@drawable/circle_shape"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/joystick_run"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/map_home"
+                android:src="@drawable/ic_run"
+                android:theme="@style/RippleWhite"/>
+        </LinearLayout>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:background="@drawable/circle_shape"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/joystick_bike"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/map_home"
+                android:src="@drawable/ic_bike"
+                android:theme="@style/RippleWhite"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
+
