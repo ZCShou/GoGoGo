@@ -15,7 +15,8 @@ public class OfflineMapActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_offline_map);
 
-        OfflineMapFragmentPagerAdapter pagerAdapter = new OfflineMapFragmentPagerAdapter(getSupportFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT,this);
+        OfflineMapFragmentPagerAdapter pagerAdapter = new OfflineMapFragmentPagerAdapter(getSupportFragmentManager(),
+                FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT,this);
 
         ViewPager viewPager = findViewById(R.id.viewpager);
         viewPager.setAdapter(pagerAdapter);

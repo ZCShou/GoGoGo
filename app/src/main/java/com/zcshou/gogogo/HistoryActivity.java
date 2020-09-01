@@ -60,8 +60,8 @@ public class HistoryActivity extends AppCompatActivity {
 
         //sqlite
         try {
-            HistoryLocationDataBaseHelper HistoryLocationDataBaseHelper = new HistoryLocationDataBaseHelper(getApplicationContext());
-            sqLiteDatabase = HistoryLocationDataBaseHelper.getWritableDatabase();
+            HistoryLocationDataBaseHelper hisLocDBHelper = new HistoryLocationDataBaseHelper(getApplicationContext());
+            sqLiteDatabase = hisLocDBHelper.getWritableDatabase();
         } catch (Exception e) {
             Log.e("HistoryActivity", "SQLiteDatabase init error");
             e.printStackTrace();
