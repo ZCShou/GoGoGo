@@ -79,6 +79,8 @@ public class GoGoGoService extends Service {
         rmNetworkTestProvider();
         //remove gps provider
         rmGPSTestProvider();
+        //remove other provider
+        rmOtherTestProvider();
 
         //add a new test network location provider
         setNetworkTestProvider();
@@ -92,11 +94,12 @@ public class GoGoGoService extends Service {
         handler = new Handler(handlerThread.getLooper()) {
             public void handleMessage(@NonNull Message msg) {
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(50);
 
                     if (!isStop) {
                         setNetworkLocation();
                         setGPSLocation();
+
                         sendEmptyMessage(0);
 
                         // broadcast to MainActivity
@@ -208,6 +211,7 @@ public class GoGoGoService extends Service {
         //remove test provider
         rmNetworkTestProvider();
         rmGPSTestProvider();
+        rmOtherTestProvider();
 
         stopForeground(true);
 
@@ -216,6 +220,7 @@ public class GoGoGoService extends Service {
         intent.putExtra("StatusRun", StopCode);
         intent.setAction("com.zcshou.service.GoGoGoService");
         sendBroadcast(intent);
+
         super.onDestroy();
     }
 
@@ -239,8 +244,8 @@ public class GoGoGoService extends Service {
 
     //添加网络定位
     private void setNetworkLocation() {
-        Log.d(TAG, "setNetworkLocation: " + curLatLng);
-        log.debug(TAG + ": setNetworkLocation: " + curLatLng);
+        // Log.d(TAG, "setNetworkLocation: " + curLatLng);
+        // log.debug(TAG + ": setNetworkLocation: " + curLatLng);
 
         String[] latLngStr = curLatLng.split("&");
         LatLng latLng = new LatLng(Double.parseDouble(latLngStr[1]), Double.parseDouble(latLngStr[0]));
@@ -258,8 +263,8 @@ public class GoGoGoService extends Service {
 
     //set gps location
     private void setGPSLocation() {
-        Log.d(TAG, "setGPSLocation: " + curLatLng);
-        log.debug(TAG + ": setGPSLocation: " + curLatLng);
+        // Log.d(TAG, "setGPSLocation: " + curLatLng);
+        // log.debug(TAG + ": setGPSLocation: " + curLatLng);
         String[] latLngStr = curLatLng.split("&");
         LatLng latLng = new LatLng(Double.parseDouble(latLngStr[1]), Double.parseDouble(latLngStr[0]));
         String providerStr = LocationManager.GPS_PROVIDER;
@@ -276,12 +281,10 @@ public class GoGoGoService extends Service {
     //remove network provider
     private void rmNetworkTestProvider() {
         try {
-            String providerStr = LocationManager.NETWORK_PROVIDER;
-
-            if (locationManager.isProviderEnabled(providerStr)) {
+            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                 Log.d(TAG, "now remove NetworkProvider");
                 log.debug(TAG + ": now remove NetworkProvider");
-                locationManager.removeTestProvider(providerStr);
+                locationManager.removeTestProvider(LocationManager.NETWORK_PROVIDER);
             } else {
                 Log.d(TAG, "NetworkProvider is not enabled");
                 log.debug(TAG + ": NetworkProvider is not enabled");
@@ -295,10 +298,8 @@ public class GoGoGoService extends Service {
 
     //set network provider
     private void setNetworkTestProvider() {
-        String providerStr = LocationManager.NETWORK_PROVIDER;
-
         try {
-            locationManager.addTestProvider(providerStr, true, false,
+            locationManager.addTestProvider(LocationManager.NETWORK_PROVIDER, true, false,
                     false, false, false, false,
                     false, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
             Log.d(TAG, "addTestProvider[NETWORK_PROVIDER] success");
@@ -309,9 +310,9 @@ public class GoGoGoService extends Service {
             log.debug(TAG + ": addTestProvider[NETWORK_PROVIDER] error");
         }
 
-        if (!locationManager.isProviderEnabled(providerStr)) {
+        if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             try {
-                locationManager.setTestProviderEnabled(providerStr, true);
+                locationManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.d(TAG, "setTestProviderEnabled[NETWORK_PROVIDER] error");
@@ -328,12 +329,10 @@ public class GoGoGoService extends Service {
     // set GPS provider
     private void rmGPSTestProvider() {
         try {
-            String providerStr = LocationManager.GPS_PROVIDER;
-
-            if (locationManager.isProviderEnabled(providerStr)) {
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 Log.d(TAG, "now remove GPSProvider");
                 log.debug(TAG + ": now remove GPSProvider");
-                locationManager.removeTestProvider(providerStr);
+                locationManager.removeTestProvider(LocationManager.GPS_PROVIDER);
             } else {
                 Log.d(TAG, "GPSProvider is not enabled");
                 log.debug(TAG + ": GPSProvider is not enabled");
@@ -346,6 +345,18 @@ public class GoGoGoService extends Service {
     }
 
     private void setGPSTestProvider() {
+        if (!locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
+            locationManager.setTestProviderEnabled(LocationManager.PASSIVE_PROVIDER, false);
+            Log.d(TAG, "Disable passive provider");
+            log.debug(TAG + ": Disable passive provider");
+        }
+
+        if (!locationManager.isProviderEnabled("fused")) {
+            locationManager.setTestProviderEnabled("fused", false);
+            Log.d(TAG, "Disable fused provider");
+            log.debug(TAG + ": Disable fused provider");
+        }
+
         try {
             locationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, true,
                     false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_HIGH);
@@ -371,6 +382,22 @@ public class GoGoGoService extends Service {
         locationManager.setTestProviderStatus(LocationManager.GPS_PROVIDER, LocationProvider.AVAILABLE, null,
                 System.currentTimeMillis());
     }
+
+    // set other provider
+    private void rmOtherTestProvider() {
+        if (!locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
+            locationManager.setTestProviderEnabled(LocationManager.PASSIVE_PROVIDER, false);
+            Log.d(TAG, "Disable passive provider");
+            log.debug(TAG + ": Disable passive provider");
+        }
+
+        if (!locationManager.isProviderEnabled("fused")) {
+            locationManager.setTestProviderEnabled("fused", false);
+            Log.d(TAG, "Disable fused provider");
+            log.debug(TAG + ": Disable fused provider");
+        }
+    }
+
 
     //uuid random
     public static String getUUID() {

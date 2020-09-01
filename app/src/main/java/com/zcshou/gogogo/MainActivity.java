@@ -1765,9 +1765,9 @@ public class MainActivity extends AppCompatActivity
 
             StatusRun = bundle.getInt("StatusRun");
 
-            Log.d("DEBUG", "BroadcastReceiver statusCode: " + StatusRun + "");
-            log.debug("DEBUG: BroadcastReceiver statusCode: " + StatusRun + "");
-            
+            // Log.d("DEBUG", "BroadcastReceiver statusCode: " + StatusRun + "");
+            // log.debug("DEBUG: BroadcastReceiver statusCode: " + StatusRun + "");
+
             if (StatusRun == RunCode) {
                 isServiceRun = true;
             } else if (StatusRun == StopCode) {
