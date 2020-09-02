@@ -31,7 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
         android:textSize="13sp"
-        android:text="@string/author"
+        android:text="@string/author_email"
         android:layout_margin="3dp"
         tools:ignore="SmallSp" />
 

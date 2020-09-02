@@ -3,7 +3,9 @@
     <!-- 欢迎页 -->
     <string name="welcome_btn_txt">进入应用</string>
     <string name="welcome_btn_cnt">4000</string>
-    <string name="author">Author: zcsexp@gmail.com</string>
+    <string name="author">ZCShou</string>
+    <string name="author_email">Author: zcsexp@gmail.com</string>
+    <string name="app_limit">当前版本无任何使用限制</string>
 
     <string name="fabtn_start">启动定位</string>
     <string name="fabtn_stop">停止定位</string>
@@ -21,10 +23,7 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">世界这么大，我想去看看</string>
-    <string name="nav_header_subtitle">zcsexp@gmail.com</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
     <string name="package_name">com.zcshou.gogogo</string>
     <!-- 导航菜单 -->
     <string name="welcome_cnt">世界这么大，我想去看看</string>
@@ -54,6 +53,7 @@
     <string name="setting_group_about">关于</string>
     <string name="setting_version">版本号</string>
     <string name="setting_author">开发作者</string>
+    <string name="setting_device_id">设备唯一标识</string>
 
     <!-- 百度地图 -->
     <string name="map_pic_hot">热力图</string>

@@ -15,7 +15,7 @@
             android:id="@+id/sliding_tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabTextAppearance="@style/TabLayout.Bar.Txt"/>
+            app:tabTextAppearance="@style/AppTheme.TabLayout"/>
 
         <ImageButton
             android:id="@+id/back"

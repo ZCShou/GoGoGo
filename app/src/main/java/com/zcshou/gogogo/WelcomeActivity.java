@@ -10,6 +10,7 @@ import android.os.CountDownTimer;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import android.view.Gravity;
 import android.view.View;
@@ -23,6 +24,7 @@ public class WelcomeActivity extends AppCompatActivity {
     private Button startBtn;
     private TimeCount time;
     int cnt;
+    boolean isPermission;
     static final  int SDK_PERMISSION_REQUEST = 127;
     ArrayList<String> ReqPermissions = new ArrayList<>();
 
@@ -37,6 +39,11 @@ public class WelcomeActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.welcome);
+
+        // 生成默认参数的值（一定要尽可能早的调用，因为后续有些界面可能需要使用参数）
+        PreferenceManager.setDefaultValues(this, R.xml.preferences_main, false);
+
+        isPermission = false;
 
         cnt = Integer.parseInt(getResources().getString (R.string.welcome_btn_cnt));
         time = new TimeCount(cnt, 1000);
@@ -54,9 +61,11 @@ public class WelcomeActivity extends AppCompatActivity {
     }
     
     private void startMainActivity() {
-        Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
-        startActivity(intent);
-        WelcomeActivity.this.finish();
+        if (isPermission) {
+            Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
+            startActivity(intent);
+            WelcomeActivity.this.finish();
+        }
     }
 
     @TargetApi(23)
@@ -89,18 +98,20 @@ public class WelcomeActivity extends AppCompatActivity {
                 ReqPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
             }
 
-            // 读取电话状态权限
-            // if (addPermission(permissions, Manifest.permission.READ_PHONE_STATE)) {
-            //     permissionInfo += "Manifest.permission.READ_PHONE_STATE Deny \n";
-            // }
+             // 读取电话状态权限
+             if (checkSelfPermission( Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                 ReqPermissions.add(Manifest.permission.READ_PHONE_STATE);
+             }
 
             if (ReqPermissions.size() > 0) {
                 requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
             } else {
                 time.start();
+                isPermission = true;
             }
         } else {
             time.start();
+            isPermission = true;
         }
     }
 
@@ -131,7 +142,9 @@ public class WelcomeActivity extends AppCompatActivity {
 
             if (i >= ReqPermissions.size()) {
                 time.start();
+                isPermission = true;
             } else {
+                isPermission = false;
                 DisplayToast("权限不足，无法运行");
             }
         }

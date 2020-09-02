@@ -1,45 +1,63 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:iconSpaceReserved="false">
 
-    <PreferenceCategory app:title="@string/setting_group_move">
+    <PreferenceCategory
+        app:title="@string/setting_group_move"
+        app:iconSpaceReserved="false">
 
         <EditTextPreference
             app:key="setting_walk"
             app:title="@string/setting_walk" 
             app:defaultValue="@string/setting_walk_default"
-            app:summary="@string/setting_walk_default"/>
+            app:summary="@string/setting_walk_default"
+            app:iconSpaceReserved="false"/>
 
         <EditTextPreference
             app:key="setting_run"
             app:title="@string/setting_run"
             app:defaultValue="@string/setting_run_default"
-            app:summary="@string/setting_run_default"/>
+            app:summary="@string/setting_run_default"
+            app:iconSpaceReserved="false"/>
 
         <EditTextPreference
             app:key="setting_bike"
             app:title="@string/setting_bike"
             app:defaultValue="@string/setting_bike_default"
-            app:summary="@string/setting_bike_default"/>
+            app:summary="@string/setting_bike_default"
+            app:iconSpaceReserved="false"/>
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/setting_group_log">
+    <PreferenceCategory
+        app:title="@string/setting_group_log"
+        app:iconSpaceReserved="false">
 
         <EditTextPreference
             app:key="setting_log_off"
-            app:title="@string/setting_log_off" />
+            app:title="@string/setting_log_off"
+            app:iconSpaceReserved="false"/>
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/setting_group_about">
+    <PreferenceCategory
+        app:title="@string/setting_group_about"
+        app:iconSpaceReserved="false">
 
         <Preference
             app:key="setting_version"
-            app:title="@string/setting_version"/>
+            app:title="@string/setting_version"
+            app:iconSpaceReserved="false"/>
 
         <Preference
             app:key="setting_author"
             app:title="@string/setting_author"
-            app:defaultValue="s"/>
+            app:defaultValue="@string/author"
+            app:iconSpaceReserved="false"/>
+
+        <Preference
+            app:key="setting_device_id"
+            app:title="@string/setting_device_id"
+            app:iconSpaceReserved="false"/>
 
     </PreferenceCategory>
 
