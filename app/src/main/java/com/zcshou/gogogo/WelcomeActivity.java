@@ -99,9 +99,9 @@ public class WelcomeActivity extends AppCompatActivity {
             }
 
              // 读取电话状态权限
-             if (checkSelfPermission( Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-                 ReqPermissions.add(Manifest.permission.READ_PHONE_STATE);
-             }
+            if (checkSelfPermission( Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                ReqPermissions.add(Manifest.permission.READ_PHONE_STATE);
+            }
 
             if (ReqPermissions.size() > 0) {
                 requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
@@ -145,7 +145,7 @@ public class WelcomeActivity extends AppCompatActivity {
                 isPermission = true;
             } else {
                 isPermission = false;
-                DisplayToast("权限不足，无法运行");
+                startBtn.setText("权限不足");
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -167,12 +167,6 @@ public class WelcomeActivity extends AppCompatActivity {
         public void onTick(long millisUntilFinished) { //计时过程显示
             startBtn.setText(String.format(Locale.getDefault(), "%d秒", millisUntilFinished / 1000));
         }
-    }
-
-    public void DisplayToast(String str) {
-        Toast toast = Toast.makeText(WelcomeActivity.this, str, Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.TOP, 0, 220);
-        toast.show();
     }
 
 }
