@@ -106,17 +106,5 @@
             android:text="@string/map_pic_hot"
             tools:ignore="RelativeOverlap" />
 
-        <ImageButton
-            android:id="@+id/pos_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginEnd="9dp"
-            android:layout_marginBottom="150dip"
-            android:onClick="goCurrentPosition"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/map_home"
-            app:srcCompat="@drawable/ic_home_position" />
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
