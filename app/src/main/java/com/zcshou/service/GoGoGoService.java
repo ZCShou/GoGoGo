@@ -170,20 +170,31 @@ public class GoGoGoService extends Service {
             mJoyStick = new JoyStick(this);
             mJoyStick.setListener(new JoyStick.JoyStickClickListener() {
                 @Override
-                public void clickAngleInfo(double angle, double r) {
-                    // 注意：这里的 x y 与 圆中角度的对应问题
+                public void clickAngleInfo(double angle, double speed) {
+                    mSpeed = speed * 3.6;   // 转换为 km/h, 1米/秒(m/s)=3.6千米/时(km/h)
+                    // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）
                     double x = Math.cos(angle * 2 * Math.PI / 360);   // 注意安卓使用的是弧度
                     double y = Math.sin(angle * 2 * Math.PI / 360);   // 注意安卓使用的是弧度
 
+                    // 根据当前的经纬度和距离，计算下一个经纬度
+                    // Latitude: 1 deg = 110.574 km // 纬度的每度的距离大约为 110.574km
+                    // Longitude: 1 deg = 111.320*cos(latitude) km  // 经度的每度的距离从0km到111km不等
+                    // 具体见：http://wp.mlab.tw/?p=2200
+
                     String[] latLngStr = curLatLng.split("&");
-                    double lat = Double.parseDouble(latLngStr[0]) + mSpeed * y;
-                    double lng = Double.parseDouble(latLngStr[1]) + mSpeed * x;
-                    curLatLng = lat + "&" + lng;
+
+                    double lngDegree = mSpeed * x / (111.320 * Math.cos(Math.abs(Double.parseDouble(latLngStr[1])) * Math.PI / 180));
+                    double latDegree = mSpeed * y / 110.574;
+
+                    double lng = Double.parseDouble(latLngStr[0]) + lngDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
+                    double lat = Double.parseDouble(latLngStr[1]) + latDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
+
+                    curLatLng = lng + "&" + lat;
                 }
 
                 @Override
                 public void setCurrentSpeed(double speed) {
-                    mSpeed = speed;
+                    mSpeed = speed * 3.6;   // 转换为 km/h, 1米/秒(m/s)=3.6千米/时(km/h)
                 }
 
             });

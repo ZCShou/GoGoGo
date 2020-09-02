@@ -43,10 +43,12 @@
     <!-- 设置界面 -->
     <string name="title_activity_settings">设置</string>
     <string name="setting_group_move">移动</string>
-    <string name="setting_move_summary">不建议将速度设置过大</string>
-    <string name="setting_walk">步行速度</string>
-    <string name="setting_run">跑步速度</string>
-    <string name="setting_bike">驾驶速度</string>
+    <string name="setting_walk">步行速度(米/秒)</string>
+    <string name="setting_walk_default">1.2</string>
+    <string name="setting_run">跑步速度(米/秒)</string>
+    <string name="setting_run_default">3.6</string>
+    <string name="setting_bike">驾驶速度(米/秒)</string>
+    <string name="setting_bike_default">10.0</string>
     <string name="setting_group_log">日志</string>
     <string name="setting_log_off">关闭日志</string>
     <string name="setting_group_about">关于</string>

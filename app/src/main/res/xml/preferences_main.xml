@@ -5,20 +5,20 @@
         <EditTextPreference
             app:key="setting_walk"
             app:title="@string/setting_walk" 
-            app:defaultValue="3"
-            app:summary="@string/setting_move_summary"/>
+            app:defaultValue="@string/setting_walk_default"
+            app:summary="@string/setting_walk_default"/>
 
         <EditTextPreference
             app:key="setting_run"
             app:title="@string/setting_run"
-            app:defaultValue="6"
-            app:summary="@string/setting_move_summary"/>
+            app:defaultValue="@string/setting_run_default"
+            app:summary="@string/setting_run_default"/>
 
         <EditTextPreference
             app:key="setting_bike"
             app:title="@string/setting_bike"
-            app:defaultValue="9"
-            app:summary="@string/setting_move_summary"/>
+            app:defaultValue="@string/setting_bike_default"
+            app:summary="@string/setting_bike_default"/>
 
     </PreferenceCategory>
 

@@ -3,6 +3,7 @@ package com.zcshou.joystick;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.CountDownTimer;
@@ -14,6 +15,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.Toast;
+
+import androidx.preference.PreferenceManager;
 
 import com.zcshou.gogogo.R;
 
@@ -24,11 +28,7 @@ public class JoyStick extends View {
     private WindowManager mWindowManager;
     private View mFloatView;
     private JoyStickClickListener mListener;
-    private TimeCount time;
-    boolean isAuto;
-    double mAngle;
-    double mR;
-
+    // 控制按键相关
     ImageButton btnInput;
     boolean isWalk;
     ImageButton btnWalk;
@@ -37,7 +37,14 @@ public class JoyStick extends View {
     boolean isBike;
     ImageButton btnBike;
 
-    public JoyStick(Service context) {
+    // 移动
+    private TimeCount time;
+    boolean isAuto;
+    double mAngle;
+    double mR;
+    double mSpeed;
+
+    public JoyStick(Context context) {
         super(context);
         this.mContext = context;
 
@@ -97,6 +104,8 @@ public class JoyStick extends View {
             return;
         }
 
+        mSpeed = 1.3;
+
         mFloatView = inflater.inflate(R.layout.joystick, null);
         mFloatView.setOnTouchListener(new JoyStickOnTouchListener());
 
@@ -120,7 +129,10 @@ public class JoyStick extends View {
                     isRun = false;
                     btnBike.setImageResource(R.drawable.ic_bike);
                     isBike = false;
-                    mListener.setCurrentSpeed(0.00003);
+//                    mSpeed = sharedPref.getFloat("setting_walk", (float) 0.00003);
+                    mSpeed = 1.3;
+                    //DisplayToast("Speed:" + mSpeed);
+                    mListener.setCurrentSpeed(mR*mSpeed);
                 }
             }
         });
@@ -137,7 +149,10 @@ public class JoyStick extends View {
                     isWalk = false;
                     btnBike.setImageResource(R.drawable.ic_bike);
                     isBike = false;
-                    mListener.setCurrentSpeed(0.00006);
+//                    mSpeed = sharedPref.getFloat("setting_run", (float) 0.00006);
+                    mSpeed = 4.0;
+                    //DisplayToast("Speed:" + mSpeed);
+                    mListener.setCurrentSpeed(mR*mSpeed);
                 }
             }
         });
@@ -154,7 +169,10 @@ public class JoyStick extends View {
                     isWalk = false;
                     btnRun.setImageResource(R.drawable.ic_run);
                     isRun = false;
-                    mListener.setCurrentSpeed(0.00009);
+//                    mSpeed = sharedPref.getFloat("setting_bike", (float) 0.00009);
+                    mSpeed = 12.0;
+                    //DisplayToast("Speed:" + mSpeed);
+                    mListener.setCurrentSpeed(mR*mSpeed);
                 }
             }
         });
@@ -163,6 +181,7 @@ public class JoyStick extends View {
     private void initJoyStickView() {
         time = new TimeCount(1000, 1000);
         isAuto = false;
+        mR = 0;
 
         ButtonView btnView = mFloatView.findViewById(R.id.joystick_view);
         btnView.setListener(new ButtonView.ButtonViewClickListener() {
@@ -171,6 +190,7 @@ public class JoyStick extends View {
                 if (isAuto) {
                     isAuto = false;
                     time.cancel();
+                    mR = 0;
                 } else {
                     isAuto = true;
                 }
@@ -179,48 +199,48 @@ public class JoyStick extends View {
             @Override
             public void clickTop() {
                 time.cancel();
-                mAngle = 0;
+                mAngle = 90;
                 mR = 1;
                 if (isAuto) {
                     time.start();
                 } else {
-                    mListener.clickAngleInfo(mAngle, mR);
+                    mListener.clickAngleInfo(mAngle, mR*mSpeed);
                 }
             }
 
             @Override
             public void clickRight() {
                 time.cancel();
-                mAngle = 90;
+                mAngle = 0;
                 mR = 1;
                 if (isAuto) {
                     time.start();
                 } else {
-                    mListener.clickAngleInfo(mAngle, mR);
+                    mListener.clickAngleInfo(mAngle, mR*mSpeed);
                 }
             }
 
             @Override
             public void clickBottom() {
                 time.cancel();
-                mAngle = 180;
+                mAngle = 270;
                 mR = 1;
                 if (isAuto) {
                     time.start();
                 } else {
-                    mListener.clickAngleInfo(mAngle, mR);
+                    mListener.clickAngleInfo(mAngle, mR*mSpeed);
                 }
             }
 
             @Override
             public void clickLeft() {
                 time.cancel();
-                mAngle = 270;
+                mAngle = 180;
                 mR = 1;
                 if (isAuto) {
                     time.start();
                 } else {
-                    mListener.clickAngleInfo(mAngle, mR);
+                    mListener.clickAngleInfo(mAngle, mR*mSpeed);
                 }
             }
 
@@ -275,7 +295,7 @@ public class JoyStick extends View {
     }
 
     public interface JoyStickClickListener {
-        void clickAngleInfo(double angle, double r);
+        void clickAngleInfo(double angle, double speed);
 
         void setCurrentSpeed(double speed);
     }
@@ -287,7 +307,7 @@ public class JoyStick extends View {
 
         @Override
         public void onFinish() {//计时完毕时触发
-            mListener.clickAngleInfo(mAngle, mR);
+            mListener.clickAngleInfo(mAngle, mR*mSpeed);
             time.start();
         }
 
@@ -297,9 +317,9 @@ public class JoyStick extends View {
         }
     }
 
-    // public void DisplayToast(String str) {
-    //     Toast toast = Toast.makeText(mContext, str, Toast.LENGTH_LONG);
-    //     toast.setGravity(Gravity.TOP, 0, 220);
-    //     toast.show();
-    // }
+//     public void DisplayToast(String str) {
+//         Toast toast = Toast.makeText(mContext, str, Toast.LENGTH_LONG);
+//         toast.setGravity(Gravity.TOP, 0, 220);
+//         toast.show();
+//     }
 }
