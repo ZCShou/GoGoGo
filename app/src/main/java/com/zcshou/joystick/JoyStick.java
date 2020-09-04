@@ -41,7 +41,6 @@ public class JoyStick extends View {
     private TimeCount time;
     boolean isAuto;
     double mAngle;
-    double mR;
     double mSpeed;
 
     public JoyStick(Context context) {
@@ -132,7 +131,7 @@ public class JoyStick extends View {
 //                    mSpeed = sharedPref.getFloat("setting_walk", (float) 0.00003);
                     mSpeed = 1.3;
                     //DisplayToast("Speed:" + mSpeed);
-                    mListener.setCurrentSpeed(mR*mSpeed);
+                    mListener.setCurrentSpeed(mSpeed);
                 }
             }
         });
@@ -152,7 +151,7 @@ public class JoyStick extends View {
 //                    mSpeed = sharedPref.getFloat("setting_run", (float) 0.00006);
                     mSpeed = 4.0;
                     //DisplayToast("Speed:" + mSpeed);
-                    mListener.setCurrentSpeed(mR*mSpeed);
+                    mListener.setCurrentSpeed(mSpeed);
                 }
             }
         });
@@ -172,7 +171,7 @@ public class JoyStick extends View {
 //                    mSpeed = sharedPref.getFloat("setting_bike", (float) 0.00009);
                     mSpeed = 12.0;
                     //DisplayToast("Speed:" + mSpeed);
-                    mListener.setCurrentSpeed(mR*mSpeed);
+                    mListener.setCurrentSpeed(mSpeed);
                 }
             }
         });
@@ -181,7 +180,6 @@ public class JoyStick extends View {
     private void initJoyStickView() {
         time = new TimeCount(1000, 1000);
         isAuto = false;
-        mR = 0;
 
         ButtonView btnView = mFloatView.findViewById(R.id.joystick_view);
         btnView.setListener(new ButtonView.ButtonViewClickListener() {
@@ -190,57 +188,19 @@ public class JoyStick extends View {
                 if (isAuto) {
                     isAuto = false;
                     time.cancel();
-                    mR = 0;
                 } else {
                     isAuto = true;
                 }
             }
 
             @Override
-            public void clickTop() {
-                time.cancel();
-                mAngle = 90;
-                mR = 1;
+            public void clickAngleInfo(double angle, double r) {
+                mAngle = angle;
+                mSpeed = mSpeed * r;
                 if (isAuto) {
                     time.start();
                 } else {
-                    mListener.clickAngleInfo(mAngle, mR*mSpeed);
-                }
-            }
-
-            @Override
-            public void clickRight() {
-                time.cancel();
-                mAngle = 0;
-                mR = 1;
-                if (isAuto) {
-                    time.start();
-                } else {
-                    mListener.clickAngleInfo(mAngle, mR*mSpeed);
-                }
-            }
-
-            @Override
-            public void clickBottom() {
-                time.cancel();
-                mAngle = 270;
-                mR = 1;
-                if (isAuto) {
-                    time.start();
-                } else {
-                    mListener.clickAngleInfo(mAngle, mR*mSpeed);
-                }
-            }
-
-            @Override
-            public void clickLeft() {
-                time.cancel();
-                mAngle = 180;
-                mR = 1;
-                if (isAuto) {
-                    time.start();
-                } else {
-                    mListener.clickAngleInfo(mAngle, mR*mSpeed);
+                    mListener.clickAngleInfo(mAngle, mSpeed);
                 }
             }
 
@@ -307,7 +267,7 @@ public class JoyStick extends View {
 
         @Override
         public void onFinish() {//计时完毕时触发
-            mListener.clickAngleInfo(mAngle, mR*mSpeed);
+            mListener.clickAngleInfo(mAngle, mSpeed);
             time.start();
         }
 
