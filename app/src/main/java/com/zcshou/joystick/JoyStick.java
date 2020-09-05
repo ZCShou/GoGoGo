@@ -14,7 +14,9 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.preference.PreferenceManager;
@@ -26,7 +28,9 @@ public class JoyStick extends View {
     private Context mContext;
     private WindowManager.LayoutParams mWindowParams;
     private WindowManager mWindowManager;
-    private View mFloatView;
+    private LayoutInflater inflater;
+    private View mJoystickView;
+    private LinearLayout mLatLngView;
     private JoyStickClickListener mListener;
     // 控制按键相关
     ImageButton btnInput;
@@ -49,9 +53,14 @@ public class JoyStick extends View {
 
         initWindowManager();
 
-        initJoyStickCtrl();
+        inflater = LayoutInflater.from(mContext);
 
-        initJoyStickView();
+        if (inflater != null) {
+            initJoyStickView();
+
+            initJoyStickLatLngView();
+        }
+
     }
 
     public JoyStick(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -59,9 +68,13 @@ public class JoyStick extends View {
 
         initWindowManager();
 
-        initJoyStickCtrl();
+        inflater = LayoutInflater.from(mContext);
 
-        initJoyStickView();
+        if (inflater != null) {
+            initJoyStickView();
+
+            initJoyStickLatLngView();
+        }
     }
 
     public JoyStick(Context context, AttributeSet attrs) {
@@ -69,9 +82,13 @@ public class JoyStick extends View {
 
         initWindowManager();
 
-        initJoyStickCtrl();
+        inflater = LayoutInflater.from(mContext);
 
-        initJoyStickView();
+        if (inflater != null) {
+            initJoyStickView();
+
+            initJoyStickLatLngView();
+        }
     }
 
     private void initWindowManager() {
@@ -96,28 +113,37 @@ public class JoyStick extends View {
     }
 
     @SuppressLint("InflateParams")
-    private void initJoyStickCtrl() {
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-
-        if (inflater == null) {
-            return;
-        }
-
+    private void initJoyStickView() {
+        time = new TimeCount(1000, 1000);
+        isAuto = false;
         mSpeed = 1.3;
 
-        mFloatView = inflater.inflate(R.layout.joystick, null);
-        mFloatView.setOnTouchListener(new JoyStickOnTouchListener());
+        mJoystickView = inflater.inflate(R.layout.joystick, null);
+        mJoystickView.setOnTouchListener(new JoyStickOnTouchListener());
 
-        btnInput = mFloatView.findViewById(R.id.joystick_input);
+        btnInput = mJoystickView.findViewById(R.id.joystick_input);
         btnInput.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mJoystickView != null) {
+                    mWindowManager.removeView(mJoystickView);
+                }
 
+                if (mLatLngView.getParent() == null) {
+                    mWindowParams.format = PixelFormat.RGBA_8888;
+                    mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                    mWindowParams.gravity = Gravity.START | Gravity.TOP;
+                    mWindowParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+                    mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                    mWindowParams.x = 300;
+                    mWindowParams.y = 300;
+                    mWindowManager.addView(mLatLngView, mWindowParams);
+                }
             }
         });
 
         isWalk = true;
-        btnWalk = mFloatView.findViewById(R.id.joystick_walk);
+        btnWalk = mJoystickView.findViewById(R.id.joystick_walk);
         btnWalk.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,7 +163,7 @@ public class JoyStick extends View {
         });
 
         isRun = false;
-        btnRun = mFloatView.findViewById(R.id.joystick_run);
+        btnRun = mJoystickView.findViewById(R.id.joystick_run);
         btnRun.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,7 +183,7 @@ public class JoyStick extends View {
         });
 
         isBike = false;
-        btnBike = mFloatView.findViewById(R.id.joystick_bike);
+        btnBike = mJoystickView.findViewById(R.id.joystick_bike);
         btnBike.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -175,13 +201,8 @@ public class JoyStick extends View {
                 }
             }
         });
-    }
 
-    private void initJoyStickView() {
-        time = new TimeCount(1000, 1000);
-        isAuto = false;
-
-        ButtonView btnView = mFloatView.findViewById(R.id.joystick_view);
+        ButtonView btnView = mJoystickView.findViewById(R.id.joystick_view);
         btnView.setListener(new ButtonView.ButtonViewClickListener() {
             @Override
             public void clickCenter() {
@@ -207,15 +228,76 @@ public class JoyStick extends View {
         });
     }
 
+    @SuppressLint("InflateParams")
+    private void initJoyStickLatLngView() {
+        mLatLngView = (LinearLayout)inflater.inflate(R.layout.joystick_latlng, null);
+        mLatLngView.setOnTouchListener(new JoyStickOnTouchListener());
+
+
+        Button btnOk = mLatLngView.findViewById(R.id.joystick_latlng_ok);
+        btnOk.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mLatLngView.getParent() != null) {
+                    mWindowManager.removeView(mLatLngView);
+                }
+
+                if (mJoystickView.getParent() == null) {
+                    mWindowParams.format = PixelFormat.RGBA_8888;
+                    mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                    mWindowParams.gravity = Gravity.START | Gravity.TOP;
+                    mWindowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
+                    mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                    mWindowParams.x = 300;
+                    mWindowParams.y = 300;
+
+                    mWindowManager.addView(mJoystickView, mWindowParams);
+                }
+
+            }
+        });
+        Button btnCancel = mLatLngView.findViewById(R.id.joystick_latlng_cancel);
+        btnCancel.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mLatLngView.getParent() != null) {
+                    mWindowManager.removeView(mLatLngView);
+                }
+
+                if (mJoystickView.getParent() == null) {
+                    mWindowParams.format = PixelFormat.RGBA_8888;
+                    mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                    mWindowParams.gravity = Gravity.START | Gravity.TOP;
+                    mWindowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
+                    mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                    mWindowParams.x = 300;
+                    mWindowParams.y = 300;
+
+                    mWindowManager.addView(mJoystickView, mWindowParams);
+                }
+            }
+        });
+
+    }
+
     public void show() {
-        if (mFloatView.getParent() == null) {
-            mWindowManager.addView(mFloatView, mWindowParams);
+        if (mLatLngView.getParent() != null) {
+            mWindowManager.removeView(mLatLngView);
+        }
+
+        if (mJoystickView.getParent() == null) {
+            mWindowManager.addView(mJoystickView, mWindowParams);
         }
     }
     
     public void hide() {
-        if (mFloatView.getParent() != null)
-            mWindowManager.removeView(mFloatView);
+        if (mLatLngView.getParent() != null) {
+            mWindowManager.removeView(mLatLngView);
+        }
+
+        if (mJoystickView.getParent() != null) {
+            mWindowManager.removeView(mJoystickView);
+        }
     }
 
     public void setListener(JoyStickClickListener mListener) {

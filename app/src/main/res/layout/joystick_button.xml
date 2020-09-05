@@ -5,16 +5,16 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
-    <AbsoluteLayout
+
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
 
         <ImageButton
             android:id="@+id/btn_north_west"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_x="0dp"
-            android:layout_y="0dp"
+            android:layout_width="@dimen/joystick_btn_width"
+            android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/map_home"
             android:src="@drawable/ic_left_up"
@@ -22,10 +22,8 @@
 
         <ImageButton
             android:id="@+id/btn_north"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_x="32dp"
-            android:layout_y="0dp"
+            android:layout_width="@dimen/joystick_btn_width"
+            android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/map_home"
             android:src="@drawable/ic_up"
@@ -33,21 +31,24 @@
 
         <ImageButton
             android:id="@+id/btn_north_east"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_x="64dp"
-            android:layout_y="0dp"
+            android:layout_width="@dimen/joystick_btn_width"
+            android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/map_home"
             android:src="@drawable/ic_right_up"
             android:theme="@style/RippleWhite" />
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
         <ImageButton
             android:id="@+id/btn_west"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_x="0dp"
-            android:layout_y="32dp"
+            android:layout_width="@dimen/joystick_btn_width"
+            android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/map_home"
             android:src="@drawable/ic_left"
@@ -55,10 +56,8 @@
 
         <ImageButton
             android:id="@+id/btn_center"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_x="32dp"
-            android:layout_y="32dp"
+            android:layout_width="@dimen/joystick_btn_width"
+            android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/map_home"
             android:src="@drawable/ic_lock_open"
@@ -66,21 +65,25 @@
 
         <ImageButton
             android:id="@+id/btn_east"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_x="64dp"
-            android:layout_y="32dp"
+            android:layout_width="@dimen/joystick_btn_width"
+            android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/map_home"
             android:src="@drawable/ic_right"
             android:theme="@style/RippleWhite" />
 
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
         <ImageButton
             android:id="@+id/btn_south_west"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_x="0dp"
-            android:layout_y="64dp"
+            android:layout_width="@dimen/joystick_btn_width"
+            android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/map_home"
             android:src="@drawable/ic_left_down"
@@ -88,10 +91,8 @@
 
         <ImageButton
             android:id="@+id/btn_south"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_x="32dp"
-            android:layout_y="64dp"
+            android:layout_width="@dimen/joystick_btn_width"
+            android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/map_home"
             android:src="@drawable/ic_down"
@@ -99,16 +100,14 @@
 
         <ImageButton
             android:id="@+id/btn_south_east"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_x="64dp"
-            android:layout_y="64dp"
+            android:layout_width="@dimen/joystick_btn_width"
+            android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/map_home"
             android:src="@drawable/ic_right_down"
             android:theme="@style/RippleWhite" />
 
-    </AbsoluteLayout>
+    </LinearLayout>
 
 </LinearLayout>
 

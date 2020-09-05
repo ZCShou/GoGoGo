@@ -10,8 +10,8 @@
         android:orientation="horizontal">
 
         <LinearLayout
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="@dimen/joystick_ctrl_btn_width"
+            android:layout_height="@dimen/joystick_ctrl_btn_height"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
             android:background="@drawable/circle_shape"
@@ -34,8 +34,8 @@
             android:layout_weight="1" />
 
         <LinearLayout
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="@dimen/joystick_ctrl_btn_width"
+            android:layout_height="@dimen/joystick_ctrl_btn_height"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
             android:background="@drawable/circle_shape"
@@ -56,8 +56,8 @@
             android:layout_weight="1" />
 
         <LinearLayout
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="@dimen/joystick_ctrl_btn_width"
+            android:layout_height="@dimen/joystick_ctrl_btn_height"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
             android:background="@drawable/circle_shape"
@@ -76,7 +76,7 @@
 
     <com.zcshou.joystick.ButtonView
         android:id="@+id/joystick_view"
-        android:padding="5dp"
+        android:padding="3dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
@@ -86,7 +86,7 @@
         android:orientation="horizontal">
 
         <LinearLayout
-            android:layout_width="28dp"
+            android:layout_width="@dimen/joystick_ctrl_btn_width"
             android:layout_height="28dp"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
@@ -108,8 +108,8 @@
             android:layout_weight="1" />
 
         <LinearLayout
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="@dimen/joystick_ctrl_btn_width"
+            android:layout_height="@dimen/joystick_ctrl_btn_height"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
             android:background="@drawable/circle_shape"
@@ -130,8 +130,8 @@
             android:layout_weight="1" />
 
         <LinearLayout
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="@dimen/joystick_ctrl_btn_width"
+            android:layout_height="@dimen/joystick_ctrl_btn_height"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
             android:background="@drawable/circle_shape"

@@ -72,4 +72,8 @@
     <string name="action_all">全选</string>
     <string name="action_cancel">取消</string>
 
+    <!-- 摇杆 -->
+    <string name="joystick_input_ok">传送</string>
+    <string name="joystick_input_cancel">取消</string>
+
 </resources>
