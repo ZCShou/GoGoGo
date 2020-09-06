@@ -362,7 +362,7 @@ public class GoGoGoService extends Service {
             log.debug(TAG + ": Disable passive provider");
         }
 
-        if (!locationManager.isProviderEnabled("fused")) {
+        if (!locationManager.isProviderEnabled("fused") && Build.VERSION.SDK_INT >= 29) {
             locationManager.setTestProviderEnabled("fused", false);
             Log.d(TAG, "Disable fused provider");
             log.debug(TAG + ": Disable fused provider");
@@ -402,7 +402,7 @@ public class GoGoGoService extends Service {
             log.debug(TAG + ": Disable passive provider");
         }
 
-        if (!locationManager.isProviderEnabled("fused")) {
+        if (!locationManager.isProviderEnabled("fused") && Build.VERSION.SDK_INT >= 29) {
             locationManager.setTestProviderEnabled("fused", false);
             Log.d(TAG, "Disable fused provider");
             log.debug(TAG + ": Disable fused provider");

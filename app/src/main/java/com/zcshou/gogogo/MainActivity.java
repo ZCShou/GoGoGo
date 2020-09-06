@@ -136,15 +136,15 @@ public class MainActivity extends AppCompatActivity
     private double mCurrentLat = 0.0;
     private double mCurrentLon = 0.0;
     private float mCurrentAccracy;
-    private String mCurrentCity = "北京市";
+    private String mCurrentCity = "济南市";
 
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
     // 当前经度&纬度
-    private static String curLatLng = "104.06121778639009&30.544111926165282";
+    private static String curLatLng = "117.027707&36.667662";
     // 当前地点击的点
-    public static LatLng curMapLatLng = new LatLng(30.547743718042415, 104.07018449827267);
+    public static LatLng curMapLatLng = new LatLng(36.547743718042415, 117.07018449827267);
     public static BitmapDescriptor bdA = BitmapDescriptorFactory
                                          .fromResource(drawable.icon_gcoding);
                                          
@@ -289,7 +289,7 @@ public class MainActivity extends AppCompatActivity
         //设置搜索建议返回值监听
         setSearchSuggestListener();
 
-        resetMap();
+        //resetMap();
     }
 
     //判断GPS是否打开
@@ -831,7 +831,6 @@ public class MainActivity extends AppCompatActivity
         final String ak = getResources().getString(string.ak);
         final String mapType = "bd09ll";
         //bd09坐标的位置信息
-        // String mapApiUrl = "https://api.map.baidu.com/geocoder/v2/?location=" + curMapLatLng.latitude + "," + curMapLatLng.longitude + "&output=json&pois=1&ak=" + ak + "&mcode=" + mcode;
         String mapApiUrl = "https://api.map.baidu.com/reverse_geocoding/v3/?ak=" + ak + "&output=json&coordtype=" + mapType + "&location=" + curMapLatLng.latitude + "," + curMapLatLng.longitude + "&mcode=" + mcode;
         Log.d("MAPAPI", mapApiUrl);
         StringRequest stringRequest = new StringRequest(mapApiUrl,
@@ -867,9 +866,7 @@ public class MainActivity extends AppCompatActivity
                                     Log.e("DATABASE", "saveSelectedLocation[HistoryLocation] error");
                                     log.error("DATABASE: saveSelectedLocation[HistoryLocation] error");
                                 }
-                            }
-                            //位置获取失败
-                            else {
+                            } else { //位置获取失败
                                 //插表参数
                                 ContentValues contentValues = new ContentValues();
                                 contentValues.put("Location", "NULL");
@@ -1064,8 +1061,8 @@ public class MainActivity extends AppCompatActivity
                             showEnableMockLocationDialog();
                         } else {
                             if (!isMockServStart && !isServiceRun) {
-                                Log.d("DEBUG", "current pt is " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
-                                log.debug("current pt is " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
+                                Log.d("DEBUG", "Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
+                                log.debug("Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
 
                                 markSelectedPosition();
 
@@ -1079,12 +1076,12 @@ public class MainActivity extends AppCompatActivity
                                 //insert end
                                 if (Build.VERSION.SDK_INT >= 26) {
                                     startForegroundService(mockLocServiceIntent);
-                                    Log.d("DEBUG", "startForegroundService: MOCK_GPS");
-                                    log.debug("startForegroundService: MOCK_GPS");
+                                    Log.d("DEBUG", "startForegroundService: GoGoGoService");
+                                    log.debug("startForegroundService: GoGoGoService");
                                 } else {
                                     startService(mockLocServiceIntent);
-                                    Log.d("DEBUG", "startService: MOCK_GPS");
-                                    log.debug("startService: MOCK_GPS");
+                                    Log.d("DEBUG", "startService: GoGoGoService");
+                                    log.debug("startService: GoGoGoService");
                                 }
 
                                 isMockServStart = true;
@@ -1501,15 +1498,6 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
     }
 
-//    @Override
-//    public boolean onKeyDown(int keyCode, KeyEvent event) {
-//        if (keyCode == KeyEvent.KEYCODE_BACK) {
-//            moveTaskToBack(false);
-//            return true;
-//        }
-//        return super.onKeyDown(keyCode, event);
-//    }
-
     @Override
     public void onBackPressed() {
         moveTaskToBack(false);
@@ -1719,11 +1707,21 @@ public class MainActivity extends AppCompatActivity
 
             if (isFirstLoc) {
                 isFirstLoc = false;
+                // 这里记录百度地图返回的位置
                 curMapLatLng = new LatLng(location.getLatitude(),
                         location.getLongitude());
                 MapStatus.Builder builder = new MapStatus.Builder();
                 builder.target(curMapLatLng).zoom(18.0f);
                 mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+
+                Log.d("DEBUG", "First Baidu LatLng: " + curMapLatLng);
+                log.debug("First Baidu LatLng: " + curMapLatLng);
+
+                // 这里将百度地图位置转换为 GPS 坐标。实际使用GPS 返回的坐标会更好点
+                double[] latLng = MapUtils.bd2wgs(curMapLatLng.longitude, curMapLatLng.latitude);
+                curLatLng = latLng[0] + "&" + latLng[1];
+                Log.d("DEBUG", "First LatLng: " + curLatLng);
+                log.debug("First LatLng: " + curLatLng);
             }
         }
     }
@@ -1773,9 +1771,6 @@ public class MainActivity extends AppCompatActivity
             assert bundle != null;
 
             StatusRun = bundle.getInt("StatusRun");
-
-            // Log.d("DEBUG", "BroadcastReceiver statusCode: " + StatusRun + "");
-            // log.debug("DEBUG: BroadcastReceiver statusCode: " + StatusRun + "");
 
             if (StatusRun == RunCode) {
                 isServiceRun = true;
