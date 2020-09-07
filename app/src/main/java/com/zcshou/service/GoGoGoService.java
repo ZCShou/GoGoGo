@@ -39,22 +39,19 @@ public class GoGoGoService extends Service {
 
     public static final int RunCode = 0x01;
     public static final int StopCode = 0x02;
-
-    private final String TAG = "GoGoGoService";
     private LocationManager locationManager;
     private HandlerThread handlerThread;
     private Handler handler;
-    private boolean isStop = true;
-    //经纬度字符串
-    private String curLatLng = "104.06121778639009&30.544111926165282";
+    private boolean isStop = true;  // 是否启动了模拟位置
+    private String curLatLng = "117.027707&36.667662";// 模拟位置的经纬度字符串
 
-    // 摇杆
+    // 摇杆相关
     private JoyStick mJoyStick;
-    // 摇杆是否启动
-    private boolean isJoyStick = false;
+    private boolean isJoyStick = false; // 摇杆是否启动
     double mSpeed;
 
-    //log debug
+    // log debug
+    private final String TAG = "GoGoGoService";
     private static final Logger log = Logger.getLogger(GoGoGoService.class);
 
     @Nullable
@@ -128,6 +125,7 @@ public class GoGoGoService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand");
         log.debug(TAG + ": onStartCommand");
+
         String channelId = "channel_01";
         String name = "channel_name";
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -160,8 +158,10 @@ public class GoGoGoService extends Service {
 
         // get location info from mainActivity
         curLatLng = intent.getStringExtra("CurLatLng");
-        Log.d(TAG, "DataFromMain is " + curLatLng);
-        log.debug(TAG + ": DataFromMain is " + curLatLng);
+
+        Log.d(TAG, "LatLng from Main is " + curLatLng);
+        log.debug(TAG + ": LatLng from Main is " + curLatLng);
+
         //start to refresh location
         isStop = false;
 
@@ -211,6 +211,7 @@ public class GoGoGoService extends Service {
     public void onDestroy() {
         Log.d(TAG, "onDestroy");
         log.debug(TAG + ": onDestroy");
+
         isStop = true;
 
         mJoyStick.hide();
@@ -255,8 +256,8 @@ public class GoGoGoService extends Service {
 
     //添加网络定位
     private void setNetworkLocation() {
-        // Log.d(TAG, "setNetworkLocation: " + curLatLng);
-        // log.debug(TAG + ": setNetworkLocation: " + curLatLng);
+        Log.d(TAG, "setNetworkLocation: " + curLatLng);
+        log.debug(TAG + ": setNetworkLocation: " + curLatLng);
 
         String[] latLngStr = curLatLng.split("&");
         LatLng latLng = new LatLng(Double.parseDouble(latLngStr[1]), Double.parseDouble(latLngStr[0]));
@@ -274,8 +275,8 @@ public class GoGoGoService extends Service {
 
     //set gps location
     private void setGPSLocation() {
-        // Log.d(TAG, "setGPSLocation: " + curLatLng);
-        // log.debug(TAG + ": setGPSLocation: " + curLatLng);
+        Log.d(TAG, "setGPSLocation: " + curLatLng);
+        log.debug(TAG + ": setGPSLocation: " + curLatLng);
         String[] latLngStr = curLatLng.split("&");
         LatLng latLng = new LatLng(Double.parseDouble(latLngStr[1]), Double.parseDouble(latLngStr[0]));
         String providerStr = LocationManager.GPS_PROVIDER;
@@ -397,15 +398,27 @@ public class GoGoGoService extends Service {
     // set other provider
     private void rmOtherTestProvider() {
         if (!locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
-            locationManager.setTestProviderEnabled(LocationManager.PASSIVE_PROVIDER, false);
-            Log.d(TAG, "Disable passive provider");
-            log.debug(TAG + ": Disable passive provider");
+            try {
+                locationManager.setTestProviderEnabled(LocationManager.PASSIVE_PROVIDER, false);
+                Log.d(TAG, "Disable passive provider");
+                log.debug(TAG + ": Disable passive provider");
+            } catch(Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, "Disable passive provider error");
+                log.debug(TAG + ": Disable passive provider error");
+            }
         }
 
         if (!locationManager.isProviderEnabled("fused") && Build.VERSION.SDK_INT >= 29) {
-            locationManager.setTestProviderEnabled("fused", false);
-            Log.d(TAG, "Disable fused provider");
-            log.debug(TAG + ": Disable fused provider");
+            try {
+                locationManager.setTestProviderEnabled("fused", false);
+                Log.d(TAG, "Disable fused provider");
+                log.debug(TAG + ": Disable fused provider");
+            } catch(Exception e) {
+                e.printStackTrace();
+                Log.d(TAG, "Disable fused provider error");
+                log.debug(TAG + ": Disable fused provider error");
+            }
         }
     }
 

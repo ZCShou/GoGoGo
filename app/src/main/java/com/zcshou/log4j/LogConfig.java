@@ -1,7 +1,5 @@
 package com.zcshou.log4j;
 
-import android.util.Log;
-
 import java.io.IOException;
 
 import org.apache.log4j.Layout;
