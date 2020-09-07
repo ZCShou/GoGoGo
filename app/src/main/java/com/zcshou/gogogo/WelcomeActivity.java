@@ -15,12 +15,17 @@ import androidx.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class WelcomeActivity extends AppCompatActivity {
     private Button startBtn;
     private TimeCount time;
+    private static final long mTS = 1630972800;
     int cnt;
     boolean isPermission;
     static final  int SDK_PERMISSION_REQUEST = 127;
@@ -43,21 +48,40 @@ public class WelcomeActivity extends AppCompatActivity {
 
         isPermission = false;
 
-        cnt = Integer.parseInt(getResources().getString (R.string.welcome_btn_cnt));
-        time = new TimeCount(cnt, 1000);
-        startBtn = findViewById(R.id.startButton);
-        //startBtn.setClickable(false);
-        startBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                time.cancel();
-                startMainActivity();
-            }
-        });
+        try {
+            if (getLocalTimeStamp() < mTS) {
+                cnt = Integer.parseInt(getResources().getString (R.string.welcome_btn_cnt));
+                time = new TimeCount(cnt, 1000);
+                startBtn = findViewById(R.id.startButton);
+                //startBtn.setClickable(false);
+                startBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        time.cancel();
+                        startMainActivity();
+                    }
+                });
 
-        requestNeedPermissions();
+                requestNeedPermissions();
+            } else {
+                WelcomeActivity.this.finish();
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+            WelcomeActivity.this.finish();
+        }
     }
-    
+
+    private long getLocalTimeStamp() throws ParseException {
+        SimpleDateFormat dff = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+
+        dff.setTimeZone(TimeZone.getTimeZone("GMT+08"));
+
+        Date date = dff.parse(dff.format(new Date()));
+
+        return date.getTime() / 1000;
+    }
+
     private void startMainActivity() {
         if (isPermission) {
             Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);

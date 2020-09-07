@@ -1,5 +1,6 @@
 package com.zcshou.gogogo;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -91,10 +92,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import mapapi.overlayutil.PoiOverlay;
 
@@ -103,6 +109,7 @@ import com.zcshou.service.GoGoGoService;
 import com.zcshou.database.HistoryLocationDataBaseHelper;
 import com.zcshou.database.HistorySearchDataBaseHelper;
 import com.zcshou.utils.MapUtils;
+
 import static com.zcshou.gogogo.R.drawable;
 import static com.zcshou.gogogo.R.id;
 import static com.zcshou.gogogo.R.layout;
@@ -111,12 +118,14 @@ import static com.zcshou.service.GoGoGoService.RunCode;
 import static com.zcshou.service.GoGoGoService.StopCode;
 
 public class MainActivity extends AppCompatActivity
-    implements NavigationView.OnNavigationItemSelectedListener, SensorEventListener {
+        implements NavigationView.OnNavigationItemSelectedListener, SensorEventListener {
 
     private boolean isServiceRun = false;
     private boolean isMockServStart = false;
     private boolean isGPSOpen = false;
     private boolean isFirstLoc = true; // 是否首次定位
+
+    private static final long mTS = 1630972800;
 
     //位置历史
     private SQLiteDatabase locHistoryDB;
@@ -146,20 +155,21 @@ public class MainActivity extends AppCompatActivity
     // 当前地点击的点
     public static LatLng curMapLatLng = new LatLng(36.547743718042415, 117.07018449827267);
     public static BitmapDescriptor bdA = BitmapDescriptorFactory
-                                         .fromResource(drawable.icon_gcoding);
-                                         
+            .fromResource(drawable.icon_gcoding);
+
     public MapView mMapView;
     public static BaiduMap mBaiduMap = null;
     private boolean isMapLoc;
-    
+
     // UI相关
+    NavigationView mNavigationView;
     RadioGroup.OnCheckedChangeListener mMapTypeListener;
     RadioGroup.OnCheckedChangeListener mGroupMapTrackListener;
     private MyLocationData locData;
 
     private FloatingActionButton faBtnStart;
     private FloatingActionButton faBtnStop;
-    
+
     //位置搜索相关
     PoiSearch poiSearch;
     private SearchView searchView;
@@ -171,7 +181,7 @@ public class MainActivity extends AppCompatActivity
     private MenuItem searchItem;
     private boolean isSubmit;
     private SuggestionSearch mSuggestionSearch;
-    
+
     //log debug
     private static final Logger log = Logger.getLogger(MainActivity.class);
 
@@ -195,7 +205,7 @@ public class MainActivity extends AppCompatActivity
 
         Log.d("MainActivity", "onCreate");
         log.debug("MainActivity: onCreate");
-        
+
         //sqlite相关
         try {
             //定位历史
@@ -212,16 +222,16 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = findViewById(id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-            this, drawer, toolbar, string.navigation_drawer_open, string.navigation_drawer_close);
+                this, drawer, toolbar, string.navigation_drawer_open, string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        mNavigationView = findViewById(id.nav_view);
+        mNavigationView.setNavigationItemSelectedListener(this);
 
         //http init
         mRequestQueue = Volley.newRequestQueue(this);
-        
+
         //注册GoGoGoService广播接收器
         try {
             MainActivity.GoGoGoServiceReceiver goGoGoServiceReceiver = new GoGoGoServiceReceiver();
@@ -232,10 +242,10 @@ public class MainActivity extends AppCompatActivity
             Log.e("UNKNOWN", "registerReceiver error");
             e.printStackTrace();
         }
-        
+
         //
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);// 获取传感器管理服务
-        if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
+        if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
             mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         }
 
@@ -289,7 +299,26 @@ public class MainActivity extends AppCompatActivity
         //设置搜索建议返回值监听
         setSearchSuggestListener();
 
-        //resetMap();
+        setUserLimitInfo();
+    }
+
+    private long getLocalTimeStamp() throws ParseException {
+        SimpleDateFormat dff = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+
+        dff.setTimeZone(TimeZone.getTimeZone("GMT+08"));
+
+        Date date = dff.parse(dff.format(new Date()));
+
+        return date.getTime() / 1000;
+    }
+
+    @SuppressLint("InflateParams")
+    private void setUserLimitInfo() {
+        // 从上到下逐级获取
+        View navHeaderView = mNavigationView.getHeaderView(0);
+        TextView mUserLimitInfo = navHeaderView.findViewById(R.id.user_limit);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+        mUserLimitInfo.setText("有效期: " + simpleDateFormat.format(new Date(mTS*1000)));
     }
 
     //判断GPS是否打开
@@ -719,8 +748,8 @@ public class MainActivity extends AppCompatActivity
         //判断bd09坐标是否在国内
         String mapApiUrl = "https://api.map.baidu.com/geoconv/v1/?coords=" + longitude + "," + latitude +
                 "&from=5&to=3&ak=" + ak + "&mcode=" + mcode;
-        Log.d("HTTP", mapApiUrl);
-        log.debug("HTTP: " + mapApiUrl);
+        Log.d("transformCoordinate", mapApiUrl);
+        log.debug("transformCoordinate: " + mapApiUrl);
         //bd09坐标转gcj02
         StringRequest stringRequest = new StringRequest(mapApiUrl,
                 new Response.Listener<String>() {
@@ -728,6 +757,7 @@ public class MainActivity extends AppCompatActivity
                     public void onResponse(String response) {
                         try {
                             JSONObject getRetJson = new JSONObject(response);
+                            log.debug("transformCoordinate:" + getRetJson.toString());
 
                             //如果api接口转换成功
                             if (Integer.parseInt(getRetJson.getString("status")) == 0) {
@@ -814,10 +844,6 @@ public class MainActivity extends AppCompatActivity
         stringRequest.setTag("MapAPI");
         // 添加tag到请求队列
         mRequestQueue.add(stringRequest);
-        //离线转换坐标系
-        // double latLng[]= MapUtils.bd2wgs(Double.parseDouble(longitude),Double.parseDouble(latitude));
-        // curLatLng=longitude+"&"+latitude;
-        // curLatLng=latLng[0]+"&"+latLng[1];
     }
 
     // 记录请求的位置信息
@@ -828,18 +854,19 @@ public class MainActivity extends AppCompatActivity
         final String mapType = "bd09ll";
         //bd09坐标的位置信息
         String mapApiUrl = "https://api.map.baidu.com/reverse_geocoding/v3/?ak=" + ak + "&output=json&coordtype=" + mapType + "&location=" + curMapLatLng.latitude + "," + curMapLatLng.longitude + "&mcode=" + mcode;
-        Log.d("MAPAPI", mapApiUrl);
+        Log.d("recordGetPositionInfo", mapApiUrl);
+        log.debug("recordGetPositionInfo:" + mapApiUrl);
         StringRequest stringRequest = new StringRequest(mapApiUrl,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         try {
                             JSONObject getRetJson = new JSONObject(response);
+                            Log.d("recordGetPositionInfo",  getRetJson.toString());
+                            log.debug("recordGetPositionInfo:" + getRetJson.toString());
 
                             //位置获取成功
                             if (Integer.parseInt(getRetJson.getString("status")) == 0) {
-                                Log.d("HTTP", "call api[get_poisition_info] success");
-                                log.debug("HTTP: call api[get_poisition_info] success");
                                 JSONObject posInfoJson = getRetJson.getJSONObject("result");
                                 String formatted_address = posInfoJson.getString("formatted_address");
                                 // DisplayToast(tmp);
@@ -1038,63 +1065,69 @@ public class MainActivity extends AppCompatActivity
         faBtnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //悬浮窗权限判断
-                if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(getApplicationContext())) {
-                    showEnableFloatWindowDialog();
-                } else {
-                    isGPSOpen = isGpsOpened();
-                    if (!isGPSOpen) {
-                        showEnableGpsDialog();
-                    } else {
-                        //gps是否开启
-                        if (!isMapLoc) {
-                            // 如果GPS定位开启，则打开定位图层
-                            openMapLocateLayer();
-                            isMapLoc = true;
-                        }
-
-                        if (!isAllowMockLocation()) {
-                            showEnableMockLocationDialog();
+                try {
+                    if (getLocalTimeStamp() < mTS) {    // 时间限制
+                        //悬浮窗权限判断
+                        if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(getApplicationContext())) {
+                            showEnableFloatWindowDialog();
                         } else {
-                            if (!isMockServStart && !isServiceRun) {
-                                Log.d("DEBUG", "Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
-                                log.debug("Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
-
-                                markSelectedPosition();
-
-                                //start mock location service
-                                Intent mockLocServiceIntent = new Intent(MainActivity.this, GoGoGoService.class);
-                                mockLocServiceIntent.putExtra("CurLatLng", curLatLng);
-
-                                //save record
-                                recordGetPositionInfo();
-
-                                //insert end
-                                if (Build.VERSION.SDK_INT >= 26) {
-                                    startForegroundService(mockLocServiceIntent);
-                                    Log.d("DEBUG", "startForegroundService: GoGoGoService");
-                                    log.debug("startForegroundService: GoGoGoService");
-                                } else {
-                                    startService(mockLocServiceIntent);
-                                    Log.d("DEBUG", "startService: GoGoGoService");
-                                    log.debug("startService: GoGoGoService");
+                            isGPSOpen = isGpsOpened();
+                            if (!isGPSOpen) {
+                                showEnableGpsDialog();
+                            } else {
+                                //gps是否开启
+                                if (!isMapLoc) {
+                                    // 如果GPS定位开启，则打开定位图层
+                                    openMapLocateLayer();
+                                    isMapLoc = true;
                                 }
 
-                                isMockServStart = true;
-                                Snackbar.make(view, "位置模拟已开启", Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
-                                faBtnStart.hide();
-                                faBtnStop.show();
-                                //track
-                            } else {
-                                Snackbar.make(view, "位置模拟已在运行", Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
-                                faBtnStart.hide();
-                                faBtnStop.show();
-                                isMockServStart = true;
+                                if (!isAllowMockLocation()) {
+                                    showEnableMockLocationDialog();
+                                } else {
+                                    if (!isMockServStart && !isServiceRun) {
+                                        Log.d("DEBUG", "Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
+                                        log.debug("Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
+
+                                        markSelectedPosition();
+
+                                        //start mock location service
+                                        Intent mockLocServiceIntent = new Intent(MainActivity.this, GoGoGoService.class);
+                                        mockLocServiceIntent.putExtra("CurLatLng", curLatLng);
+
+                                        //save record
+                                        recordGetPositionInfo();
+
+                                        //insert end
+                                        if (Build.VERSION.SDK_INT >= 26) {
+                                            startForegroundService(mockLocServiceIntent);
+                                            Log.d("DEBUG", "startForegroundService: GoGoGoService");
+                                            log.debug("startForegroundService: GoGoGoService");
+                                        } else {
+                                            startService(mockLocServiceIntent);
+                                            Log.d("DEBUG", "startService: GoGoGoService");
+                                            log.debug("startService: GoGoGoService");
+                                        }
+
+                                        isMockServStart = true;
+                                        Snackbar.make(view, "位置模拟已开启", Snackbar.LENGTH_LONG)
+                                                .setAction("Action", null).show();
+                                        faBtnStart.hide();
+                                        faBtnStop.show();
+                                        //track
+                                    } else {
+                                        Snackbar.make(view, "位置模拟已在运行", Snackbar.LENGTH_LONG)
+                                                .setAction("Action", null).show();
+                                        faBtnStart.hide();
+                                        faBtnStop.show();
+                                        isMockServStart = true;
+                                    }
+                                }
                             }
                         }
                     }
+                } catch (ParseException e) {
+                    e.printStackTrace();
                 }
             }
         });

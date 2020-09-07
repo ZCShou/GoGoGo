@@ -26,16 +26,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:text="@string/author"
+        android:text="@string/user_name"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView
-        android:id="@+id/app_info"
+        android:id="@+id/user_limit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="bottom"
         android:layout_gravity="bottom"
         android:layout_marginTop="20dp"
-        android:text="@string/app_limit" />
+        android:text="@string/user_limit_info" />
 
 </LinearLayout>

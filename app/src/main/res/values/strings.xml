@@ -5,7 +5,8 @@
     <string name="welcome_btn_cnt">4000</string>
     <string name="author">ZCShou</string>
     <string name="author_email">Author: zcsexp@gmail.com</string>
-    <string name="app_limit">当前版本无任何使用限制</string>
+    <string name="user_name">Test</string>
+    <string name="user_limit_info">> 当前版本无使用限制</string>
 
     <string name="fabtn_start">启动定位</string>
     <string name="fabtn_stop">停止定位</string>
