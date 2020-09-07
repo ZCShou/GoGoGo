@@ -193,8 +193,8 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
 
-        Log.d("PROGRESS", "onCreate");
-        log.debug("PROGRESS: onCreate");
+        Log.d("MainActivity", "onCreate");
+        log.debug("MainActivity: onCreate");
         
         //sqlite相关
         try {
@@ -577,7 +577,6 @@ public class MainActivity extends AppCompatActivity
              */
             public void onMapClick(LatLng point) {
                 curMapLatLng = point;
-                // DisplayToast("BD09\n[纬度:" + point.latitude + "]\n[经度:" + point.longitude + "]");
                 //百度坐标系转wgs坐标系
                 transformCoordinate(String.valueOf(point.longitude), String.valueOf(point.latitude));
                 markSelectedPosition();
@@ -587,7 +586,6 @@ public class MainActivity extends AppCompatActivity
              */
             public boolean onMapPoiClick(MapPoi poi) {
                 curMapLatLng = poi.getPosition();
-                // DisplayToast("BD09\n[维度:" + poi.getPosition().latitude + "]\n[经度:" + poi.getPosition().longitude + "]");
                 //百度坐标系转wgs坐标系
                 transformCoordinate(String.valueOf(poi.getPosition().longitude), String.valueOf(poi.getPosition().latitude));
                 markSelectedPosition();
@@ -601,7 +599,6 @@ public class MainActivity extends AppCompatActivity
              */
             public void onMapLongClick(LatLng point) {
                 curMapLatLng = point;
-                // DisplayToast("BD09\n[维度:" + point.latitude + "]\n[经度:" + point.longitude + "]");
                 //百度坐标系转wgs坐标系
                 transformCoordinate(String.valueOf(point.longitude), String.valueOf(point.latitude));
                 markSelectedPosition();
@@ -614,7 +611,6 @@ public class MainActivity extends AppCompatActivity
              */
             public void onMapDoubleClick(LatLng point) {
                 curMapLatLng = point;
-                // DisplayToast("BD09\n[维度:" + point.latitude + "]\n[经度:" + point.longitude + "]");
                 //百度坐标系转wgs坐标系
                 transformCoordinate(String.valueOf(point.longitude), String.valueOf(point.latitude));
                 markSelectedPosition();
@@ -688,7 +684,7 @@ public class MainActivity extends AppCompatActivity
     //标定选择的位置
     private void markSelectedPosition() {
         Log.d("DEBUG", "markSelectedPosition");
-        log.debug("DEBUG: markSelectedPosition");
+        log.debug("markSelectedPosition");
         
         if (curMapLatLng != null) {
             MarkerOptions ooA = new MarkerOptions().position(curMapLatLng).icon(bdA);
@@ -1442,16 +1438,16 @@ public class MainActivity extends AppCompatActivity
     
     @Override
     protected void onPause() {
-        Log.d("PROGRESS", "onPause");
-        log.debug("PROGRESS: onPause");
+        Log.d("MainActivity", "onPause");
+        log.debug("MainActivity: onPause");
         mMapView.onPause();
         super.onPause();
     }
     
     @Override
     protected void onResume() {
-        Log.d("PROGRESS", "onPause");
-        log.debug("PROGRESS: onPause");
+        Log.d("MainActivity", "onPause");
+        log.debug("MainActivity: onPause");
         mMapView.onResume();
         super.onResume();
         //为系统的方向传感器注册监听器
@@ -1460,8 +1456,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onStop() {
-        Log.d("PROGRESS", "onStop");
-        log.debug("PROGRESS: onStop");
+        Log.d("MainActivity", "onStop");
+        log.debug("MainActivity: onStop");
         //取消注册传感器监听
         mSensorManager.unregisterListener(this);
         super.onStop();
@@ -1469,7 +1465,7 @@ public class MainActivity extends AppCompatActivity
     
     @Override
     protected void onDestroy() {
-        Log.d("PROGRESS", "onDestroy");
+        Log.d("MainActivity", "onDestroy");
         
         if (isMockServStart) {
             Intent mockLocServiceIntent = new Intent(MainActivity.this, GoGoGoService.class);
