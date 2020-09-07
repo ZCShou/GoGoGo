@@ -1,9 +1,7 @@
 package com.zcshou.joystick;
 
 import android.annotation.SuppressLint;
-import android.app.Service;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.CountDownTimer;
@@ -17,9 +15,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Toast;
-
-import androidx.preference.PreferenceManager;
 
 import com.zcshou.gogogo.R;
 
@@ -28,7 +23,7 @@ public class JoyStick extends View {
     private Context mContext;
     private WindowManager.LayoutParams mWindowParams;
     private WindowManager mWindowManager;
-    private LayoutInflater inflater;
+    private final LayoutInflater inflater;
     private View mJoystickView;
     private LinearLayout mLatLngView;
     private JoyStickClickListener mListener;
@@ -228,7 +223,7 @@ public class JoyStick extends View {
         });
     }
 
-    @SuppressLint("InflateParams")
+    @SuppressLint({"InflateParams", "ClickableViewAccessibility"})
     private void initJoyStickLatLngView() {
         mLatLngView = (LinearLayout)inflater.inflate(R.layout.joystick_latlng, null);
         mLatLngView.setOnTouchListener(new JoyStickOnTouchListener());
