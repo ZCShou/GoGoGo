@@ -2,8 +2,11 @@ package com.zcshou.gogogo;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -12,8 +15,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -86,6 +91,49 @@ public class WelcomeActivity extends AppCompatActivity {
         }
     }
 
+    //WIFI是否可用
+    private boolean isWifiConnected() {
+        ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mWiFiNetworkInfo = mConnectivityManager
+                .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+        if (mWiFiNetworkInfo != null) {
+            return mWiFiNetworkInfo.isAvailable();
+        }
+
+        return false;
+    }
+
+    //MOBILE网络是否可用
+    private boolean isMobileConnected() {
+        ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mMobileNetworkInfo = mConnectivityManager
+                .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+
+        if (mMobileNetworkInfo != null) {
+            return mMobileNetworkInfo.isAvailable();
+        }
+
+        return false;
+    }
+
+    // 断是否有网络连接，但是如果该连接的网络无法上网，也会返回true
+    public boolean isNetworkConnected() {
+        ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+
+        if (mNetworkInfo != null) {
+            return mNetworkInfo.isAvailable();
+        }
+
+        return false;
+    }
+
+    //网络是否可用
+    private boolean isNetworkAvailable() {
+        return ((isWifiConnected() || isMobileConnected()) && isNetworkConnected());
+    }
+
     private void startMainActivity() {
         if (isPermission) {
             Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
@@ -132,12 +180,26 @@ public class WelcomeActivity extends AppCompatActivity {
             if (ReqPermissions.size() > 0) {
                 requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
             } else {
-                time.start();
-                isPermission = true;
+                //网络是否可用
+                if (isNetworkAvailable()) {
+                    time.start();
+                    isPermission = true;
+                } else {
+                    startBtn.setClickable(false);
+                    startBtn.setText("网络不可用");
+                    DisplayToast("网络连接不可用,请检查网络连接设置");
+                }
             }
         } else {
-            time.start();
-            isPermission = true;
+            //网络是否可用
+            if (isNetworkAvailable()) {
+                time.start();
+                isPermission = true;
+            } else {
+                startBtn.setClickable(false);
+                startBtn.setText("网络不可用");
+                DisplayToast("网络连接不可用,请检查网络连接设置");
+            }
         }
     }
 
@@ -167,9 +229,17 @@ public class WelcomeActivity extends AppCompatActivity {
             }
 
             if (i >= ReqPermissions.size()) {
-                time.start();
-                isPermission = true;
+                //网络是否可用
+                if (isNetworkAvailable()) {
+                    time.start();
+                    isPermission = true;
+                } else {
+                    startBtn.setClickable(false);
+                    startBtn.setText("网络不可用");
+                    DisplayToast("网络连接不可用,请检查网络连接设置");
+                }
             } else {
+                startBtn.setClickable(false);
                 isPermission = false;
                 startBtn.setText("权限不足");
             }
@@ -193,6 +263,12 @@ public class WelcomeActivity extends AppCompatActivity {
         public void onTick(long millisUntilFinished) { //计时过程显示
             startBtn.setText(String.format(Locale.getDefault(), "%d秒", millisUntilFinished / 1000));
         }
+    }
+
+    public void DisplayToast(String str) {
+        Toast toast = Toast.makeText(WelcomeActivity.this, str, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.TOP, 0, 220);
+        toast.show();
     }
 
 }

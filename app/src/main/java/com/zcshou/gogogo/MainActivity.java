@@ -182,6 +182,8 @@ public class MainActivity extends AppCompatActivity
     private boolean isSubmit;
     private SuggestionSearch mSuggestionSearch;
 
+    Date mNTP;
+
     //log debug
     private static final Logger log = Logger.getLogger(MainActivity.class);
 
@@ -1062,6 +1064,7 @@ public class MainActivity extends AppCompatActivity
 
     //set float action button listener
     private void setGoBtnListener() {
+        DisplayToast(mNTP.toString());
         //应用内悬浮按钮
         faBtnStart = findViewById(id.faBtnStart);
         faBtnStop = findViewById(id.faBtnStop);
