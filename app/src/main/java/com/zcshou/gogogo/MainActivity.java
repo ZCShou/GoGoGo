@@ -21,6 +21,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
@@ -92,7 +93,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -100,7 +100,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import mapapi.overlayutil.PoiOverlay;
 
@@ -108,6 +109,7 @@ import com.zcshou.log4j.LogUtil;
 import com.zcshou.service.GoGoGoService;
 import com.zcshou.database.HistoryLocationDataBaseHelper;
 import com.zcshou.database.HistorySearchDataBaseHelper;
+import com.zcshou.service.GoSntpClient;
 import com.zcshou.utils.MapUtils;
 
 import static com.zcshou.gogogo.R.drawable;
@@ -181,6 +183,8 @@ public class MainActivity extends AppCompatActivity
     private MenuItem searchItem;
     private boolean isSubmit;
     private SuggestionSearch mSuggestionSearch;
+
+    Date mDate;
 
     //log debug
     private static final Logger log = Logger.getLogger(MainActivity.class);
@@ -300,20 +304,11 @@ public class MainActivity extends AppCompatActivity
         setSearchSuggestListener();
 
         setUserLimitInfo();
-    }
 
-    private long getLocalTimeStamp() throws ParseException {
-        SimpleDateFormat dff = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        TimeTask timeTask = new TimeTask();
 
-        dff.setTimeZone(TimeZone.getTimeZone("GMT+08"));
-
-        Date date = dff.parse(dff.format(new Date()));
-
-        if (date != null) {
-            return date.getTime() / 1000;
-        } else {
-            return mTS;
-        }
+        ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
+        threadExecutor.submit(timeTask);
     }
 
     @SuppressLint("InflateParams")
@@ -1068,69 +1063,66 @@ public class MainActivity extends AppCompatActivity
         faBtnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    if (getLocalTimeStamp() < mTS) {    // 时间限制
-                        //悬浮窗权限判断
-                        if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(getApplicationContext())) {
-                            showEnableFloatWindowDialog();
+                if (mDate != null && mDate.getTime()/1000 < mTS) {    // 时间限制
+                    //悬浮窗权限判断
+                    if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(getApplicationContext())) {
+                        showEnableFloatWindowDialog();
+                    } else {
+                        isGPSOpen = isGpsOpened();
+                        if (!isGPSOpen) {
+                            showEnableGpsDialog();
                         } else {
-                            isGPSOpen = isGpsOpened();
-                            if (!isGPSOpen) {
-                                showEnableGpsDialog();
+                            //gps是否开启
+                            if (!isMapLoc) {
+                                // 如果GPS定位开启，则打开定位图层
+                                openMapLocateLayer();
+                                isMapLoc = true;
+                            }
+
+                            if (!isAllowMockLocation()) {
+                                showEnableMockLocationDialog();
                             } else {
-                                //gps是否开启
-                                if (!isMapLoc) {
-                                    // 如果GPS定位开启，则打开定位图层
-                                    openMapLocateLayer();
-                                    isMapLoc = true;
-                                }
+                                if (!isMockServStart && !isServiceRun) {
+                                    Log.d("DEBUG", "Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
+                                    log.debug("Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
 
-                                if (!isAllowMockLocation()) {
-                                    showEnableMockLocationDialog();
-                                } else {
-                                    if (!isMockServStart && !isServiceRun) {
-                                        Log.d("DEBUG", "Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
-                                        log.debug("Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
+                                    markSelectedPosition();
 
-                                        markSelectedPosition();
+                                    //start mock location service
+                                    Intent mockLocServiceIntent = new Intent(MainActivity.this, GoGoGoService.class);
+                                    mockLocServiceIntent.putExtra("CurLatLng", curLatLng);
+                                    mockLocServiceIntent.putExtra("DT", mDate.getTime() / 1000);
 
-                                        //start mock location service
-                                        Intent mockLocServiceIntent = new Intent(MainActivity.this, GoGoGoService.class);
-                                        mockLocServiceIntent.putExtra("CurLatLng", curLatLng);
+                                    //save record
+                                    recordGetPositionInfo();
 
-                                        //save record
-                                        recordGetPositionInfo();
-
-                                        //insert end
-                                        if (Build.VERSION.SDK_INT >= 26) {
-                                            startForegroundService(mockLocServiceIntent);
-                                            Log.d("DEBUG", "startForegroundService: GoGoGoService");
-                                            log.debug("startForegroundService: GoGoGoService");
-                                        } else {
-                                            startService(mockLocServiceIntent);
-                                            Log.d("DEBUG", "startService: GoGoGoService");
-                                            log.debug("startService: GoGoGoService");
-                                        }
-
-                                        isMockServStart = true;
-                                        Snackbar.make(view, "位置模拟已开启", Snackbar.LENGTH_LONG)
-                                                .setAction("Action", null).show();
-                                        faBtnStart.hide();
-                                        faBtnStop.show();
-                                        //track
+                                    //insert end
+                                    if (Build.VERSION.SDK_INT >= 26) {
+                                        startForegroundService(mockLocServiceIntent);
+                                        Log.d("DEBUG", "startForegroundService: GoGoGoService");
+                                        log.debug("startForegroundService: GoGoGoService");
                                     } else {
-                                        Snackbar.make(view, "位置模拟已在运行", Snackbar.LENGTH_LONG)
-                                                .setAction("Action", null).show();
-                                        faBtnStart.hide();
-                                        faBtnStop.show();
-                                        isMockServStart = true;
+                                        startService(mockLocServiceIntent);
+                                        Log.d("DEBUG", "startService: GoGoGoService");
+                                        log.debug("startService: GoGoGoService");
                                     }
+
+                                    isMockServStart = true;
+                                    Snackbar.make(view, "位置模拟已开启", Snackbar.LENGTH_LONG)
+                                            .setAction("Action", null).show();
+                                    faBtnStart.hide();
+                                    faBtnStop.show();
+                                    //track
+                                } else {
+                                    Snackbar.make(view, "位置模拟已在运行", Snackbar.LENGTH_LONG)
+                                            .setAction("Action", null).show();
+                                    faBtnStart.hide();
+                                    faBtnStop.show();
+                                    isMockServStart = true;
                                 }
                             }
                         }
                     }
-                } catch (ParseException e) {
-                    e.printStackTrace();
                 }
             }
         });
@@ -1805,6 +1797,27 @@ public class MainActivity extends AppCompatActivity
                 isServiceRun = true;
             } else if (StatusRun == StopCode) {
                 isServiceRun = false;
+            }
+        }
+    }
+
+    private class TimeTask implements Runnable {
+        private String[] ntpServerPool = {"ntp1.aliyun.com", "ntp2.aliyun.com", "ntp3.aliyun.com", "ntp4.aliyun.com", "ntp5.aliyun.com", "ntp6.aliyun.com", "ntp7.aliyun.com",
+                "cn.pool.ntp.org", "cn.ntp.org.cn", "sg.pool.ntp.org", "tw.pool.ntp.org", "jp.pool.ntp.org", "hk.pool.ntp.org", "th.pool.ntp.org",
+                "time.windows.com", "time.nist.gov", "time.apple.com", "time.asia.apple.com",
+                "dns1.synet.edu.cn", "news.neu.edu.cn", "dns.sjtu.edu.cn", "dns2.synet.edu.cn", "ntp.glnet.edu.cn", "s2g.time.edu.cn",
+                "ntp-sz.chl.la", "ntp.gwadar.cn", "3.asia.pool.ntp.org"};
+
+        @Override
+        public void run() {
+            GoSntpClient GoSntpClient = new GoSntpClient();
+            for (String serverHost : ntpServerPool) {
+                if (GoSntpClient.requestTime(serverHost, 30000)) {
+                    long now = GoSntpClient.getNtpTime() + SystemClock.elapsedRealtime() - GoSntpClient.getNtpTimeReference();
+                    mDate = new Date(now);
+                    Log.d("MainActivity", mDate.toString());
+                    break;
+                }
             }
         }
     }

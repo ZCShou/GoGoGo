@@ -33,11 +33,6 @@ import com.zcshou.gogogo.R;
 
 import org.apache.log4j.Logger;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 import java.util.UUID;
 
 public class GoGoGoService extends Service {
@@ -50,7 +45,7 @@ public class GoGoGoService extends Service {
     private boolean isStop = true;  // 是否启动了模拟位置
     private String curLatLng = "117.027707&36.667662";// 模拟位置的经纬度字符串
     private static final long mTS = 1630972800;
-    private long mDT = 0;
+    private long mDT = 1630972800;
 
     // 摇杆相关
     private JoyStick mJoyStick;
@@ -131,95 +126,89 @@ public class GoGoGoService extends Service {
         Log.d("GoGoGoService", "onStartCommand");
         log.debug("onStartCommand");
 
-        try {
-            mDT = getLocalTimeStamp();
-            if (mDT < mTS) {
-                String channelId = "channel_01";
-                String name = "channel_name";
-                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                Notification notification;
+        String channelId = "channel_01";
+        String name = "channel_name";
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification notification;
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    NotificationChannel mChannel = new NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_LOW);
-                    Log.i("GoGoGoService", mChannel.toString());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel mChannel = new NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_LOW);
+            Log.i("GoGoGoService", mChannel.toString());
 
-                    if (notificationManager != null) {
-                        notificationManager.createNotificationChannel(mChannel);
-                    }
-
-                    notification = new NotificationCompat.Builder(this, channelId)
-                            .setChannelId(channelId)
-                            .setContentTitle("GoGoGo")
-                            .setContentText("GoGoGo service is running")
-                            .setSmallIcon(R.mipmap.ic_launcher).build();
-                } else {
-                    NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "M_CH_ID")
-                            .setContentTitle("GoGoGo")
-                            .setContentText("GoGoGo service is running")
-                            .setSmallIcon(R.mipmap.ic_launcher)
-                            .setOngoing(true)
-                            .setChannelId(channelId);//无效
-                    notification = notificationBuilder.build();
-                }
-
-                startForeground(1, notification);
-
-                // get location info from mainActivity
-                curLatLng = intent.getStringExtra("CurLatLng");
-
-                Log.d("GoGoGoService", "LatLng from Main is " + curLatLng);
-                log.debug("LatLng from Main is " + curLatLng);
-
-                //start to refresh location
-                isStop = false;
-
-                // 开启摇杆
-                if (!isJoyStick) {
-                    mJoyStick = new JoyStick(this);
-                    mJoyStick.setListener(new JoyStick.JoyStickClickListener() {
-                        @Override
-                        public void clickAngleInfo(double angle, double speed) {
-                            mSpeed = speed * 3.6;   // 转换为 km/h, 1米/秒(m/s)=3.6千米/时(km/h)
-                            double lng;
-                            double lat;
-                            if (mDT < mTS) {
-                                // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）
-                                double x = Math.cos(angle * 2 * Math.PI / 360);   // 注意安卓使用的是弧度
-                                double y = Math.sin(angle * 2 * Math.PI / 360);   // 注意安卓使用的是弧度
-
-                                // 根据当前的经纬度和距离，计算下一个经纬度
-                                // Latitude: 1 deg = 110.574 km // 纬度的每度的距离大约为 110.574km
-                                // Longitude: 1 deg = 111.320*cos(latitude) km  // 经度的每度的距离从0km到111km不等
-                                // 具体见：http://wp.mlab.tw/?p=2200
-
-                                String[] latLngStr = curLatLng.split("&");
-
-                                double lngDegree = mSpeed * x / (111.320 * Math.cos(Math.abs(Double.parseDouble(latLngStr[1])) * Math.PI / 180));
-                                double latDegree = mSpeed * y / 110.574;
-
-                                lng = Double.parseDouble(latLngStr[0]) + lngDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
-                                lat = Double.parseDouble(latLngStr[1]) + latDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
-                            } else {
-                                lng = Math.random() * (180 - 1 + 1);
-                                lat = Math.random() * (90 - 1 + 1);
-                            }
-                            curLatLng = lng + "&" + lat;
-                        }
-
-                        @Override
-                        public void setCurrentSpeed(double speed) {
-                            mSpeed = speed * 3.6;   // 转换为 km/h, 1米/秒(m/s)=3.6千米/时(km/h)
-                        }
-
-                    });
-
-                    mJoyStick.show();
-
-                    isJoyStick = true;
-                }
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(mChannel);
             }
-        } catch (ParseException e) {
-            e.printStackTrace();
+
+            notification = new NotificationCompat.Builder(this, channelId)
+                    .setChannelId(channelId)
+                    .setContentTitle("GoGoGo")
+                    .setContentText("GoGoGo service is running")
+                    .setSmallIcon(R.mipmap.ic_launcher).build();
+        } else {
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "M_CH_ID")
+                    .setContentTitle("GoGoGo")
+                    .setContentText("GoGoGo service is running")
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setOngoing(true)
+                    .setChannelId(channelId);//无效
+            notification = notificationBuilder.build();
+        }
+
+        startForeground(1, notification);
+
+        // get location info from mainActivity
+        curLatLng = intent.getStringExtra("CurLatLng");
+        mDT = intent.getLongExtra("DT", mDT);
+
+        Log.d("GoGoGoService", "LatLng from Main is " + curLatLng);
+        log.debug("LatLng from Main is " + curLatLng);
+
+        //start to refresh location
+        isStop = false;
+
+        // 开启摇杆
+        if (!isJoyStick) {
+            mJoyStick = new JoyStick(this);
+            mJoyStick.setListener(new JoyStick.JoyStickClickListener() {
+                @Override
+                public void clickAngleInfo(double angle, double speed) {
+                    mSpeed = speed * 3.6;   // 转换为 km/h, 1米/秒(m/s)=3.6千米/时(km/h)
+                    double lng;
+                    double lat;
+                    if (mDT < mTS) {
+                        // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）
+                        double x = Math.cos(angle * 2 * Math.PI / 360);   // 注意安卓使用的是弧度
+                        double y = Math.sin(angle * 2 * Math.PI / 360);   // 注意安卓使用的是弧度
+
+                        // 根据当前的经纬度和距离，计算下一个经纬度
+                        // Latitude: 1 deg = 110.574 km // 纬度的每度的距离大约为 110.574km
+                        // Longitude: 1 deg = 111.320*cos(latitude) km  // 经度的每度的距离从0km到111km不等
+                        // 具体见：http://wp.mlab.tw/?p=2200
+
+                        String[] latLngStr = curLatLng.split("&");
+
+                        double lngDegree = mSpeed * x / (111.320 * Math.cos(Math.abs(Double.parseDouble(latLngStr[1])) * Math.PI / 180));
+                        double latDegree = mSpeed * y / 110.574;
+
+                        lng = Double.parseDouble(latLngStr[0]) + lngDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
+                        lat = Double.parseDouble(latLngStr[1]) + latDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
+                    } else {
+                        lng = Math.random() * (180 - 1 + 1);
+                        lat = Math.random() * (90 - 1 + 1);
+                    }
+                    curLatLng = lng + "&" + lat;
+                }
+
+                @Override
+                public void setCurrentSpeed(double speed) {
+                    mSpeed = speed * 3.6;   // 转换为 km/h, 1米/秒(m/s)=3.6千米/时(km/h)
+                }
+
+            });
+
+            mJoyStick.show();
+
+            isJoyStick = true;
         }
 
         return super.onStartCommand(intent, flags, startId);
@@ -252,20 +241,6 @@ public class GoGoGoService extends Service {
         sendBroadcast(intent);
 
         super.onDestroy();
-    }
-
-    private long getLocalTimeStamp() throws ParseException {
-        SimpleDateFormat dff = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-
-        dff.setTimeZone(TimeZone.getTimeZone("GMT+08"));
-
-        Date date = dff.parse(dff.format(new Date()));
-
-        if (date != null) {
-            return date.getTime() / 1000;
-        } else {
-            return mTS;
-        }
     }
 
     //generate a location

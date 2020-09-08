@@ -15,17 +15,17 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
-import android.view.Gravity;
+import android.os.SystemClock;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import com.zcshou.service.GoSntpClient;
+
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class WelcomeActivity extends AppCompatActivity {
     private Button startBtn;
@@ -33,6 +33,7 @@ public class WelcomeActivity extends AppCompatActivity {
     private static final long mTS = 1630972800;
     int cnt;
     boolean isPermission;
+    boolean isLimit;
     static final  int SDK_PERMISSION_REQUEST = 127;
     ArrayList<String> ReqPermissions = new ArrayList<>();
 
@@ -52,43 +53,30 @@ public class WelcomeActivity extends AppCompatActivity {
         PreferenceManager.setDefaultValues(this, R.xml.preferences_main, false);
 
         isPermission = false;
+        isLimit = true;
 
-        try {
-            if (getLocalTimeStamp() < mTS) {
-                cnt = Integer.parseInt(getResources().getString (R.string.welcome_btn_cnt));
-                time = new TimeCount(cnt, 1000);
-                startBtn = findViewById(R.id.startButton);
-                //startBtn.setClickable(false);
-                startBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        time.cancel();
-                        startMainActivity();
-                    }
-                });
-
-                requestNeedPermissions();
-            } else {
-                WelcomeActivity.this.finish();
+        cnt = Integer.parseInt(getResources().getString (R.string.welcome_btn_cnt));
+        time = new TimeCount(cnt, 1000);
+        startBtn = findViewById(R.id.startButton);
+        startBtn.setClickable(false);
+        startBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                time.cancel();
+                startMainActivity();
             }
-        } catch (ParseException e) {
-            e.printStackTrace();
-            WelcomeActivity.this.finish();
-        }
-    }
+        });
 
-    private long getLocalTimeStamp() throws ParseException {
-        SimpleDateFormat dff = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        if (isNetworkAvailable()) {
+            TimeTask timeTask = new TimeTask();
 
-        dff.setTimeZone(TimeZone.getTimeZone("GMT+08"));
-
-        Date date = dff.parse(dff.format(new Date()));
-
-        if (date != null) {
-            return date.getTime() / 1000;
+            ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
+            threadExecutor.submit(timeTask);
         } else {
-            return mTS;
+            startBtn.setText("网络不可用");
         }
+
+        requestNeedPermissions();
     }
 
     //WIFI是否可用
@@ -135,7 +123,7 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     private void startMainActivity() {
-        if (isPermission) {
+        if (isPermission && isLimit) {
             Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
             startActivity(intent);
             WelcomeActivity.this.finish();
@@ -180,42 +168,12 @@ public class WelcomeActivity extends AppCompatActivity {
             if (ReqPermissions.size() > 0) {
                 requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
             } else {
-                //网络是否可用
-                if (isNetworkAvailable()) {
-                    time.start();
-                    isPermission = true;
-                } else {
-                    startBtn.setClickable(false);
-                    startBtn.setText("网络不可用");
-                    DisplayToast("网络连接不可用,请检查网络连接设置");
-                }
+                isPermission = true;
             }
         } else {
-            //网络是否可用
-            if (isNetworkAvailable()) {
-                time.start();
-                isPermission = true;
-            } else {
-                startBtn.setClickable(false);
-                startBtn.setText("网络不可用");
-                DisplayToast("网络连接不可用,请检查网络连接设置");
-            }
+            isPermission = true;
         }
     }
-
-//    @TargetApi(23)
-//    private boolean addPermission(ArrayList<String> permissionsList, String permission) {
-//        if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) { // 如果应用没有获得对应权限,则添加到列表中,准备批量申请
-//            if (shouldShowRequestPermissionRationale(permission)) {
-//                return true;
-//            } else {
-//                permissionsList.add(permission);
-//                return false;
-//            }
-//        } else {
-//            return true;
-//        }
-//    }
 
     @TargetApi(23)
     @Override
@@ -229,17 +187,8 @@ public class WelcomeActivity extends AppCompatActivity {
             }
 
             if (i >= ReqPermissions.size()) {
-                //网络是否可用
-                if (isNetworkAvailable()) {
-                    time.start();
-                    isPermission = true;
-                } else {
-                    startBtn.setClickable(false);
-                    startBtn.setText("网络不可用");
-                    DisplayToast("网络连接不可用,请检查网络连接设置");
-                }
+                isPermission = true;
             } else {
-                startBtn.setClickable(false);
                 isPermission = false;
                 startBtn.setText("权限不足");
             }
@@ -265,10 +214,30 @@ public class WelcomeActivity extends AppCompatActivity {
         }
     }
 
-    public void DisplayToast(String str) {
-        Toast toast = Toast.makeText(WelcomeActivity.this, str, Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.TOP, 0, 220);
-        toast.show();
+    private class TimeTask implements Runnable {
+        private String[] ntpServerPool = {"ntp1.aliyun.com", "ntp2.aliyun.com", "ntp3.aliyun.com", "ntp4.aliyun.com", "ntp5.aliyun.com", "ntp6.aliyun.com", "ntp7.aliyun.com",
+                "cn.pool.ntp.org", "cn.ntp.org.cn", "sg.pool.ntp.org", "tw.pool.ntp.org", "jp.pool.ntp.org", "hk.pool.ntp.org", "th.pool.ntp.org",
+                "time.windows.com", "time.nist.gov", "time.apple.com", "time.asia.apple.com",
+                "dns1.synet.edu.cn", "news.neu.edu.cn", "dns.sjtu.edu.cn", "dns2.synet.edu.cn", "ntp.glnet.edu.cn", "s2g.time.edu.cn",
+                "ntp-sz.chl.la", "ntp.gwadar.cn", "3.asia.pool.ntp.org"};
+
+        @Override
+        public void run() {
+            GoSntpClient GoSntpClient = new GoSntpClient();
+            int i;
+            for (i = 0; i < ntpServerPool.length; i++) {
+                if (GoSntpClient.requestTime(ntpServerPool[i], 30000)) {
+                    long now = GoSntpClient.getNtpTime() + SystemClock.elapsedRealtime() - GoSntpClient.getNtpTimeReference();
+                    if (now /1000 < mTS) {
+                        isLimit = true;
+                    }
+                    break;
+                }
+            }
+            if (i < ntpServerPool.length) {
+                time.start();
+            }
+        }
     }
 
 }
