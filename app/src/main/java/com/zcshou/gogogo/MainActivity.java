@@ -184,7 +184,9 @@ public class MainActivity extends AppCompatActivity
     private boolean isSubmit;
     private SuggestionSearch mSuggestionSearch;
 
-    Date mDate;
+    // 时间
+    private Date mDate;
+    private long mWelDT;
 
     //log debug
     private static final Logger log = Logger.getLogger(MainActivity.class);
@@ -304,6 +306,8 @@ public class MainActivity extends AppCompatActivity
         setSearchSuggestListener();
 
         setUserLimitInfo();
+
+        mWelDT = getIntent().getLongExtra("DT", 0);
 
         TimeTask timeTask = new TimeTask();
 

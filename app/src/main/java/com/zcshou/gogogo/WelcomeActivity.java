@@ -22,6 +22,7 @@ import android.widget.Button;
 import com.zcshou.service.GoSntpClient;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,6 +36,7 @@ public class WelcomeActivity extends AppCompatActivity {
     boolean isLimit;
     static final  int SDK_PERMISSION_REQUEST = 127;
     ArrayList<String> ReqPermissions = new ArrayList<>();
+    private Date mDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,13 +126,16 @@ public class WelcomeActivity extends AppCompatActivity {
     }
 
     private void startMainActivity() {
-        if (isPermission && isLimit) {
+        if (isPermission && !isLimit) {
             Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
+            if (mDate == null) {
+                intent.putExtra("DT", 0);
+            } else {
+                intent.putExtra("DT", mDate.getTime() / 1000);
+            }
             startActivity(intent);
-            WelcomeActivity.this.finish();
-        } else {
-            WelcomeActivity.this.finish();
         }
+        WelcomeActivity.this.finish();
     }
 
     @TargetApi(23)
@@ -229,8 +234,9 @@ public class WelcomeActivity extends AppCompatActivity {
             for (i = 0; i < ntpServerPool.length; i++) {
                 if (GoSntpClient.requestTime(ntpServerPool[i], 30000)) {
                     long now = GoSntpClient.getNtpTime() + SystemClock.elapsedRealtime() - GoSntpClient.getNtpTimeReference();
+                    mDate = new Date(now);
                     if (now /1000 < mTS) {
-                        isLimit = true;
+                        isLimit = false;
                     }
                     break;
                 }
