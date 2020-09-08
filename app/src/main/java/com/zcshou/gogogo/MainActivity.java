@@ -307,7 +307,7 @@ public class MainActivity extends AppCompatActivity
 
         setUserLimitInfo();
 
-        mWelDT = getIntent().getLongExtra("DT", 0);
+        // mWelDT = getIntent().getLongExtra("DT", 0);
 
         TimeTask timeTask = new TimeTask();
 

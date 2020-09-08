@@ -36,7 +36,7 @@ public class WelcomeActivity extends AppCompatActivity {
     boolean isLimit;
     static final  int SDK_PERMISSION_REQUEST = 127;
     ArrayList<String> ReqPermissions = new ArrayList<>();
-    private Date mDate;
+    //private Date mDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,11 +128,11 @@ public class WelcomeActivity extends AppCompatActivity {
     private void startMainActivity() {
         if (isPermission && !isLimit) {
             Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
-            if (mDate == null) {
-                intent.putExtra("DT", 0);
-            } else {
-                intent.putExtra("DT", mDate.getTime() / 1000);
-            }
+            //if (mDate == null) {
+            //    intent.putExtra("DT", 0);
+            //} else {
+            //    intent.putExtra("DT", mDate.getTime() / 1000);
+            //}
             startActivity(intent);
         }
         WelcomeActivity.this.finish();
@@ -234,7 +234,7 @@ public class WelcomeActivity extends AppCompatActivity {
             for (i = 0; i < ntpServerPool.length; i++) {
                 if (GoSntpClient.requestTime(ntpServerPool[i], 30000)) {
                     long now = GoSntpClient.getNtpTime() + SystemClock.elapsedRealtime() - GoSntpClient.getNtpTimeReference();
-                    mDate = new Date(now);
+                    //mDate = new Date(now);
                     if (now /1000 < mTS) {
                         isLimit = false;
                     }
