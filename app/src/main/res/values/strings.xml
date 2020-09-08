@@ -6,7 +6,7 @@
     <string name="author">ZCShou</string>
     <string name="author_email">Author: zcsexp@gmail.com</string>
     <string name="user_name">Test</string>
-    <string name="user_limit_info">> 当前版本无使用限制</string>
+    <string name="user_limit_info">当前版本无使用限制</string>
 
     <string name="fabtn_start">启动定位</string>
     <string name="fabtn_stop">停止定位</string>
@@ -14,12 +14,6 @@
     <string name="label_longitude">经度</string>
     <string name="label_latitude">纬度</string>
 
-    <string name="offline_map_tips_all">全国</string>
-    <string name="offline_map_tips_hot">热门城市</string>
-    <string name="local_map_city">城市</string>
-    <string name="local_map_update">更新</string>
-    <string name="local_map_delete">删除</string>
-    <string name="local_map_idle">暂无离线地图</string>
     <string name="history_idle">暂无历史记录</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -31,9 +25,11 @@
     <string name="nav_menu_history">历史记录</string>
     <string name="nav_menu_offline_map">离线地图</string>
     <string name="nav_menu_settings">设置</string>
+    <string name="nav_menu_preference">设置</string>
     <string name="nav_menu_dev">开发人员选项</string>
+    <string name="nav_menu_more">更多</string>
     <string name="nav_menu_feedback">问题反馈</string>
-    <string name="nav_menu_us">联系</string>
+    <string name="nav_menu_contact">联系作者</string>
 
     <!-- 主菜单 -->
     <string name="main_menu_action_latlng">经纬度定位</string>

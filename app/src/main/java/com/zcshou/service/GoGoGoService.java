@@ -261,7 +261,11 @@ public class GoGoGoService extends Service {
 
         Date date = dff.parse(dff.format(new Date()));
 
-        return date.getTime() / 1000;
+        if (date != null) {
+            return date.getTime() / 1000;
+        } else {
+            return mTS;
+        }
     }
 
     //generate a location

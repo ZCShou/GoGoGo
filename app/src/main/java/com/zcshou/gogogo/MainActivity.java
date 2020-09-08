@@ -309,7 +309,11 @@ public class MainActivity extends AppCompatActivity
 
         Date date = dff.parse(dff.format(new Date()));
 
-        return date.getTime() / 1000;
+        if (date != null) {
+            return date.getTime() / 1000;
+        } else {
+            return mTS;
+        }
     }
 
     @SuppressLint("InflateParams")
@@ -329,7 +333,6 @@ public class MainActivity extends AppCompatActivity
 
     //模拟位置权限是否开启
     public boolean isAllowMockLocation() {
-        // return true;
         boolean canMockPosition;
 
         if (Build.VERSION.SDK_INT <= 22) {//6.0以下
@@ -1681,9 +1684,6 @@ public class MainActivity extends AppCompatActivity
         
         if (id == R.id.nav_history) {
             Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
-            startActivity(intent);
-        } else if (id == R.id.nav_localmap) {
-            Intent intent = new Intent(MainActivity.this, OfflineMapActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_settings) {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);

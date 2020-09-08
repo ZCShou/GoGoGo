@@ -79,7 +79,11 @@ public class WelcomeActivity extends AppCompatActivity {
 
         Date date = dff.parse(dff.format(new Date()));
 
-        return date.getTime() / 1000;
+        if (date != null) {
+            return date.getTime() / 1000;
+        } else {
+            return mTS;
+        }
     }
 
     private void startMainActivity() {

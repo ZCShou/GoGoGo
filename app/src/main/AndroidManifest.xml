@@ -94,8 +94,6 @@
 
         <activity android:name=".HistoryActivity" />
 
-        <activity android:name=".OfflineMapActivity" />
-
         <receiver
             android:name=".MainActivity$GoGoGoServiceReceiver"
             tools:ignore="Instantiatable" />

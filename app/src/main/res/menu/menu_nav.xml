@@ -8,10 +8,6 @@
             android:id="@+id/nav_history"
             android:icon="@drawable/ic_menu_history"
             android:title="@string/nav_menu_history" />
-        <item
-            android:id="@+id/nav_localmap"
-            android:icon="@drawable/ic_menu_map"
-            android:title="@string/nav_menu_offline_map" />
     </group>
     
     <group>
@@ -29,8 +25,12 @@
         </item>
     </group>
 
-    <item android:title="@string/nav_menu_us">
+    <item android:title="@string/nav_menu_more">
         <menu>
+            <item
+                android:id="@+id/nav_contact"
+                android:icon="@drawable/ic_menu_feedback"
+                android:title="@string/nav_menu_contact" />
             <item
                 android:id="@+id/nav_bug_report"
                 android:icon="@drawable/ic_menu_feedback"
