@@ -16,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -58,7 +57,6 @@ public class WelcomeActivity extends AppCompatActivity {
         cnt = Integer.parseInt(getResources().getString (R.string.welcome_btn_cnt));
         time = new TimeCount(cnt, 1000);
         startBtn = findViewById(R.id.startButton);
-        startBtn.setClickable(false);
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,12 +65,15 @@ public class WelcomeActivity extends AppCompatActivity {
             }
         });
 
+        startBtn.setClickable(false);        // 放在 setOnClickListener 之后才能生效
+
         if (isNetworkAvailable()) {
             TimeTask timeTask = new TimeTask();
 
             ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
             threadExecutor.submit(timeTask);
         } else {
+            startBtn.setClickable(true);
             startBtn.setText("网络不可用");
         }
 
@@ -126,6 +127,8 @@ public class WelcomeActivity extends AppCompatActivity {
         if (isPermission && isLimit) {
             Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
             startActivity(intent);
+            WelcomeActivity.this.finish();
+        } else {
             WelcomeActivity.this.finish();
         }
     }
@@ -204,8 +207,6 @@ public class WelcomeActivity extends AppCompatActivity {
         @Override
         public void onFinish() {//计时完毕时触发
             startMainActivity();
-            // startBtn.setText(getResources().getString (R.string.welcome_btn_txt));
-            // startBtn.setClickable(true);
         }
 
         @Override
@@ -237,6 +238,7 @@ public class WelcomeActivity extends AppCompatActivity {
             if (i < ntpServerPool.length) {
                 time.start();
             }
+            startBtn.setClickable(true);
         }
     }
 
