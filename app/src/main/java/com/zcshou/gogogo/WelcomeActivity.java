@@ -23,7 +23,6 @@ import com.google.android.gms.ads.AdView;
 import com.zcshou.service.GoSntpClient;
 
 import java.util.ArrayList;
-//import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,7 +36,6 @@ public class WelcomeActivity extends BaseActivity {
     boolean isLimit;
     static final  int SDK_PERMISSION_REQUEST = 127;
     ArrayList<String> ReqPermissions = new ArrayList<>();
-    //private Date mDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,11 +133,6 @@ public class WelcomeActivity extends BaseActivity {
     private void startMainActivity() {
         if (isPermission && !isLimit) {
             Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
-            //if (mDate == null) {
-            //    intent.putExtra("DT", 0);
-            //} else {
-            //    intent.putExtra("DT", mDate.getTime() / 1000);
-            //}
             startActivity(intent);
         }
         WelcomeActivity.this.finish();

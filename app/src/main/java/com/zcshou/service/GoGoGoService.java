@@ -13,6 +13,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -55,7 +56,7 @@ public class GoGoGoService extends Service {
     private boolean isLimit = false;
     private TimeTask timeTask;
     private ExecutorService threadExecutor;
-    private long mCounter = 0;
+    private TimeCount time;
 
     // log debug
     private static final Logger log = Logger.getLogger(GoGoGoService.class);
@@ -75,6 +76,8 @@ public class GoGoGoService extends Service {
         log.debug("onCreate");
 
         super.onCreate();
+
+        time = new TimeCount(1000 * 60 * 20, 1000);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
@@ -135,6 +138,7 @@ public class GoGoGoService extends Service {
         log.debug("onStartCommand");
 
         threadExecutor.submit(timeTask);
+        time.start();
 
         String channelId = "channel_01";
         String name = "channel_name";
@@ -206,11 +210,6 @@ public class GoGoGoService extends Service {
                         lat = Math.random() * (90 - 1 + 1);
                     }
                     curLatLng = lng + "&" + lat;
-                    mCounter++;
-                    if (mCounter > 600) {
-                        mCounter = 0;
-                        threadExecutor.submit(timeTask);
-                    }
                 }
 
                 @Override
@@ -240,6 +239,7 @@ public class GoGoGoService extends Service {
 
         handler.removeMessages(0);
         handlerThread.quit();
+        time.cancel();
         threadExecutor.shutdownNow();
 
         //remove test provider
@@ -442,6 +442,23 @@ public class GoGoGoService extends Service {
     //uuid random
     public static String getUUID() {
         return UUID.randomUUID().toString();
+    }
+
+    class TimeCount extends CountDownTimer {
+        public TimeCount(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);//参数依次为总时长,和计时的时间间隔
+        }
+
+        @Override
+        public void onFinish() {//计时完毕时触发
+            threadExecutor.submit(timeTask);
+            time.start();
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) { //计时过程显示
+
+        }
     }
 
     private class TimeTask implements Runnable {
