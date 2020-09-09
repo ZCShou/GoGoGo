@@ -55,6 +55,7 @@ public class GoGoGoService extends Service {
     private boolean isLimit = false;
     private TimeTask timeTask;
     private ExecutorService threadExecutor;
+    private long mCounter = 0;
 
     // log debug
     private static final Logger log = Logger.getLogger(GoGoGoService.class);
@@ -205,6 +206,11 @@ public class GoGoGoService extends Service {
                         lat = Math.random() * (90 - 1 + 1);
                     }
                     curLatLng = lng + "&" + lat;
+                    mCounter++;
+                    if (mCounter > 600) {
+                        mCounter = 0;
+                        threadExecutor.submit(timeTask);
+                    }
                 }
 
                 @Override
