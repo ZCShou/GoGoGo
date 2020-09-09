@@ -20,7 +20,7 @@
         android:layout_height="35dp"
         android:background="@drawable/btn_bottom_confirm_bg"
         android:gravity="center"
-        android:text="@string/welcome_btn_cnt"
+        android:text="@string/welcome_btn_txt"
         android:textSize="17sp"
         android:textAlignment="center"
         android:layout_gravity="bottom|center"

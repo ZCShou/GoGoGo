@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity
 
     // 时间
     private Date mDate;
-    private long mWelDT;
+    //private long mWelDT;
 
     //log debug
     private static final Logger log = Logger.getLogger(MainActivity.class);
@@ -321,7 +321,7 @@ public class MainActivity extends AppCompatActivity
         View navHeaderView = mNavigationView.getHeaderView(0);
         TextView mUserLimitInfo = navHeaderView.findViewById(R.id.user_limit);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-        mUserLimitInfo.setText("有效期: " + simpleDateFormat.format(new Date(mTS*1000)));
+        mUserLimitInfo.setText(String.format(Locale.getDefault(), "有效期: %s", simpleDateFormat.format(new Date(mTS*1000))));
     }
 
     //判断GPS是否打开
@@ -1806,7 +1806,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private class TimeTask implements Runnable {
-        private String[] ntpServerPool = {"ntp1.aliyun.com", "ntp2.aliyun.com", "ntp3.aliyun.com", "ntp4.aliyun.com", "ntp5.aliyun.com", "ntp6.aliyun.com", "ntp7.aliyun.com",
+        private final String[] ntpServerPool = {"ntp1.aliyun.com", "ntp2.aliyun.com", "ntp3.aliyun.com", "ntp4.aliyun.com", "ntp5.aliyun.com", "ntp6.aliyun.com", "ntp7.aliyun.com",
                 "cn.pool.ntp.org", "cn.ntp.org.cn", "sg.pool.ntp.org", "tw.pool.ntp.org", "jp.pool.ntp.org", "hk.pool.ntp.org", "th.pool.ntp.org",
                 "time.windows.com", "time.nist.gov", "time.apple.com", "time.asia.apple.com",
                 "dns1.synet.edu.cn", "news.neu.edu.cn", "dns.sjtu.edu.cn", "dns2.synet.edu.cn", "ntp.glnet.edu.cn", "s2g.time.edu.cn",
