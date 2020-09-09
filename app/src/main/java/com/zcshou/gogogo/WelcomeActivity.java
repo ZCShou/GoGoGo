@@ -30,7 +30,7 @@ import java.util.concurrent.Executors;
 public class WelcomeActivity extends BaseActivity {
     private Button startBtn;
     private TimeCount time;
-    private static final long mTS = 1630972800;
+    private static final long mTS = 1607472000;
     int cnt;
     boolean isPermission;
     boolean isLimit;

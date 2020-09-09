@@ -47,7 +47,7 @@ public class GoGoGoService extends Service {
     private Handler handler;
     private boolean isStop = true;  // 是否启动了模拟位置
     private String curLatLng = "117.027707&36.667662";// 模拟位置的经纬度字符串
-    private static final long mTS = 1630972800;
+    private static final long mTS = 1607472000;
 
     // 摇杆相关
     private JoyStick mJoyStick;
