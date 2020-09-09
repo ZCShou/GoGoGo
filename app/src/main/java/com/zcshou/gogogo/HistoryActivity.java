@@ -37,7 +37,7 @@ import com.zcshou.database.HistoryLocationDataBaseHelper;
 import static com.zcshou.gogogo.MainActivity.showHistoryLocation;
 
 
-public class HistoryActivity extends AppCompatActivity {
+public class HistoryActivity extends BaseActivity {
     private ListView listView;
     private TextView noRecordText;
     private SearchView mSearchView;

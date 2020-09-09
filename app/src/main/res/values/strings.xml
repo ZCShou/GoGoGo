@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">GoGoGo</string>
+    <string name="app_settings">设置</string>
+    <string name="app_history">历史记录</string>
     <!-- 欢迎页 -->
     <string name="welcome_btn_txt">进入应用</string>
     <string name="welcome_btn_cnt">4000</string>

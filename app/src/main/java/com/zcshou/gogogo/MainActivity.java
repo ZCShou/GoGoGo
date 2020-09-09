@@ -124,7 +124,7 @@ import static com.zcshou.gogogo.R.string;
 import static com.zcshou.service.GoGoGoService.RunCode;
 import static com.zcshou.service.GoGoGoService.StopCode;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, SensorEventListener {
 
     private boolean isServiceRun = false;
