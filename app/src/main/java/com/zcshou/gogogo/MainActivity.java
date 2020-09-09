@@ -99,6 +99,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -320,6 +321,7 @@ public class MainActivity extends BaseActivity
         View navHeaderView = mNavigationView.getHeaderView(0);
         TextView mUserLimitInfo = navHeaderView.findViewById(R.id.user_limit);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         mUserLimitInfo.setText(String.format(Locale.getDefault(), "有效期: %s", simpleDateFormat.format(new Date(mTS*1000))));
     }
 
