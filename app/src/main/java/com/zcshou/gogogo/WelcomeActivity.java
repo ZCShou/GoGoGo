@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
 import android.os.SystemClock;
@@ -40,8 +39,6 @@ public class WelcomeActivity extends BaseActivity {
     ArrayList<String> ReqPermissions = new ArrayList<>();
     //private Date mDate;
 
-    private AdView mAdView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +51,7 @@ public class WelcomeActivity extends BaseActivity {
 
         setContentView(R.layout.welcome);
 
-        mAdView = findViewById(R.id.ad_view);
+        AdView mAdView = findViewById(R.id.ad_view);
         // Create an ad request.
         AdRequest adRequest = new AdRequest.Builder().build();
         // Start loading the ad in the background.
