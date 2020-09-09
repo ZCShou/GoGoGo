@@ -43,7 +43,6 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -83,11 +82,6 @@ import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -1689,15 +1683,15 @@ public class MainActivity extends BaseActivity
         } else if (id == R.id.nav_settings) {
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_bug_report) {
+        } else if (id == R.id.nav_contact) {
             Intent i = new Intent(Intent.ACTION_SEND);
             // i.setType("text/plain"); //模拟器请使用这行
             i.setType("message/rfc822"); // 真机上使用这行
             i.putExtra(Intent.EXTRA_EMAIL,
-                       new String[] {"zcsexp@gmail.com"});
+                    new String[] {"zcsexp@gmail.com"});
             i.putExtra(Intent.EXTRA_SUBJECT, "SUGGESTION");
             startActivity(Intent.createChooser(i,
-                                               "Select email application."));
+                    "Select email application."));
         } else if (id == R.id.nav_dev) {
             try {
                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);

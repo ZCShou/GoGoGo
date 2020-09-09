@@ -74,6 +74,15 @@ public class LogUtil {
         logConfig.setImmediateFlush(true);
         logConfig.configure();
     }
+
+    /**
+     * 获取日志文件
+     *
+     * @param logConfig
+     */
+    public static String getLogFile() {
+        return LOG_FILE_PATH;
+    }
     
     /**
      * 将log设置为生产环境
