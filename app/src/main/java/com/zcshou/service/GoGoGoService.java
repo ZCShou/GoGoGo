@@ -34,6 +34,8 @@ import com.zcshou.gogogo.R;
 import org.apache.log4j.Logger;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GoGoGoService extends Service {
 
@@ -45,12 +47,14 @@ public class GoGoGoService extends Service {
     private boolean isStop = true;  // 是否启动了模拟位置
     private String curLatLng = "117.027707&36.667662";// 模拟位置的经纬度字符串
     private static final long mTS = 1630972800;
-    private long mDT = 1630972800;
 
     // 摇杆相关
     private JoyStick mJoyStick;
     private boolean isJoyStick = false; // 摇杆是否启动
     double mSpeed;
+    private boolean isLimit = false;
+    private TimeTask timeTask;
+    private ExecutorService threadExecutor;
 
     // log debug
     private static final Logger log = Logger.getLogger(GoGoGoService.class);
@@ -118,6 +122,9 @@ public class GoGoGoService extends Service {
         handler.sendEmptyMessage(0);
 
         mSpeed = 0.00003;
+
+        timeTask = new TimeTask();
+        threadExecutor = Executors.newSingleThreadExecutor();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -125,6 +132,8 @@ public class GoGoGoService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("GoGoGoService", "onStartCommand");
         log.debug("onStartCommand");
+
+        threadExecutor.submit(timeTask);
 
         String channelId = "channel_01";
         String name = "channel_name";
@@ -158,7 +167,6 @@ public class GoGoGoService extends Service {
 
         // get location info from mainActivity
         curLatLng = intent.getStringExtra("CurLatLng");
-        mDT = intent.getLongExtra("DT", mDT);
 
         Log.d("GoGoGoService", "LatLng from Main is " + curLatLng);
         log.debug("LatLng from Main is " + curLatLng);
@@ -175,7 +183,7 @@ public class GoGoGoService extends Service {
                     mSpeed = speed * 3.6;   // 转换为 km/h, 1米/秒(m/s)=3.6千米/时(km/h)
                     double lng;
                     double lat;
-                    if (mDT < mTS) {
+                    if (!isLimit) {
                         // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）
                         double x = Math.cos(angle * 2 * Math.PI / 360);   // 注意安卓使用的是弧度
                         double y = Math.sin(angle * 2 * Math.PI / 360);   // 注意安卓使用的是弧度
@@ -226,6 +234,7 @@ public class GoGoGoService extends Service {
 
         handler.removeMessages(0);
         handlerThread.quit();
+        threadExecutor.shutdownNow();
 
         //remove test provider
         rmNetworkTestProvider();
@@ -427,6 +436,34 @@ public class GoGoGoService extends Service {
     //uuid random
     public static String getUUID() {
         return UUID.randomUUID().toString();
+    }
+
+    private class TimeTask implements Runnable {
+        private final String[] ntpServerPool = {"ntp1.aliyun.com", "ntp2.aliyun.com", "ntp3.aliyun.com", "ntp4.aliyun.com", "ntp5.aliyun.com", "ntp6.aliyun.com", "ntp7.aliyun.com",
+                "cn.pool.ntp.org", "cn.ntp.org.cn", "sg.pool.ntp.org", "tw.pool.ntp.org", "jp.pool.ntp.org", "hk.pool.ntp.org", "th.pool.ntp.org",
+                "time.windows.com", "time.nist.gov", "time.apple.com", "time.asia.apple.com",
+                "dns1.synet.edu.cn", "news.neu.edu.cn", "dns.sjtu.edu.cn", "dns2.synet.edu.cn", "ntp.glnet.edu.cn", "s2g.time.edu.cn",
+                "ntp-sz.chl.la", "ntp.gwadar.cn", "3.asia.pool.ntp.org"};
+
+        @Override
+        public void run() {
+            GoSntpClient GoSntpClient = new GoSntpClient();
+            int i;
+            for (i = 0; i < ntpServerPool.length; i++) {
+                if (GoSntpClient.requestTime(ntpServerPool[i], 30000)) {
+                    long now = GoSntpClient.getNtpTime() + SystemClock.elapsedRealtime() - GoSntpClient.getNtpTimeReference();
+                    //mDate = new Date(now);
+                    if (now / 1000 > mTS) {
+                        isLimit = true;
+                    }
+                    break;
+                }
+            }
+
+            if (i >= ntpServerPool.length) {
+                isLimit = true;
+            }
+        }
     }
 
 }

@@ -242,7 +242,7 @@ public class WelcomeActivity extends BaseActivity {
                 if (GoSntpClient.requestTime(ntpServerPool[i], 30000)) {
                     long now = GoSntpClient.getNtpTime() + SystemClock.elapsedRealtime() - GoSntpClient.getNtpTimeReference();
                     //mDate = new Date(now);
-                    if (now /1000 < mTS) {
+                    if (now / 1000 < mTS) {
                         isLimit = false;
                     }
                     break;
@@ -250,6 +250,8 @@ public class WelcomeActivity extends BaseActivity {
             }
             if (i < ntpServerPool.length) {
                 time.start();
+            } else {
+                isLimit = true;
             }
             startBtn.setClickable(true);
         }

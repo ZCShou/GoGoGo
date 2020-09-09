@@ -184,9 +184,7 @@ public class MainActivity extends BaseActivity
     private boolean isSubmit;
     private SuggestionSearch mSuggestionSearch;
 
-    // 时间
-    private Date mDate;
-    //private long mWelDT;
+    private boolean isLimit = true;
 
     //log debug
     private static final Logger log = Logger.getLogger(MainActivity.class);
@@ -1068,7 +1066,7 @@ public class MainActivity extends BaseActivity
         faBtnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mDate != null && mDate.getTime()/1000 < mTS) {    // 时间限制
+                if (!isLimit && isNetworkAvailable()) {    // 时间限制
                     //悬浮窗权限判断
                     if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(getApplicationContext())) {
                         showEnableFloatWindowDialog();
@@ -1096,7 +1094,6 @@ public class MainActivity extends BaseActivity
                                     //start mock location service
                                     Intent mockLocServiceIntent = new Intent(MainActivity.this, GoGoGoService.class);
                                     mockLocServiceIntent.putExtra("CurLatLng", curLatLng);
-                                    mockLocServiceIntent.putExtra("DT", mDate.getTime() / 1000);
 
                                     //save record
                                     recordGetPositionInfo();
@@ -1816,13 +1813,19 @@ public class MainActivity extends BaseActivity
         @Override
         public void run() {
             GoSntpClient GoSntpClient = new GoSntpClient();
-            for (String serverHost : ntpServerPool) {
-                if (GoSntpClient.requestTime(serverHost, 30000)) {
+            int i;
+            for (i = 0; i < ntpServerPool.length; i++) {
+                if (GoSntpClient.requestTime(ntpServerPool[i], 30000)) {
                     long now = GoSntpClient.getNtpTime() + SystemClock.elapsedRealtime() - GoSntpClient.getNtpTimeReference();
-                    mDate = new Date(now);
-                    Log.d("MainActivity", mDate.toString());
+                    //mDate = new Date(now);
+                    if (now / 1000 < mTS) {
+                        isLimit = false;
+                    }
                     break;
                 }
+            }
+            if (i >= ntpServerPool.length) {
+                isLimit = true;
             }
         }
     }
