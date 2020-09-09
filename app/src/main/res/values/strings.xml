@@ -73,4 +73,6 @@
     <string name="joystick_input_ok">传送</string>
     <string name="joystick_input_cancel">取消</string>
 
+    <string name="ad_unit_id_welcome" translatable="false">ca-app-pub-2117389248426871/1567963500</string>
+
 </resources>

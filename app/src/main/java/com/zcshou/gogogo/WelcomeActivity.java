@@ -19,6 +19,8 @@ import android.os.SystemClock;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.zcshou.service.GoSntpClient;
 
 import java.util.ArrayList;
@@ -38,6 +40,8 @@ public class WelcomeActivity extends AppCompatActivity {
     ArrayList<String> ReqPermissions = new ArrayList<>();
     //private Date mDate;
 
+    private AdView mAdView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +53,12 @@ public class WelcomeActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.welcome);
+
+        mAdView = findViewById(R.id.ad_view);
+        // Create an ad request.
+        AdRequest adRequest = new AdRequest.Builder().build();
+        // Start loading the ad in the background.
+        mAdView.loadAd(adRequest);
 
         // 生成默认参数的值（一定要尽可能早的调用，因为后续有些界面可能需要使用参数）
         PreferenceManager.setDefaultValues(this, R.xml.preferences_main, false);
