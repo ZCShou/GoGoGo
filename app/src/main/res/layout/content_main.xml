@@ -106,5 +106,14 @@
             android:text="@string/map_pic_hot"
             tools:ignore="RelativeOverlap" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_horizontal|center_vertical"
+            android:textSize="10sp"
+            android:text="@string/app_statement"
+            tools:ignore="SmallSp" />
+
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

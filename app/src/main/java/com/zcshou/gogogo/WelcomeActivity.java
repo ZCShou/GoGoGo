@@ -31,10 +31,9 @@ public class WelcomeActivity extends BaseActivity {
     private Button startBtn;
     private TimeCount time;
     private static final long mTS = 1607472000;
-    int cnt;
-    boolean isPermission;
-    boolean isLimit;
-    static final  int SDK_PERMISSION_REQUEST = 127;
+    private boolean isPermission;
+    private boolean isLimit;
+    private static final int SDK_PERMISSION_REQUEST = 127;
     ArrayList<String> ReqPermissions = new ArrayList<>();
 
     @Override
@@ -61,7 +60,7 @@ public class WelcomeActivity extends BaseActivity {
         isPermission = false;
         isLimit = true;
 
-        cnt = Integer.parseInt(getResources().getString (R.string.welcome_btn_cnt));
+        int cnt = Integer.parseInt(getResources().getString(R.string.welcome_btn_cnt));
         time = new TimeCount(cnt, 1000);
         startBtn = findViewById(R.id.startButton);
         startBtn.setOnClickListener(new View.OnClickListener() {
@@ -234,7 +233,6 @@ public class WelcomeActivity extends BaseActivity {
             for (i = 0; i < ntpServerPool.length; i++) {
                 if (GoSntpClient.requestTime(ntpServerPool[i], 30000)) {
                     long now = GoSntpClient.getNtpTime() + SystemClock.elapsedRealtime() - GoSntpClient.getNtpTimeReference();
-                    //mDate = new Date(now);
                     if (now / 1000 < mTS) {
                         isLimit = false;
                     }

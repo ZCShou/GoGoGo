@@ -1817,7 +1817,6 @@ public class MainActivity extends BaseActivity
             for (i = 0; i < ntpServerPool.length; i++) {
                 if (GoSntpClient.requestTime(ntpServerPool[i], 30000)) {
                     long now = GoSntpClient.getNtpTime() + SystemClock.elapsedRealtime() - GoSntpClient.getNtpTimeReference();
-                    //mDate = new Date(now);
                     if (now / 1000 < mTS) {
                         isLimit = false;
                     }
