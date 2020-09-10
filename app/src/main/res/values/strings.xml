@@ -4,8 +4,7 @@
     <string name="app_history">历史记录</string>
     <string name="author">ZCShou</string>
     <string name="author_email">Author: zcsexp@gmail.com</string>
-    <string name="app_statement">本程序为学习 Android 开发的 Demo，请勿用于非法用途，否则后果自负！</string>
-    <string name="app_protocol1">2. 用户不得对本软件产品进行反向工程（reverse engineer）、反向编译（decompile）或反汇编（disassemble）， 违者属于侵权行为，并自行承担由此产生的不利后果。</string>
+    <string name="app_statement">仅供学习使用，否则后果自负！</string>
 
     <!-- 欢迎页 -->
     <string name="welcome_btn_txt">进入应用</string>
