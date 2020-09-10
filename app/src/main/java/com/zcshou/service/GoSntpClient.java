@@ -96,7 +96,7 @@ public class GoSntpClient {
      */
     public boolean requestTime(String host, int timeout) {
         DatagramSocket socket = null;
-        InetAddress address = null;
+        InetAddress address;
         try {
             address = InetAddress.getByName(host);
             socket = new DatagramSocket();
