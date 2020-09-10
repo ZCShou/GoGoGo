@@ -484,6 +484,8 @@ public class GoGoGoService extends Service {
 
             if (i >= ntpServerPool.length) {
                 isLimit = true;
+                Log.d("GoGoGoService", "GoSntpClient is error");
+                log.debug("GoSntpClient is error");
             }
         }
     }

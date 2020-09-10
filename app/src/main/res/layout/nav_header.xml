@@ -18,14 +18,13 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:contentDescription="@string/nav_header_desc"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
         app:srcCompat="@mipmap/ic_launcher_round" />
 
     <TextView
         android:id="@+id/user_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
+        android:layout_marginTop="@dimen/nav_header_vertical_spacing"
         android:text="@string/user_name"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
