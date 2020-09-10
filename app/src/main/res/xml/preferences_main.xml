@@ -7,7 +7,7 @@
 
         <EditTextPreference
             app:key="setting_walk"
-            app:title="@string/setting_walk" 
+            app:title="@string/setting_walk"
             app:defaultValue="@string/setting_walk_default"
             app:summary="@string/setting_walk_default"
             app:iconSpaceReserved="false"/>
@@ -32,9 +32,10 @@
         app:title="@string/setting_group_log"
         app:iconSpaceReserved="false">
 
-        <EditTextPreference
+        <SwitchPreferenceCompat
             app:key="setting_log_off"
             app:title="@string/setting_log_off"
+            app:defaultValue="false"
             app:iconSpaceReserved="false"/>
 
         <Preference

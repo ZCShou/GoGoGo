@@ -2,6 +2,7 @@ package com.zcshou.joystick;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.CountDownTimer;
@@ -15,6 +16,9 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import androidx.preference.PreferenceManager;
 
 import com.zcshou.gogogo.R;
 
@@ -41,10 +45,13 @@ public class JoyStick extends View {
     boolean isAuto;
     double mAngle;
     double mSpeed;
+    SharedPreferences sharedPreferences;
 
     public JoyStick(Context context) {
         super(context);
         this.mContext = context;
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         initWindowManager();
 
@@ -56,10 +63,20 @@ public class JoyStick extends View {
             initJoyStickLatLngView();
         }
 
+        // 这里记录启动次数
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        long num = sharedPreferences.getLong("setting_startup_num", 0);
+        sharedPreferences.edit()
+                .putLong("setting_startup_num", ++num)
+                .apply();
+
     }
 
     public JoyStick(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        this.mContext = context;
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         initWindowManager();
 
@@ -74,6 +91,9 @@ public class JoyStick extends View {
 
     public JoyStick(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.mContext = context;
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
         initWindowManager();
 
@@ -111,7 +131,12 @@ public class JoyStick extends View {
     private void initJoyStickView() {
         time = new TimeCount(1000, 1000);
         isAuto = false;
-        mSpeed = 1.3;
+        String sSpeed = sharedPreferences.getString("setting_walk", "");
+        if (sSpeed == null) {
+            mSpeed = Double.parseDouble(getResources().getString(R.string.setting_walk_default));
+        } else {
+            mSpeed = Double.parseDouble(sSpeed);
+        }
 
         mJoystickView = inflater.inflate(R.layout.joystick, null);
         mJoystickView.setOnTouchListener(new JoyStickOnTouchListener());
@@ -149,9 +174,13 @@ public class JoyStick extends View {
                     isRun = false;
                     btnBike.setImageResource(R.drawable.ic_bike);
                     isBike = false;
-//                    mSpeed = sharedPref.getFloat("setting_walk", (float) 0.00003);
-                    mSpeed = 1.3;
-                    //DisplayToast("Speed:" + mSpeed);
+                    String sSpeed = sharedPreferences.getString("setting_walk", "");
+                    if (sSpeed == null) {
+                        mSpeed = Double.parseDouble(getResources().getString(R.string.setting_walk_default));
+                    } else {
+                        mSpeed = Double.parseDouble(sSpeed);
+                    }
+                    DisplayToast("Speed:" + mSpeed);
                     mListener.setCurrentSpeed(mSpeed);
                 }
             }
@@ -169,9 +198,13 @@ public class JoyStick extends View {
                     isWalk = false;
                     btnBike.setImageResource(R.drawable.ic_bike);
                     isBike = false;
-//                    mSpeed = sharedPref.getFloat("setting_run", (float) 0.00006);
-                    mSpeed = 4.0;
-                    //DisplayToast("Speed:" + mSpeed);
+                    String sSpeed = sharedPreferences.getString("setting_run", "");
+                    if (sSpeed == null) {
+                        mSpeed = Double.parseDouble(getResources().getString(R.string.setting_run_default));
+                    } else {
+                        mSpeed = Double.parseDouble(sSpeed);
+                    }
+                    DisplayToast("Speed:" + mSpeed);
                     mListener.setCurrentSpeed(mSpeed);
                 }
             }
@@ -189,9 +222,13 @@ public class JoyStick extends View {
                     isWalk = false;
                     btnRun.setImageResource(R.drawable.ic_run);
                     isRun = false;
-//                    mSpeed = sharedPref.getFloat("setting_bike", (float) 0.00009);
-                    mSpeed = 12.0;
-                    //DisplayToast("Speed:" + mSpeed);
+                    String sSpeed = sharedPreferences.getString("setting_bike", "");
+                    if (sSpeed == null) {
+                        mSpeed = Double.parseDouble(getResources().getString(R.string.setting_bike_default));
+                    } else {
+                        mSpeed = Double.parseDouble(sSpeed);
+                    }
+                    DisplayToast("Speed:" + mSpeed);
                     mListener.setCurrentSpeed(mSpeed);
                 }
             }
@@ -354,9 +391,9 @@ public class JoyStick extends View {
         }
     }
 
-//     public void DisplayToast(String str) {
-//         Toast toast = Toast.makeText(mContext, str, Toast.LENGTH_LONG);
-//         toast.setGravity(Gravity.TOP, 0, 220);
-//         toast.show();
-//     }
+     public void DisplayToast(String str) {
+         Toast toast = Toast.makeText(mContext, str, Toast.LENGTH_LONG);
+         toast.setGravity(Gravity.TOP, 0, 220);
+         toast.show();
+     }
 }
