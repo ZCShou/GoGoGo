@@ -112,7 +112,7 @@ public class FragmentSettings extends PreferenceFragmentCompat implements OnPref
     
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
-        return false;
+        return true;
     }
 
 }
