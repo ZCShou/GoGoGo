@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Sensor;
@@ -47,6 +48,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.preference.PreferenceManager;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -308,9 +310,15 @@ public class MainActivity extends BaseActivity
         // mWelDT = getIntent().getLongExtra("DT", 0);
 
         TimeTask timeTask = new TimeTask();
-
         ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
         threadExecutor.submit(timeTask);
+
+        // 这里记录启动次数
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        long num = sharedPreferences.getLong("setting_startup_num", 0);
+        sharedPreferences.edit()
+                .putLong("setting_startup_num", ++num)
+                .apply();
     }
 
     @SuppressLint("InflateParams")

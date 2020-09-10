@@ -37,6 +37,11 @@
             app:title="@string/setting_log_off"
             app:iconSpaceReserved="false"/>
 
+        <Preference
+            app:key="setting_startup_num"
+            app:isPreferenceVisible="false"
+            app:iconSpaceReserved="false"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory
