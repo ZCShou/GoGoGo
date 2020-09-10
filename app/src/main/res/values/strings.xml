@@ -50,7 +50,7 @@
     <string name="setting_log_off">关闭日志</string>
     <string name="setting_group_about">关于</string>
     <string name="setting_version">版本号</string>
-    <string name="setting_author">开发作者</string>
+    <string name="setting_author">开发者</string>
     <string name="setting_device_id">设备唯一标识</string>
 
     <!-- 百度地图 -->
