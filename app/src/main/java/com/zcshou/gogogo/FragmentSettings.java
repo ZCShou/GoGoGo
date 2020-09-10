@@ -24,17 +24,23 @@ public class FragmentSettings extends PreferenceFragmentCompat implements OnPref
         String verName;
         verName = AppUtils.getVersionName(FragmentSettings.this.getContext());
         Preference pfVersion = findPreference("setting_version");
-        pfVersion.setSummary(verName);
+        if (pfVersion  != null) {
+            pfVersion.setSummary(verName);
+        }
 
         // 设置作者
         Preference pfAuthor = findPreference("setting_author");
-        pfAuthor.setSummary(R.string.author);
+        if (pfAuthor != null) {
+            pfAuthor.setSummary(R.string.author);
+        }
 
         // 设置 ID
         String sDid;
         sDid = DeviceIdUtils.getDeviceId(FragmentSettings.this.getContext());
         Preference pfDid = findPreference("setting_device_id");
-        pfDid.setSummary(sDid);
+        if (pfDid != null) {
+            pfDid.setSummary(sDid);
+        }
     }
     
     @Override
