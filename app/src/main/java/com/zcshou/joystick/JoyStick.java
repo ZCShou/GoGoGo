@@ -180,7 +180,6 @@ public class JoyStick extends View {
                     } else {
                         mSpeed = Double.parseDouble(sSpeed);
                     }
-                    DisplayToast("Speed:" + mSpeed);
                     mListener.setCurrentSpeed(mSpeed);
                 }
             }
@@ -204,7 +203,6 @@ public class JoyStick extends View {
                     } else {
                         mSpeed = Double.parseDouble(sSpeed);
                     }
-                    DisplayToast("Speed:" + mSpeed);
                     mListener.setCurrentSpeed(mSpeed);
                 }
             }
@@ -228,7 +226,6 @@ public class JoyStick extends View {
                     } else {
                         mSpeed = Double.parseDouble(sSpeed);
                     }
-                    DisplayToast("Speed:" + mSpeed);
                     mListener.setCurrentSpeed(mSpeed);
                 }
             }
