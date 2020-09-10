@@ -1,31 +1,27 @@
 <resources>
-    <string name="app_name">GoGoGo</string>
+    <string name="app_name">影梭</string>
     <string name="app_settings">设置</string>
     <string name="app_history">历史记录</string>
+    <string name="author">ZCShou</string>
+    <string name="author_email">Author: zcsexp@gmail.com</string>
     <!-- 欢迎页 -->
     <string name="welcome_btn_txt">进入应用</string>
     <string name="welcome_btn_cnt">5000</string>
-    <string name="author">ZCShou</string>
-    <string name="author_email">Author: zcsexp@gmail.com</string>
-    <string name="user_name">Test</string>
-    <string name="user_limit_info">当前版本无使用限制</string>
-
+    <string name="welcome_desc">世界这么大，我想去看看</string>
+    <!-- 主界面 -->
     <string name="fabtn_start">启动定位</string>
     <string name="fabtn_stop">停止定位</string>
-
     <string name="label_longitude">经度</string>
     <string name="label_latitude">纬度</string>
-
+    <!-- 历史记录页面 -->
     <string name="history_idle">暂无历史记录</string>
-
+    <!-- 导航页 -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="package_name">com.zcshou.gogogo</string>
-    <!-- 导航菜单 -->
-    <string name="welcome_cnt">世界这么大，我想去看看</string>
+    <string name="user_name">Test</string>
+    <string name="user_limit_info">当前版本无使用限制</string>
     <string name="nav_menu_history">历史记录</string>
-    <string name="nav_menu_offline_map">离线地图</string>
     <string name="nav_menu_settings">设置</string>
     <string name="nav_menu_preference">设置</string>
     <string name="nav_menu_dev">开发人员选项</string>
