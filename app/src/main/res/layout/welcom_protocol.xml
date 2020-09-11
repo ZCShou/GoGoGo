@@ -14,8 +14,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="20dp"
-            android:padding="3dp"
+            android:padding="5dp"
             android:text="@string/welcome_protocol_title"
             android:textColor="#282828"
             android:textSize="20sp"
@@ -23,9 +22,7 @@
  
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="480dp"
-            android:paddingTop="20dp"
-            android:paddingBottom="20dp">
+            android:layout_height="400dp">
  
             <TextView
                 android:id="@+id/tv_content"
@@ -57,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:padding="12dp"
+                android:padding="8dp"
                 android:text="@string/welcome_protocol_disagree"
                 android:textColor="#282828"
                 android:textStyle="bold" />
@@ -72,7 +69,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:padding="12dp"
+                android:padding="8dp"
                 android:text="@string/welcome_protocol_agree"
                 android:textColor="#282828"
                 android:textStyle="bold" />

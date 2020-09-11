@@ -1,102 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/reg_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="5dp"
+        android:text="@string/register_title"
+        android:textColor="#282828"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/reg_user_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="longitude"
+        android:hint="@string/register_user_name"
+        android:inputType="text"
+        android:drawablePadding="10dip"
+        app:drawableStartCompat="@drawable/ic_user"/>
+
+    <EditText
+        android:id="@+id/editTextDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="date"
+        android:hint="@string/register_limit"
+        android:autofillHints="date"
+        android:drawablePadding="10dip"
+        app:drawableStartCompat="@drawable/ic_date" />
+
+    <TextView
+        android:id="@+id/reg_request"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:text="请求码：3333333333333333333333333333333333333333333333333333333"
+        android:drawablePadding="10dip"
+        app:drawableStartCompat="@drawable/ic_pwd"
+        android:background="@drawable/border_gray"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginTop="8dp"
+        android:textStyle="bold"
+        android:text="@string/register_tips"/>
+
+    <EditText
+        android:id="@+id/reg_response"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="longitude"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:hint="@string/register_response"
+        android:inputType="textMultiLine"
+        android:minLines="4"
+        android:maxLines="6"
+        android:layout_marginTop="8dp"
+        android:scrollbars="vertical"
+        android:drawablePadding="10dip"
+        app:drawableStartCompat="@drawable/ic_key"
+        android:background="@drawable/border_gray"/>
+
+    <CheckBox
+        android:id="@+id/reg_check"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="@string/register_check" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/reg_title"
-            android:layout_width="wrap_content"
+            android:id="@+id/reg_cancel"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="20dp"
-            android:padding="3dp"
-            android:text="@string/register_title"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="@string/register_cancel"
             android:textColor="#282828"
-            android:textSize="20sp"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/reg_user_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:autofillHints="longitude"
-            android:hint="@string/register_user_name"
-            android:inputType="text" />
+        <Space
+            android:layout_width="1dp"
+            android:layout_height="match_parent"/>
 
         <TextView
-            android:id="@+id/reg_device_id"
-            android:layout_width="wrap_content"
+            android:id="@+id/reg_agree"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
-            android:lineSpacingMultiplier="1.2"
-            android:textColor="#282828"
-            android:textSize="16sp" />
-        
-        <TextView
-            android:id="@+id/reg_request"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
-            android:lineSpacingMultiplier="1.2"
-            android:textColor="#282828"
-            android:textSize="16sp" />
-
-        <EditText
-            android:id="@+id/reg_response"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:autofillHints="longitude"
-            android:hint="@string/register_response"
-            android:inputType="text" />
-
-        <CheckBox
-            android:id="@+id/reg_check"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_weight="1"
             android:gravity="center"
-            android:text="@string/register_check" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/reg_cancel"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="12dp"
-                android:text="@string/register_cancel"
-                android:textColor="#282828"
-                android:textStyle="bold" />
-
-            <Space
-                android:layout_width="1dp"
-                android:layout_height="match_parent"/>
-
-            <TextView
-                android:id="@+id/reg_agree"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:padding="12dp"
-                android:text="@string/register_ok"
-                android:textColor="#282828"
-                android:textStyle="bold" />
-        </LinearLayout>
+            android:padding="8dp"
+            android:text="@string/register_ok"
+            android:textColor="#282828"
+            android:textStyle="bold" />
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+</LinearLayout>

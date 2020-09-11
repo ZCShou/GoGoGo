@@ -83,7 +83,9 @@
     <string name="register_title">离线注册</string>
     <string name="register_user_name">用户名</string>
     <string name="register_response">注册码</string>
+    <string name="register_limit">有效期</string>
     <string name="register_ok">注册</string>
+    <string name="register_tips">将以上请求码发送给开发者，然后在下面填写获取到的注册码</string>
     <string name="register_cancel">取消</string>
     <string name="register_check">我已阅读免责声明，并同意所有条款</string>
 
