@@ -21,6 +21,7 @@ import android.text.SpannableStringBuilder;
 // import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 // import android.text.style.ClickableSpan;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -246,6 +247,33 @@ public class WelcomeActivity extends BaseActivity {
                 }
             });
         }
+    }
+
+    @Override
+    protected void onPause() {
+        Log.d("WelcomeActivity", "onPause");
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.d("WelcomeActivity", "onPause");
+        super.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d("WelcomeActivity", "onStop");
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d("WelcomeActivity", "onDestroy");
+        time.cancel();
+        threadExecutor.shutdownNow();
+
+        super.onDestroy();
     }
 
     @TargetApi(23)
