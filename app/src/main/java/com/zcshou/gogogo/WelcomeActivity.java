@@ -2,8 +2,10 @@ package com.zcshou.gogogo;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -15,8 +17,16 @@ import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import android.os.SystemClock;
+import android.text.SpannableStringBuilder;
+// import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
+// import android.text.style.ClickableSpan;
+import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -33,8 +43,12 @@ public class WelcomeActivity extends BaseActivity {
     private static final long mTS = 1607472000;
     private boolean isPermission;
     private boolean isLimit;
+    private boolean isNetwork;
     private static final int SDK_PERMISSION_REQUEST = 127;
     ArrayList<String> ReqPermissions = new ArrayList<>();
+    private boolean isFirstUse;
+    private SharedPreferences preferences;
+    ExecutorService threadExecutor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +80,6 @@ public class WelcomeActivity extends BaseActivity {
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                time.cancel();
                 startMainActivity();
             }
         });
@@ -75,15 +88,23 @@ public class WelcomeActivity extends BaseActivity {
 
         if (isNetworkAvailable()) {
             TimeTask timeTask = new TimeTask();
-
-            ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
+            threadExecutor = Executors.newSingleThreadExecutor();
             threadExecutor.submit(timeTask);
+            isNetwork = true;
         } else {
             startBtn.setClickable(true);
             startBtn.setText("网络不可用");
+            isNetwork = false;
         }
 
-        requestNeedPermissions();
+        preferences = getSharedPreferences("isFirstUse", MODE_PRIVATE);
+        isFirstUse = preferences.getBoolean("isFirstUse", true);
+
+        if (isFirstUse) {
+            showProtocolDialog();
+        } else {
+            requestNeedPermissions();
+        }
     }
 
     //WIFI是否可用
@@ -134,7 +155,97 @@ public class WelcomeActivity extends BaseActivity {
             Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
             startActivity(intent);
         }
+        time.cancel();
+        threadExecutor.shutdownNow();
         WelcomeActivity.this.finish();
+    }
+
+    private void showProtocolDialog() {
+        final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.show();
+        alertDialog.setCancelable(false);
+        Window window = alertDialog.getWindow();
+        if (window != null) {
+            window.setContentView(R.layout.welcom_protocol);
+            window.setGravity(Gravity.CENTER);
+ 
+            TextView tvContent = window.findViewById(R.id.tv_content);
+            TextView tvCancel = window.findViewById(R.id.tv_cancel);
+            TextView tvAgree = window.findViewById(R.id.tv_agree);
+            final CheckBox tvCheck = window.findViewById(R.id.tv_check);
+            String str = "1. 本软件专为学习 Android 开发使用，不会收集任何用户数据。"
+                    + "严禁利用本软件侵犯他人隐私权或者用于游戏牟利，如软件使用者不能遵守此规定， 请立即删除。"
+                    + "对于因用户使用本软件而造成自身或他人隐私泄露等任何不良后果，均由用户自行承担，软件作者不负任何责任。\n"
+                    + "2. 用户不得对本软件产品进行反向工程（reverse engineer）、反向编译（decompile）或反汇编（disassemble）， 违者属于侵权行为，并自行承担由此产生的不利后果。\n"
+                    + "3. 软件保证不含任何病毒，木马，等破坏用户数据的恶意代码，但是由于本软件产品可以通过网络等途径下载、传播，对于从非软件作者指定站点下载的本软件产品软件作者无法保证该软件是否感染计算机病毒、是否隐藏有伪装的特洛伊木马程序或者黑客软件，不承担由此引起的直接和间接损害责任。\n"
+                    + "4. 软件会不断更新，以便及时为用户提供新功能和修正软件中的BUG。 同时软件作者保证本软件在升级过程中也不含有任何旨在破坏用户计算机数据的恶意代码。\n"
+                    + "5. 由于用户计算机软硬件环境的差异性和复杂性，本软件所提供的各项功能并不能保证在任何情况下都能正常执行或达到用户所期望的结果。 用户使用本软件所产生的一切后果，软件作者不承担任何责任。\n"
+                    + "6. 如果用户自行安装本软件，即表明用户信任软件作者，自愿选择安装本软件，并接受本协议所有条款。 如果用户不接受本协议，请立即删除。\n";
+ 
+            SpannableStringBuilder ssb = new SpannableStringBuilder();
+            ssb.append(str);
+
+            // final int start = str.indexOf("《");//第一个出现的位置
+            // ssb.setSpan(new ClickableSpan() {
+            //     @Override
+            //     public void onClick(@NonNull View widget) {
+            //         //Toast.makeText(SplashScreenActivity.this, "《隐私政策》", Toast.LENGTH_SHORT).show();
+            //     }
+
+            //     @Override
+            //     public void updateDrawState(@NonNull TextPaint ds) {
+            //         super.updateDrawState(ds);
+            //         ds.setColor(getResources().getColor(R.color.chocolate));
+            //         ds.setUnderlineText(false);
+            //     }
+            // }, start, start + 6, 0);
+
+            // int end = str.lastIndexOf("《");
+            // ssb.setSpan(new ClickableSpan() {
+            //     @Override
+            //     public void onClick(@NonNull View widget) {
+            //         // Toast.makeText(SplashScreenActivity.this, "《用户协议》", Toast.LENGTH_SHORT).show();
+            //     }
+
+            //     @Override
+            //     public void updateDrawState(@NonNull TextPaint ds) {
+            //         super.updateDrawState(ds);
+            //         ds.setColor(getResources().getColor(R.color.chocolate));
+            //         ds.setUnderlineText(false);
+            //     }
+            // }, end, end + 6, 0);
+ 
+            tvContent.setMovementMethod(LinkMovementMethod.getInstance());
+            tvContent.setText(ssb, TextView.BufferType.SPANNABLE);
+
+            tvCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    alertDialog.cancel();
+                    finish();
+                }
+            });
+ 
+            tvAgree.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (tvCheck.isChecked()) {
+                        //实例化Editor对象
+                        SharedPreferences.Editor editor = preferences.edit();
+                        //存入数据
+                        editor.putBoolean("isFirstUse", false);
+                        //提交修改
+                        editor.apply();
+
+                        isFirstUse = false;
+                    }
+
+                    requestNeedPermissions();
+
+                    alertDialog.cancel();
+                }
+            });
+        }
     }
 
     @TargetApi(23)
@@ -176,9 +287,15 @@ public class WelcomeActivity extends BaseActivity {
                 requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
             } else {
                 isPermission = true;
+                if (!isLimit) {
+                    time.start();
+                }
             }
         } else {
             isPermission = true;
+            if (!isLimit) {
+                time.start();
+            }
         }
     }
 
@@ -195,9 +312,13 @@ public class WelcomeActivity extends BaseActivity {
 
             if (i >= ReqPermissions.size()) {
                 isPermission = true;
+                if (!isLimit) {
+                    time.start();
+                }
             } else {
                 isPermission = false;
                 startBtn.setText("权限不足");
+                startBtn.setClickable(true);
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -229,9 +350,8 @@ public class WelcomeActivity extends BaseActivity {
         @Override
         public void run() {
             GoSntpClient GoSntpClient = new GoSntpClient();
-            int i;
-            for (i = 0; i < ntpServerPool.length; i++) {
-                if (GoSntpClient.requestTime(ntpServerPool[i], 30000)) {
+            for (String s : ntpServerPool) {
+                if (GoSntpClient.requestTime(s, 30000)) {
                     long now = GoSntpClient.getNtpTime() + SystemClock.elapsedRealtime() - GoSntpClient.getNtpTimeReference();
                     if (now / 1000 < mTS) {
                         isLimit = false;
@@ -239,12 +359,15 @@ public class WelcomeActivity extends BaseActivity {
                     break;
                 }
             }
-            if (i < ntpServerPool.length) {
-                time.start();
+            if (!isLimit) {
+                if (!isFirstUse && isPermission && isNetwork) {
+                    time.start();
+                }
             } else {
                 isLimit = true;
+                startBtn.setClickable(true);
+                startBtn.setText("无法连接服务器");
             }
-            startBtn.setClickable(true);
         }
     }
 

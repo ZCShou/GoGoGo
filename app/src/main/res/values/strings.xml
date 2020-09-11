@@ -10,6 +10,11 @@
     <string name="welcome_btn_txt">进入应用</string>
     <string name="welcome_btn_cnt">5000</string>
     <string name="welcome_desc">世界这么大，我想去看看</string>
+    <string name="welcome_protocol_title">免责声明</string>
+    <string name="welcome_protocol_agree">同意并继续</string>
+    <string name="welcome_protocol_disagree">不同意</string>
+    <string name="welcome_protocol_check">不再显示</string>
+
     <!-- 主界面 -->
     <string name="fabtn_start">启动定位</string>
     <string name="fabtn_stop">停止定位</string>
