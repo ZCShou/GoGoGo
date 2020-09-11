@@ -12,7 +12,7 @@
         android:layout_marginTop="8dp"
         android:autofillHints="longitude"
         android:hint="@string/label_longitude"
-        android:inputType="number" />
+        android:inputType="numberDecimal" />
 
     <EditText
         android:id="@+id/joystick_latitude"
@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:autofillHints="latitude"
         android:hint="@string/label_latitude"
-        android:inputType="number" />
+        android:inputType="numberDecimal" />
 
     <LinearLayout
         android:layout_width="match_parent"

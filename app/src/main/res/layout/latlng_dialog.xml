@@ -10,7 +10,7 @@
         android:layout_marginStart="10dp"
         android:autofillHints="longitude"
         android:hint="@string/label_longitude"
-        android:inputType="number" />
+        android:inputType="numberDecimal" />
 
     <EditText
         android:id="@+id/dialog_latitude"
@@ -20,6 +20,6 @@
         android:layout_marginStart="10dp"
         android:autofillHints="latitude"
         android:hint="@string/label_latitude"
-        android:inputType="number" />
+        android:inputType="numberDecimal" />
 
 </RelativeLayout>

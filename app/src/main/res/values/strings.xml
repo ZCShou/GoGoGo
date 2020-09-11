@@ -26,8 +26,8 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="user_name">Test</string>
-    <string name="user_limit_info">当前版本无使用限制</string>
+    <string name="user_name">点击注册</string>
+    <string name="user_limit_info">未注册版本部分功能受限</string>
     <string name="nav_menu_history">历史记录</string>
     <string name="nav_menu_settings">设置</string>
     <string name="nav_menu_preference">设置</string>
@@ -79,5 +79,12 @@
     <string name="joystick_input_cancel">取消</string>
 
     <string name="ad_unit_id_welcome" translatable="false">ca-app-pub-2117389248426871/1567963500</string>
+
+    <string name="register_title">离线注册</string>
+    <string name="register_user_name">用户名</string>
+    <string name="register_response">注册码</string>
+    <string name="register_ok">注册</string>
+    <string name="register_cancel">取消</string>
+    <string name="register_check">我已阅读免责声明，并同意所有条款</string>
 
 </resources>

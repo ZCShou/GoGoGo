@@ -20,10 +20,13 @@ import android.location.LocationProvider;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.opengl.Visibility;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.text.SpannableStringBuilder;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,9 +34,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioGroup;
@@ -114,6 +119,7 @@ import com.zcshou.database.HistorySearchDataBaseHelper;
 import com.zcshou.service.GoSntpClient;
 import com.zcshou.utils.MapUtils;
 
+import static android.view.View.GONE;
 import static com.zcshou.gogogo.R.drawable;
 import static com.zcshou.gogogo.R.id;
 import static com.zcshou.gogogo.R.layout;
@@ -187,6 +193,8 @@ public class MainActivity extends BaseActivity
     private SuggestionSearch mSuggestionSearch;
 
     private boolean isLimit = true;
+
+    CheckBox mPtlCheck;
 
     //log debug
     private static final Logger log = Logger.getLogger(MainActivity.class);
@@ -326,9 +334,109 @@ public class MainActivity extends BaseActivity
         // 从上到下逐级获取
         View navHeaderView = mNavigationView.getHeaderView(0);
         TextView mUserLimitInfo = navHeaderView.findViewById(R.id.user_limit);
+        TextView mUserName = navHeaderView.findViewById(R.id.user_name);
+
+        mUserName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DrawerLayout drawer = findViewById(id.drawer_layout);
+
+                if (drawer.isDrawerOpen(GravityCompat.START)) {
+                    drawer.closeDrawer(GravityCompat.START);
+                }
+                showRegisterDialog();
+            }
+        });
+
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         mUserLimitInfo.setText(String.format(Locale.getDefault(), "有效期: %s", simpleDateFormat.format(new Date(mTS*1000))));
+    }
+
+    public void showRegisterDialog() {
+        final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(this).create();
+        alertDialog.show();
+        alertDialog.setCancelable(false);
+        Window window = alertDialog.getWindow();
+        if (window != null) {
+            window.setContentView(layout.register_dialog);
+            window.setGravity(Gravity.CENTER);
+
+            TextView regCancel = window.findViewById(R.id.reg_cancel);
+            TextView regAgree = window.findViewById(R.id.reg_agree);
+            mPtlCheck = window.findViewById(id.reg_check);
+
+            mPtlCheck.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showProtocolDialog();
+                }
+            });
+
+            regCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    alertDialog.cancel();
+                }
+            });
+
+            regAgree.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mPtlCheck.isChecked()) {
+
+                    }
+                    alertDialog.cancel();
+                }
+            });
+        }
+    }
+
+    private void showProtocolDialog() {
+        final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(this).create();
+        alertDialog.show();
+        alertDialog.setCancelable(false);
+        Window window = alertDialog.getWindow();
+        if (window != null) {
+            window.setContentView(R.layout.welcom_protocol);
+            window.setGravity(Gravity.CENTER);
+
+            TextView tvContent = window.findViewById(R.id.tv_content);
+            TextView tvCancel = window.findViewById(R.id.tv_cancel);
+            TextView tvAgree = window.findViewById(R.id.tv_agree);
+            final CheckBox tvCheck = window.findViewById(R.id.tv_check);
+            tvCheck.setVisibility(GONE);
+            String str = "1. 本软件专为学习 Android 开发使用，不会收集任何用户数据。"
+                    + "严禁利用本软件侵犯他人隐私权或者用于游戏牟利，如软件使用者不能遵守此规定， 请立即删除。"
+                    + "对于因用户使用本软件而造成自身或他人隐私泄露等任何不良后果，均由用户自行承担，软件作者不负任何责任。\n"
+                    + "2. 用户不得对本软件产品进行反向工程（reverse engineer）、反向编译（decompile）或反汇编（disassemble）， 违者属于侵权行为，并自行承担由此产生的不利后果。\n"
+                    + "3. 软件保证不含任何病毒，木马，等破坏用户数据的恶意代码，但是由于本软件产品可以通过网络等途径下载、传播，对于从非软件作者指定站点下载的本软件产品软件作者无法保证该软件是否感染计算机病毒、是否隐藏有伪装的特洛伊木马程序或者黑客软件，不承担由此引起的直接和间接损害责任。\n"
+                    + "4. 软件会不断更新，以便及时为用户提供新功能和修正软件中的BUG。 同时软件作者保证本软件在升级过程中也不含有任何旨在破坏用户计算机数据的恶意代码。\n"
+                    + "5. 由于用户计算机软硬件环境的差异性和复杂性，本软件所提供的各项功能并不能保证在任何情况下都能正常执行或达到用户所期望的结果。 用户使用本软件所产生的一切后果，软件作者不承担任何责任。\n"
+                    + "6. 如果用户自行安装本软件，即表明用户信任软件作者，自愿选择安装本软件，并接受本协议所有条款。 如果用户不接受本协议，请立即删除。\n";
+
+            SpannableStringBuilder ssb = new SpannableStringBuilder();
+            ssb.append(str);
+
+            tvContent.setMovementMethod(LinkMovementMethod.getInstance());
+            tvContent.setText(ssb, TextView.BufferType.SPANNABLE);
+
+            tvCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mPtlCheck.setChecked(false);
+                    alertDialog.cancel();
+                }
+            });
+
+            tvAgree.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mPtlCheck.setChecked(true);
+                    alertDialog.cancel();
+                }
+            });
+        }
     }
 
     //判断GPS是否打开
@@ -1534,7 +1642,6 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onBackPressed() {
-        moveTaskToBack(false);
 //        DrawerLayout drawer = findViewById(id.drawer_layout);
 //
 //        if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -1542,6 +1649,7 @@ public class MainActivity extends BaseActivity
 //        } else {
 //            super.onBackPressed();
 //        }
+        moveTaskToBack(false);
     }
     
     @Override

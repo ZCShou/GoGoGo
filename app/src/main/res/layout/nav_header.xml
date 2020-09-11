@@ -4,9 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/nav_header_height"
     android:background="@drawable/side_nav_bar"
-    android:gravity="bottom"
     android:orientation="vertical"
-    android:paddingBottom="3dp"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
@@ -30,11 +28,13 @@
 
     <TextView
         android:id="@+id/user_limit"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="bottom"
-        android:layout_gravity="bottom"
         android:layout_marginTop="20dp"
-        android:text="@string/user_limit_info" />
+        android:layout_gravity="center_vertical"
+        android:gravity="center_vertical"
+        android:text="@string/user_limit_info"
+        android:drawablePadding="5dip"
+        app:drawableStartCompat="@drawable/ic_msg"/>
 
 </LinearLayout>
