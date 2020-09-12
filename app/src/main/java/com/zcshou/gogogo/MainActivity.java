@@ -366,6 +366,7 @@ public class MainActivity extends BaseActivity
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
             window.setContentView(layout.register_dialog);
             window.setGravity(Gravity.CENTER);
+            window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
 
             TextView regCancel = window.findViewById(R.id.reg_cancel);
             TextView regAgree = window.findViewById(R.id.reg_agree);
@@ -376,7 +377,7 @@ public class MainActivity extends BaseActivity
             mPtlCheck.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!mPtlCheck.isChecked()) {
+                    if (mPtlCheck.isChecked()) {
                         showProtocolDialog();
                     }
                 }
@@ -422,6 +423,7 @@ public class MainActivity extends BaseActivity
         if (window != null) {
             window.setContentView(R.layout.welcom_protocol);
             window.setGravity(Gravity.CENTER);
+            window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
 
             TextView tvContent = window.findViewById(R.id.tv_content);
             TextView tvCancel = window.findViewById(R.id.tv_cancel);

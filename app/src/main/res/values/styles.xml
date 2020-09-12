@@ -25,10 +25,10 @@
         <item name="android:radius">14dp</item>
     </style>
 
-    <!-- 修改tablayout的背景色，提示线的颜色，字体颜色等-->
-    <style name="AppTheme.TabLayout" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
-        <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="tabIndicatorColor">@color/white</item>
+    <!-- dialog动画 -->
+    <style name="DialogAnimFadeInFadeOut" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/anim_fade_in</item>
+        <item name="android:windowExitAnimation">@anim/anim_fade_out</item>
     </style>
+
 </resources>

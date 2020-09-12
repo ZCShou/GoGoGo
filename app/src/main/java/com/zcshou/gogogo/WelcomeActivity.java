@@ -169,7 +169,8 @@ public class WelcomeActivity extends BaseActivity {
         if (window != null) {
             window.setContentView(R.layout.welcom_protocol);
             window.setGravity(Gravity.CENTER);
- 
+            window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
+
             TextView tvContent = window.findViewById(R.id.tv_content);
             TextView tvCancel = window.findViewById(R.id.tv_cancel);
             TextView tvAgree = window.findViewById(R.id.tv_agree);
