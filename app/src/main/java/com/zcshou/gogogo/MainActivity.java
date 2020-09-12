@@ -421,6 +421,7 @@ public class MainActivity extends BaseActivity
         alertDialog.setCancelable(false);
         Window window = alertDialog.getWindow();
         if (window != null) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);      // 防止出现闪屏
             window.setContentView(R.layout.welcom_protocol);
             window.setGravity(Gravity.CENTER);
             window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
@@ -428,7 +429,7 @@ public class MainActivity extends BaseActivity
             TextView tvContent = window.findViewById(R.id.tv_content);
             TextView tvCancel = window.findViewById(R.id.tv_cancel);
             TextView tvAgree = window.findViewById(R.id.tv_agree);
-            final CheckBox tvCheck = window.findViewById(R.id.tv_check);
+            CheckBox tvCheck = window.findViewById(R.id.tv_check);
             tvCheck.setVisibility(GONE);
             String str = "1. 本软件专为学习 Android 开发使用，不会收集任何用户数据。"
                     + "严禁利用本软件侵犯他人隐私权或者用于游戏牟利，如软件使用者不能遵守此规定， 请立即删除。"

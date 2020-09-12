@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:padding="12dp"
+            android:padding="14dp"
             android:text="@string/welcome_protocol_disagree"
             android:textColor="#282828"
             android:textStyle="bold" />
@@ -65,7 +65,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:padding="12dp"
+            android:padding="14dp"
             android:text="@string/welcome_protocol_agree"
             android:textColor="#282828"
             android:textStyle="bold" />
