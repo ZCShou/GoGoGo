@@ -117,7 +117,9 @@ import com.zcshou.service.GoGoGoService;
 import com.zcshou.database.HistoryLocationDataBaseHelper;
 import com.zcshou.database.HistorySearchDataBaseHelper;
 import com.zcshou.service.GoSntpClient;
+import com.zcshou.utils.AESUtils;
 import com.zcshou.utils.MapUtils;
+import com.zcshou.utils.RSAUtils;
 
 import static android.view.View.GONE;
 import static com.zcshou.gogogo.R.drawable;
