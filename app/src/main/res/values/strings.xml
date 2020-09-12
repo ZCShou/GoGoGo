@@ -56,6 +56,7 @@
     <string name="setting_version">版本号</string>
     <string name="setting_author">开发者</string>
     <string name="setting_device_id">设备唯一标识</string>
+    <string name="setting_group_sys">系统</string>
 
     <!-- 百度地图 -->
     <string name="map_pic_hot">热力图</string>

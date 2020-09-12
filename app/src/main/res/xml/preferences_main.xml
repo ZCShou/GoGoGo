@@ -38,11 +38,6 @@
             app:defaultValue="false"
             app:iconSpaceReserved="false"/>
 
-        <Preference
-            app:key="setting_startup_num"
-            app:isPreferenceVisible="false"
-            app:iconSpaceReserved="false"/>
-
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -63,6 +58,22 @@
         <Preference
             app:key="setting_device_id"
             app:title="@string/setting_device_id"
+            app:iconSpaceReserved="false"/>
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/setting_group_sys"
+        app:isPreferenceVisible="false"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            app:key="setting_startup_num"
+            app:iconSpaceReserved="false"/>
+
+        <Preference
+            app:key="setting_reg_code"
             app:iconSpaceReserved="false"/>
 
     </PreferenceCategory>

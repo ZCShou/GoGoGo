@@ -186,8 +186,6 @@ public class GoGoGoService extends Service {
                 @Override
                 public void clickAngleInfo(double angle, double speed) {
                     mSpeed = speed * 3.6;   // 转换为 km/h, 1米/秒(m/s)=3.6千米/时(km/h)
-                    double lng;
-                    double lat;
                     if (!isLimit) {
                         // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）
                         double x = Math.cos(angle * 2 * Math.PI / 360);   // 注意安卓使用的是弧度
@@ -203,13 +201,10 @@ public class GoGoGoService extends Service {
                         double lngDegree = mSpeed * x / (111.320 * Math.cos(Math.abs(Double.parseDouble(latLngStr[1])) * Math.PI / 180));
                         double latDegree = mSpeed * y / 110.574;
 
-                        lng = Double.parseDouble(latLngStr[0]) + lngDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
-                        lat = Double.parseDouble(latLngStr[1]) + latDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
-                    } else {
-                        lng = Math.random() * (180 - 1 + 1);
-                        lat = Math.random() * (90 - 1 + 1);
+                        double lng = Double.parseDouble(latLngStr[0]) + lngDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
+                        double lat = Double.parseDouble(latLngStr[1]) + latDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
+                        curLatLng = lng + "&" + lat;
                     }
-                    curLatLng = lng + "&" + lat;
                 }
 
                 @Override

@@ -20,12 +20,12 @@ import android.location.LocationProvider;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.opengl.Visibility;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Gravity;
@@ -36,11 +36,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioGroup;
@@ -197,6 +195,7 @@ public class MainActivity extends BaseActivity
     private boolean isLimit = true;
 
     CheckBox mPtlCheck;
+    SharedPreferences sharedPreferences;
 
     //log debug
     private static final Logger log = Logger.getLogger(MainActivity.class);
@@ -324,11 +323,13 @@ public class MainActivity extends BaseActivity
         threadExecutor.submit(timeTask);
 
         // 这里记录启动次数
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         long num = sharedPreferences.getLong("setting_startup_num", 0);
         sharedPreferences.edit()
                 .putLong("setting_startup_num", ++num)
                 .apply();
+
+        // sharedPreferences.getString("setting_reg_code", "");
     }
 
     @SuppressLint("InflateParams")
@@ -369,11 +370,15 @@ public class MainActivity extends BaseActivity
             TextView regCancel = window.findViewById(R.id.reg_cancel);
             TextView regAgree = window.findViewById(R.id.reg_agree);
             mPtlCheck = window.findViewById(id.reg_check);
+            final TextView regResp = window.findViewById(id.reg_response);
+            final TextView regUserName = window.findViewById(id.reg_user_name);
 
             mPtlCheck.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showProtocolDialog();
+                    if (!mPtlCheck.isChecked()) {
+                        showProtocolDialog();
+                    }
                 }
             });
 
@@ -387,9 +392,22 @@ public class MainActivity extends BaseActivity
             regAgree.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mPtlCheck.isChecked()) {
-
+                    if (!mPtlCheck.isChecked()) {
+                        DisplayToast("您必须先阅读并同意免责声明");
+                        return;
                     }
+                    if (TextUtils.isEmpty(regResp.getText())) {
+                        DisplayToast("注册码不能为空");
+                        return;
+                    }
+                    if (TextUtils.isEmpty(regUserName.getText())) {
+                        DisplayToast("用户名不能为空");
+                        return;
+                    }
+                    sharedPreferences.edit()
+                            .putString("setting_reg_code", regResp.getText().toString())
+                            .apply();
+
                     alertDialog.cancel();
                 }
             });
