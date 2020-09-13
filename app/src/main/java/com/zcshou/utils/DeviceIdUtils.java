@@ -111,14 +111,14 @@ public class DeviceIdUtils {
      *
      * @return 设备序列号
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private static String getSERIAL() {
-        try {
-            return Build.getSerial();
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        String serial ="";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            serial = Build.getSerial();
+        } else {
+            serial = Build.SERIAL;
         }
-        return "";
+        return serial;
     }
 
     /**

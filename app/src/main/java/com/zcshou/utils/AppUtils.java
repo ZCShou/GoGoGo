@@ -62,7 +62,6 @@ public class AppUtils {
             PackageManager packageManager = context.getPackageManager();
 
             PackageInfo packageInfo = packageManager.getPackageInfo(
-
                     context.getPackageName(), 0);
 
             return packageInfo.versionCode;
@@ -84,7 +83,6 @@ public class AppUtils {
             PackageManager packageManager = context.getPackageManager();
 
             PackageInfo packageInfo = packageManager.getPackageInfo(
-
                     context.getPackageName(), 0);
 
             return packageInfo.packageName;
