@@ -1,6 +1,5 @@
 package com.zcshou.utils;
 
-import android.util.Base64;
 
 import javax.crypto.Cipher;
 import java.io.ByteArrayOutputStream;
@@ -9,12 +8,9 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-// https://blog.csdn.net/yuzhiqiang_1993/article/details/88657793
-// https://www.jianshu.com/p/fe02af0933ef
 
 public class RSAUtils {
     public static final int KEY_LENGTH_1024 = 1024;
@@ -75,7 +71,7 @@ public class RSAUtils {
 //            String data = "测试提交数据";
 //
 //            byte[] publicEncryptBytes = RSAUtils.encryptByPublicKey(data.getBytes(), publicKey);
-//            System.out.println("公钥加密后的数据：" + Arrays.toString(Base64.encode(publicEncryptBytes, Base64.DEFAULT)));
+//            System.out.println("公钥加密后的数据：" + Base64.encode(publicEncryptBytes));
 //            byte[] privatDecryptBytes = RSAUtils.decryptByPrivateKey(publicEncryptBytes, privateKey);
 //            System.out.println("私钥解密后的数据：" + new String(privatDecryptBytes));
 //
@@ -83,9 +79,9 @@ public class RSAUtils {
 //            System.out.println("--------------------");
 //
 //            byte[] privateKeyEncryptBytes = RSAUtils.encryptByPrivateKey(data.getBytes(), privateKey);
-//            System.out.println("私钥加密后的数据：" + Arrays.toString(Base64.encode(privateKeyEncryptBytes, Base64.DEFAULT)));
+//            System.out.println("私钥加密后的数据：" + Base64.encode(privateKeyEncryptBytes));
 //
-//            String singnData = Arrays.toString(RSAUtils.sign(data.getBytes(), privateKey));
+//            String singnData = RSAUtils.sign(data.getBytes(), privateKey);
 //            System.out.println("私钥签名后的数据：" + singnData);
 //
 //
@@ -104,10 +100,13 @@ public class RSAUtils {
 
     /**
      * @param keySize 生成的秘钥长度  一般为1024或2048
-     * @return s
-     * @throws Exception 异常
+     * @return
+     * * @throws Exception 异常
      */
     public static Map<String, Object> genKeyPair(int keySize) throws Exception {
+        if (keySize != KEY_LENGTH_1024 && keySize != KEY_LENGTH_2048) {
+            return null;
+        }
         KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(KEY_ALGORITHM);
         keyPairGen.initialize(keySize);
         KeyPair keyPair = keyPairGen.generateKeyPair();
@@ -116,6 +115,9 @@ public class RSAUtils {
         Map<String, Object> keyMap = new HashMap<>(2);
         keyMap.put(PUBLIC_KEY, publicKey);
         keyMap.put(PRIVATE_KEY, privateKey);
+
+        System.out.println("publicKey：" + Base64.encode(publicKey.getEncoded()));
+        System.out.println("privateKey：" + Base64.encode(privateKey.getEncoded()));
 
         return keyMap;
     }
@@ -127,18 +129,18 @@ public class RSAUtils {
      * @param data       已加密的数据
      * @param privateKey 私钥
      * @return 对已加密数据生成的签名
-     * @throws Exception 异常
+     * * @throws Exception 异常
      */
 
-    public static byte[] sign(byte[] data, String privateKey) throws Exception {
-        byte[] keyBytes = Base64.decode(privateKey, Base64.DEFAULT);
+    public static String sign(byte[] data, String privateKey) throws Exception {
+        byte[] keyBytes = Base64.decode(privateKey);
         PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
         PrivateKey privateK = keyFactory.generatePrivate(pkcs8KeySpec);
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initSign(privateK);
         signature.update(data);
-        return Base64.encode(signature.sign(), Base64.DEFAULT);
+        return Base64.encode(signature.sign());
     }
 
 
@@ -149,17 +151,17 @@ public class RSAUtils {
      * @param publicKey 公钥
      * @param sign      签名之后的数据
      * @return 验签是否成功
-     * @throws Exception 异常
+     * * @throws Exception 异常
      */
     public static boolean verify(byte[] data, String publicKey, String sign) throws Exception {
-        byte[] keyBytes = Base64.decode(publicKey, Base64.DEFAULT);
+        byte[] keyBytes = Base64.decode(publicKey);
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
         PublicKey publicK = keyFactory.generatePublic(keySpec);
         Signature signature = Signature.getInstance(SIGNATURE_ALGORITHM);
         signature.initVerify(publicK);
         signature.update(data);
-        return signature.verify(Base64.decode(sign.getBytes(), Base64.DEFAULT));
+        return signature.verify(Base64.decode(sign));
     }
 
 
@@ -169,13 +171,14 @@ public class RSAUtils {
      * @param encryptedData 使用公钥加密过的数据
      * @param privateKey    私钥
      * @return 解密后的数据
-     * @throws Exception 异常
+     * * @throws Exception 异常
      */
     public static byte[] decryptByPrivateKey(byte[] encryptedData, String privateKey) throws Exception {
-        byte[] keyBytes = Base64.decode(privateKey, Base64.DEFAULT);
+        byte[] keyBytes = Base64.decode(privateKey);
         PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
         Key privateK = keyFactory.generatePrivate(pkcs8KeySpec);
+        //Cipher cipher = Cipher.getInstance(keyFactory.getAlgorithm());
         Cipher cipher = Cipher.getInstance(KEY_ALGORITHM);
         cipher.init(Cipher.DECRYPT_MODE, privateK);
 
@@ -208,10 +211,10 @@ public class RSAUtils {
      * @param encryptedData 使用私钥加密过的数据
      * @param publicKey     公钥
      * @return 解密后的数据
-     * @throws Exception 异常
+     * * @throws Exception 异常
      */
     public static byte[] decryptByPublicKey(byte[] encryptedData, String publicKey) throws Exception {
-        byte[] keyBytes = Base64.decode(publicKey, Base64.DEFAULT);
+        byte[] keyBytes = Base64.decode(publicKey);
         X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
         Key publicK = keyFactory.generatePublic(x509KeySpec);
@@ -245,10 +248,10 @@ public class RSAUtils {
      * @param data      需要加密的数据
      * @param publicKey 公钥
      * @return 使用公钥加密后的数据
-     * @throws Exception 异常
+     * * @throws Exception 异常
      */
     public static byte[] encryptByPublicKey(byte[] data, String publicKey) throws Exception {
-        byte[] keyBytes = Base64.decode(publicKey, Base64.DEFAULT);
+        byte[] keyBytes = Base64.decode(publicKey);
         X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
         Key publicK = keyFactory.generatePublic(x509KeySpec);
@@ -283,10 +286,10 @@ public class RSAUtils {
      * @param data       待加密的数据
      * @param privateKey 私钥
      * @return 使用私钥加密后的数据
-     * @throws Exception 异常
+     * * @throws Exception 异常
      */
     public static byte[] encryptByPrivateKey(byte[] data, String privateKey) throws Exception {
-        byte[] keyBytes = Base64.decode(privateKey, Base64.DEFAULT);
+        byte[] keyBytes = Base64.decode(privateKey);
         PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(KEY_ALGORITHM);
         Key privateK = keyFactory.generatePrivate(pkcs8KeySpec);
@@ -319,14 +322,13 @@ public class RSAUtils {
      *
      * @param keyMap 生成的秘钥对
      * @return 私钥
-     * @throws Exception 异常
      */
-    public static String getPrivateKey(Map<String, Object> keyMap) throws Exception {
+    public static String getPrivateKey(Map<String, Object> keyMap) {
         Key key = (Key) keyMap.get(PRIVATE_KEY);
         if (key == null) {
             return null;
         } else {
-            return Arrays.toString(Base64.encode(key.getEncoded(), Base64.DEFAULT));
+            return Base64.encode(key.getEncoded());
         }
     }
 
@@ -336,14 +338,14 @@ public class RSAUtils {
      *
      * @param keyMap 生成的秘钥对
      * @return 公钥
-     * @throws Exception 异常
      */
-    public static String getPublicKey(Map<String, Object> keyMap) throws Exception {
+    public static String getPublicKey(Map<String, Object> keyMap) {
         Key key = (Key) keyMap.get(PUBLIC_KEY);
         if (key == null) {
             return null;
         } else {
-            return  Arrays.toString(Base64.encode(key.getEncoded(), Base64.DEFAULT));
+            return Base64.encode(key.getEncoded());
         }
     }
+
 }
