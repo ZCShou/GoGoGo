@@ -31,6 +31,7 @@ import com.baidu.mapapi.model.LatLng;
 import com.zcshou.joystick.JoyStick;
 import com.zcshou.log4j.LogUtil;
 import com.zcshou.gogogo.R;
+import com.zcshou.utils.RomUtils;
 
 import org.apache.log4j.Logger;
 
@@ -86,7 +87,7 @@ public class GoGoGoService extends Service {
         //remove gps provider
         rmGPSTestProvider();
         //remove other provider
-        rmOtherTestProvider();
+        //rmOtherTestProvider();
 
         //add a new test network location provider
         setNetworkTestProvider();
@@ -240,7 +241,7 @@ public class GoGoGoService extends Service {
         //remove test provider
         rmNetworkTestProvider();
         rmGPSTestProvider();
-        rmOtherTestProvider();
+        //rmOtherTestProvider();
 
         stopForeground(true);
 
@@ -369,17 +370,18 @@ public class GoGoGoService extends Service {
     }
 
     private void setGPSTestProvider() {
-        if (!locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
-            locationManager.setTestProviderEnabled(LocationManager.PASSIVE_PROVIDER, false);
-            Log.d("GoGoGoService", "Disable passive provider");
-            log.debug("Disable passive provider");
-        }
-
-        if (!locationManager.isProviderEnabled("fused") && Build.VERSION.SDK_INT >= 29) {
-            locationManager.setTestProviderEnabled("fused", false);
-            Log.d("GoGoGoService", "Disable fused provider");
-            log.debug("Disable fused provider");
-        }
+//        if (!locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
+//            locationManager.setTestProviderEnabled(LocationManager.PASSIVE_PROVIDER, false);
+//            Log.d("GoGoGoService", "Disable passive provider");
+//            log.debug("Disable passive provider");
+//        }
+//
+//        if (!locationManager.isProviderEnabled("fused") && Build.VERSION.SDK_INT >= 29
+//                && !RomUtils.isVivo() && !RomUtils.isEmui()) {    // 目前 ViVo 会崩溃
+//            locationManager.setTestProviderEnabled("fused", false);
+//            Log.d("GoGoGoService", "Disable fused provider");
+//            log.debug("Disable fused provider");
+//        }
 
         try {
             locationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, true,
@@ -421,7 +423,7 @@ public class GoGoGoService extends Service {
             }
         }
 
-        if (!locationManager.isProviderEnabled("fused") && Build.VERSION.SDK_INT >= 29) {
+        if (!locationManager.isProviderEnabled("fused") && Build.VERSION.SDK_INT >= 29 && !RomUtils.isVivo() && !RomUtils.isEmui()) {   // 目前 ViVo 会崩溃
             try {
                 locationManager.setTestProviderEnabled("fused", false);
                 Log.d("GoGoGoService", "Disable fused provider");
