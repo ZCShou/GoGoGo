@@ -20,7 +20,10 @@ public class AESUtils {
     public static final int KEY_LENGTH_24 = 24;
     //  32 字节 AES秘钥长度（256bit）
     public static final int KEY_LENGTH_32 = 32;
-    private static String cipherMode = "AES/ECB/PKCS5Padding";//算法/模式/补码方式
+
+    // 实际上，“ RSA / ECB / PKCS1Padding”未实现ECB模式加密。 它应该被称为“ RSA / None / PKCS1Padding”，
+    // 因为它只能用于加密单个明文块（或者实际上是一个秘密密钥）。 这只是Sun / Oracle的命名错误。
+    private static final String cipherMode = "AES/None/PKCS5Padding";//算法/模式/补码方式
 
 
 //    public static void main(String[] args) {
