@@ -39,14 +39,6 @@ public class FragmentSettings extends PreferenceFragmentCompat implements OnPref
             pfAuthor.setSummary(R.string.author);
         }
 
-        // 设置 ID
-        String sDid;
-        sDid = DeviceIdUtils.getDeviceId(FragmentSettings.this.getContext());
-        Preference pfDid = findPreference("setting_device_id");
-        if (pfDid != null) {
-            pfDid.setSummary(sDid);
-        }
-
         EditTextPreference pfWalk = findPreference("setting_walk");
         if (pfWalk != null) {
             pfWalk.setSummaryProvider(new Preference.SummaryProvider<EditTextPreference>() {// 使用自定义 SummaryProvider

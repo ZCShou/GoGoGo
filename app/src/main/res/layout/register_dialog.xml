@@ -2,6 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -27,16 +28,36 @@
         android:drawablePadding="10dip"
         app:drawableStartCompat="@drawable/ic_user"/>
 
-    <EditText
-        android:id="@+id/editTextDate"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="date"
-        android:hint="@string/register_limit"
-        android:autofillHints="date"
-        android:drawablePadding="10dip"
-        app:drawableStartCompat="@drawable/ic_date" />
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_marginStart="2dp"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_date"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/register_limit" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:background="@android:color/transparent"
+            android:textSize="18sp"
+            android:textColor="@color/darkgray"
+            android:text="@string/register_limit"/>
+
+        <DatePicker
+            android:id="@+id/date_picker"
+            style="@android:style/Widget.DatePicker"
+            android:layout_width="match_parent"
+            android:layout_height="100dp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/reg_request"
@@ -49,6 +70,7 @@
         android:drawablePadding="10dip"
         app:drawableStartCompat="@drawable/ic_pwd"
         android:background="@drawable/border_gray"/>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

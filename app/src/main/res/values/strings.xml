@@ -20,6 +20,12 @@
     <string name="fabtn_stop">停止定位</string>
     <string name="label_longitude">经度</string>
     <string name="label_latitude">纬度</string>
+    <string name="label_faq">FAQ</string>
+    <!-- 主菜单 -->
+    <string name="main_menu_action_latlng">经纬度定位</string>
+    <string name="main_menu_action_history">历史记录</string>
+    <string name="main_menu_action_setting">设置</string>
+
     <!-- 历史记录页面 -->
     <string name="history_idle">暂无历史记录</string>
     <!-- 导航页 -->
@@ -36,10 +42,6 @@
     <string name="nav_menu_feedback">问题反馈</string>
     <string name="nav_menu_contact">联系作者</string>
 
-    <!-- 主菜单 -->
-    <string name="main_menu_action_latlng">经纬度定位</string>
-    <string name="main_menu_action_history">历史记录</string>
-    <string name="main_menu_action_setting">设置</string>
 
     <!-- 设置界面 -->
     <string name="title_activity_settings">设置</string>
@@ -55,7 +57,6 @@
     <string name="setting_group_about">关于</string>
     <string name="setting_version">版本号</string>
     <string name="setting_author">开发者</string>
-    <string name="setting_device_id">设备唯一标识</string>
     <string name="setting_group_sys">系统</string>
 
     <!-- 百度地图 -->

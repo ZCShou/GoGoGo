@@ -55,11 +55,6 @@
             app:defaultValue="@string/author"
             app:iconSpaceReserved="false"/>
 
-        <Preference
-            app:key="setting_device_id"
-            app:title="@string/setting_device_id"
-            app:iconSpaceReserved="false"/>
-
 
     </PreferenceCategory>
 
