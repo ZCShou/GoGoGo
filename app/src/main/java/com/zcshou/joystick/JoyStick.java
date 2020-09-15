@@ -42,7 +42,6 @@ public class JoyStick extends View {
 
     // 移动
     private TimeCount time;
-    boolean isAuto;
     double mAngle;
     double mSpeed;
     SharedPreferences sharedPreferences;
@@ -130,7 +129,6 @@ public class JoyStick extends View {
     @SuppressLint("InflateParams")
     private void initJoyStickView() {
         time = new TimeCount(1000, 1000);
-        isAuto = false;
         String sSpeed = sharedPreferences.getString("setting_walk", "");
         if (sSpeed == null) {
             mSpeed = Double.parseDouble(getResources().getString(R.string.setting_walk_default));
@@ -234,23 +232,18 @@ public class JoyStick extends View {
         ButtonView btnView = mJoystickView.findViewById(R.id.joystick_view);
         btnView.setListener(new ButtonView.ButtonViewClickListener() {
             @Override
-            public void clickCenter() {
-                if (isAuto) {
-                    isAuto = false;
+            public void clickAngleInfo(Boolean auto, double angle, double r) {
+                if (r <= 0) {
                     time.cancel();
                 } else {
-                    isAuto = true;
-                }
-            }
-
-            @Override
-            public void clickAngleInfo(double angle, double r) {
-                mAngle = angle;
-                mSpeed = mSpeed * r;
-                if (isAuto) {
-                    time.start();
-                } else {
-                    mListener.clickAngleInfo(mAngle, mSpeed);
+                    mAngle = angle;
+                    mSpeed = mSpeed * r;
+                    if (auto) {
+                        time.start();
+                    } else {
+                        time.cancel();
+                        mListener.clickAngleInfo(mAngle, mSpeed);
+                    }
                 }
             }
 

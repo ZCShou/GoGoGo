@@ -68,6 +68,7 @@ public class ButtonView extends LinearLayout {
 				} else {
 					isCenter = false;
 					btnCenter.setImageResource(R.drawable.ic_lock_open);
+
 					if (isNorth) {
 						isNorth = false;
 						btnNorth.setImageResource(R.drawable.ic_up);
@@ -100,10 +101,9 @@ public class ButtonView extends LinearLayout {
 						isWestSouth = false;
 						btnWestSouth.setImageResource(R.drawable.ic_left_down);
 					}
-				}
-
-				if (mListener != null) {
-					mListener.clickCenter();
+					if (mListener != null) {
+						mListener.clickAngleInfo(false,0, 0);
+					}
 				}
 			}
 		});
@@ -132,14 +132,20 @@ public class ButtonView extends LinearLayout {
 						btnWestNorth.setImageResource(R.drawable.ic_left_up);
 						isWestSouth = false;
 						btnWestSouth.setImageResource(R.drawable.ic_left_down);
+						if (mListener != null) {
+							mListener.clickAngleInfo(true,90, 1);
+						}
 					} else {
 						isNorth = false;
 						btnNorth.setImageResource(R.drawable.ic_up);
-						btnCenter.performClick();
+						if (mListener != null) {
+							mListener.clickAngleInfo(false,90, 0);
+						}
 					}
-				}
-				if (mListener != null) {
-					mListener.clickAngleInfo(90, 1);
+				} else {
+					if (mListener != null) {
+						mListener.clickAngleInfo(false,90, 1);
+					}
 				}
 			}
 		});
@@ -167,14 +173,20 @@ public class ButtonView extends LinearLayout {
 						btnWestNorth.setImageResource(R.drawable.ic_left_up);
 						isWestSouth = false;
 						btnWestSouth.setImageResource(R.drawable.ic_left_down);
+						if (mListener != null) {
+							mListener.clickAngleInfo(true,270, 1);
+						}
 					} else {
 						isSouth = false;
 						btnSouth.setImageResource(R.drawable.ic_down);
-						btnCenter.performClick();
+						if (mListener != null) {
+							mListener.clickAngleInfo(false,270, 0);
+						}
 					}
-				}
-				if (mListener != null) {
-					mListener.clickAngleInfo(270, 1);
+				} else {
+					if (mListener != null) {
+						mListener.clickAngleInfo(false,270, 1);
+					}
 				}
 			}
 		});
@@ -202,14 +214,20 @@ public class ButtonView extends LinearLayout {
 						btnWestNorth.setImageResource(R.drawable.ic_left_up);
 						isWestSouth = false;
 						btnWestSouth.setImageResource(R.drawable.ic_left_down);
+						if (mListener != null) {
+							mListener.clickAngleInfo(true,180, 1);
+						}
 					} else {
 						isWest = false;
 						btnWest.setImageResource(R.drawable.ic_left);
-						btnCenter.performClick();
+						if (mListener != null) {
+							mListener.clickAngleInfo(false,180, 0);
+						}
 					}
-				}
-				if (mListener != null) {
-					mListener.clickAngleInfo(180, 1);
+				} else {
+					if (mListener != null) {
+						mListener.clickAngleInfo(false,180, 1);
+					}
 				}
 			}
 		});
@@ -237,14 +255,20 @@ public class ButtonView extends LinearLayout {
 						btnWestNorth.setImageResource(R.drawable.ic_left_up);
 						isWestSouth = false;
 						btnWestSouth.setImageResource(R.drawable.ic_left_down);
+						if (mListener != null) {
+							mListener.clickAngleInfo(true,0, 1);
+						}
 					} else {
 						isEast = false;
 						btnEast.setImageResource(R.drawable.ic_right);
-						btnCenter.performClick();
+						if (mListener != null) {
+							mListener.clickAngleInfo(false,0, 0);
+						}
 					}
-				}
-				if (mListener != null) {
-					mListener.clickAngleInfo(0, 1);
+				} else {
+					if (mListener != null) {
+						mListener.clickAngleInfo(false,0, 1);
+					}
 				}
 			}
 		});
@@ -274,14 +298,20 @@ public class ButtonView extends LinearLayout {
 						btnWestNorth.setImageResource(R.drawable.ic_left_up);
 						isWestSouth = false;
 						btnWestSouth.setImageResource(R.drawable.ic_left_down);
+						if (mListener != null) {
+							mListener.clickAngleInfo(true,45, 1);
+						}
 					} else {
 						isEastNorth = false;
 						btnEastNorth.setImageResource(R.drawable.ic_right_up);
-						btnCenter.performClick();
+						if (mListener != null) {
+							mListener.clickAngleInfo(false,45, 0);
+						}
 					}
-				}
-				if (mListener != null) {
-					mListener.clickAngleInfo(45, 1);
+				} else {
+					if (mListener != null) {
+						mListener.clickAngleInfo(false,45, 1);
+					}
 				}
 			}
 		});
@@ -310,14 +340,20 @@ public class ButtonView extends LinearLayout {
 						btnWestNorth.setImageResource(R.drawable.ic_left_up);
 						isWestSouth = false;
 						btnWestSouth.setImageResource(R.drawable.ic_left_down);
+						if (mListener != null) {
+							mListener.clickAngleInfo(true,315, 1);
+						}
 					} else {
 						isEastSouth = false;
 						btnEastSouth.setImageResource(R.drawable.ic_right_down);
-						btnCenter.performClick();
+						if (mListener != null) {
+							mListener.clickAngleInfo(false,315, 0);
+						}
 					}
-				}
-				if (mListener != null) {
-					mListener.clickAngleInfo(315, 1);
+				} else {
+					if (mListener != null) {
+						mListener.clickAngleInfo(false,315, 1);
+					}
 				}
 			}
 		});
@@ -346,14 +382,20 @@ public class ButtonView extends LinearLayout {
 						btnEastSouth.setImageResource(R.drawable.ic_right_down);
 						isWestSouth = false;
 						btnWestSouth.setImageResource(R.drawable.ic_left_down);
+						if (mListener != null) {
+							mListener.clickAngleInfo(true,135, 1);
+						}
 					} else {
 						isWestNorth = false;
 						btnWestNorth.setImageResource(R.drawable.ic_left_up);
-						btnCenter.performClick();
+						if (mListener != null) {
+							mListener.clickAngleInfo(false,135, 0);
+						}
 					}
-				}
-				if (mListener != null) {
-					mListener.clickAngleInfo(135, 1);
+				} else {
+					if (mListener != null) {
+						mListener.clickAngleInfo(false,135, 1);
+					}
 				}
 			}
 		});
@@ -382,14 +424,20 @@ public class ButtonView extends LinearLayout {
 						btnEastSouth.setImageResource(R.drawable.ic_right_down);
 						isWestNorth = false;
 						btnWestNorth.setImageResource(R.drawable.ic_left_up);
+						if (mListener != null) {
+							mListener.clickAngleInfo(true,225, 1);
+						}
 					} else {
 						isWestSouth = false;
 						btnWestSouth.setImageResource(R.drawable.ic_left_down);
-						btnCenter.performClick();
+						if (mListener != null) {
+							mListener.clickAngleInfo(false,225, 0);
+						}
 					}
-				}
-				if (mListener != null) {
-					mListener.clickAngleInfo(225, 1);
+				} else {
+					if (mListener != null) {
+						mListener.clickAngleInfo(false,225, 1);
+					}
 				}
 			}
 		});
@@ -401,14 +449,9 @@ public class ButtonView extends LinearLayout {
 
 	public interface ButtonViewClickListener {
 		/**
-		 * 中间按钮被点击了
-		 */
-		void clickCenter();
-
-		/**
 		 * 点击的角度信息
 		 */
-		void clickAngleInfo(double angle, double r);
+		void clickAngleInfo(Boolean auto, double angle, double r);
 
 	}
 
