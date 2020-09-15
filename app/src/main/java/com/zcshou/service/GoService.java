@@ -39,7 +39,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class GoGoGoService extends Service {
+public class GoService extends Service {
 
     public static final int RunCode = 0x01;
     public static final int StopCode = 0x02;
@@ -60,7 +60,7 @@ public class GoGoGoService extends Service {
     private TimeCount time;
 
     // log debug
-    private static final Logger log = Logger.getLogger(GoGoGoService.class);
+    private static final Logger log = Logger.getLogger(GoService.class);
 
     @Nullable
     @Override
@@ -73,7 +73,7 @@ public class GoGoGoService extends Service {
     public void onCreate() {
         LogUtil.configLog();
 
-        Log.d("GoGoGoService", "onCreate");
+        Log.d("GoService", "onCreate");
         log.debug("onCreate");
 
         super.onCreate();
@@ -113,12 +113,12 @@ public class GoGoGoService extends Service {
                         Intent intent = new Intent();
                         intent.putExtra("StatusRun", RunCode);
                         // intent.putExtra("CurLatLng", curLatLng);
-                        intent.setAction("com.zcshou.service.GoGoGoService");
+                        intent.setAction("com.zcshou.service.GoService");
                         sendBroadcast(intent);
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    Log.d("GoGoGoService", "handleMessage error");
+                    Log.d("GoService", "handleMessage error");
                     log.debug("handleMessage error");
                     Thread.currentThread().interrupt();
                 }
@@ -135,7 +135,7 @@ public class GoGoGoService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("GoGoGoService", "onStartCommand");
+        Log.d("GoService", "onStartCommand");
         log.debug("onStartCommand");
 
         threadExecutor.submit(timeTask);
@@ -148,7 +148,7 @@ public class GoGoGoService extends Service {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel mChannel = new NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_LOW);
-            Log.i("GoGoGoService", mChannel.toString());
+            Log.i("GoService", mChannel.toString());
 
             if (notificationManager != null) {
                 notificationManager.createNotificationChannel(mChannel);
@@ -156,13 +156,13 @@ public class GoGoGoService extends Service {
 
             notification = new NotificationCompat.Builder(this, channelId)
                     .setChannelId(channelId)
-                    .setContentTitle("GoGoGo")
-                    .setContentText("GoGoGo service is running")
+                    .setContentTitle(getResources().getString(R.string.app_name))
+                    .setContentText(getResources().getString(R.string.app_service))
                     .setSmallIcon(R.mipmap.ic_launcher).build();
         } else {
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "M_CH_ID")
-                    .setContentTitle("GoGoGo")
-                    .setContentText("GoGoGo service is running")
+                    .setContentTitle(getResources().getString(R.string.app_name))
+                    .setContentText(getResources().getString(R.string.app_service))
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setOngoing(true)
                     .setChannelId(channelId);//无效
@@ -174,7 +174,7 @@ public class GoGoGoService extends Service {
         // get location info from mainActivity
         curLatLng = intent.getStringExtra("CurLatLng");
 
-        Log.d("GoGoGoService", "LatLng from Main is " + curLatLng);
+        Log.d("GoService", "LatLng from Main is " + curLatLng);
         log.debug("LatLng from Main is " + curLatLng);
 
         //start to refresh location
@@ -205,6 +205,9 @@ public class GoGoGoService extends Service {
                         double lng = Double.parseDouble(latLngStr[0]) + lngDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
                         double lat = Double.parseDouble(latLngStr[1]) + latDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
                         curLatLng = lng + "&" + lat;
+                    } else {
+                        Log.d("GoService", "isLimit " + isLimit);
+                        log.debug("isLimit " + isLimit);
                     }
                 }
 
@@ -225,7 +228,7 @@ public class GoGoGoService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.d("GoGoGoService", "onDestroy");
+        Log.d("GoService", "onDestroy");
         log.debug("onDestroy");
 
         isStop = true;
@@ -248,7 +251,7 @@ public class GoGoGoService extends Service {
         // broadcast to MainActivity
         Intent intent = new Intent();
         intent.putExtra("StatusRun", StopCode);
-        intent.setAction("com.zcshou.service.GoGoGoService");
+        intent.setAction("com.zcshou.service.GoService");
         sendBroadcast(intent);
 
         super.onDestroy();
@@ -282,7 +285,7 @@ public class GoGoGoService extends Service {
         try {
             locationManager.setTestProviderLocation(providerStr, generateLocation(latLng));
         } catch (Exception e) {
-            Log.d("GoGoGoService", "setNetworkLocation error");
+            Log.d("GoService", "setNetworkLocation error");
             log.debug("setNetworkLocation error");
             e.printStackTrace();
         }
@@ -297,7 +300,7 @@ public class GoGoGoService extends Service {
         try {
             locationManager.setTestProviderLocation(providerStr, generateLocation(latLng));
         } catch (Exception e) {
-            Log.d("GoGoGoService", "setGPSLocation error");
+            Log.d("GoService", "setGPSLocation error");
             log.debug("setGPSLocation error");
             e.printStackTrace();
         }
@@ -307,16 +310,16 @@ public class GoGoGoService extends Service {
     private void rmNetworkTestProvider() {
         try {
             if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                Log.d("GoGoGoService", "now remove NetworkProvider");
+                Log.d("GoService", "now remove NetworkProvider");
                 log.debug("now remove NetworkProvider");
                 locationManager.removeTestProvider(LocationManager.NETWORK_PROVIDER);
             } else {
-                Log.d("GoGoGoService", "NetworkProvider is not enabled");
+                Log.d("GoService", "NetworkProvider is not enabled");
                 log.debug("NetworkProvider is not enabled");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("GoGoGoService", "rmNetworkProvider error");
+            Log.d("GoService", "rmNetworkProvider error");
             log.debug("rmNetworkProvider error");
         }
     }
@@ -327,11 +330,11 @@ public class GoGoGoService extends Service {
             locationManager.addTestProvider(LocationManager.NETWORK_PROVIDER, true, false,
                     false, false, false, false,
                     false, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
-            Log.d("GoGoGoService", "addTestProvider[NETWORK_PROVIDER] success");
+            Log.d("GoService", "addTestProvider[NETWORK_PROVIDER] success");
             log.debug("addTestProvider[NETWORK_PROVIDER] success");
         } catch (SecurityException e) {
             e.printStackTrace();
-            Log.d("GoGoGoService", "addTestProvider[NETWORK_PROVIDER] error");
+            Log.d("GoService", "addTestProvider[NETWORK_PROVIDER] error");
             log.debug("addTestProvider[NETWORK_PROVIDER] error");
         }
 
@@ -340,7 +343,7 @@ public class GoGoGoService extends Service {
                 locationManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d("GoGoGoService", "setTestProviderEnabled[NETWORK_PROVIDER] error");
+                Log.d("GoService", "setTestProviderEnabled[NETWORK_PROVIDER] error");
                 log.debug("setTestProviderEnabled[NETWORK_PROVIDER] error");
             }
         }
@@ -355,16 +358,16 @@ public class GoGoGoService extends Service {
     private void rmGPSTestProvider() {
         try {
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                Log.d("GoGoGoService", "now remove GPSProvider");
+                Log.d("GoService", "now remove GPSProvider");
                 log.debug("now remove GPSProvider");
                 locationManager.removeTestProvider(LocationManager.GPS_PROVIDER);
             } else {
-                Log.d("GoGoGoService", "GPSProvider is not enabled");
+                Log.d("GoService", "GPSProvider is not enabled");
                 log.debug("GPSProvider is not enabled");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("GoGoGoService", "rmGPSProvider error");
+            Log.d("GoService", "rmGPSProvider error");
             log.debug("rmGPSProvider error");
         }
     }
@@ -372,25 +375,25 @@ public class GoGoGoService extends Service {
     private void setGPSTestProvider() {
 //        if (!locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
 //            locationManager.setTestProviderEnabled(LocationManager.PASSIVE_PROVIDER, false);
-//            Log.d("GoGoGoService", "Disable passive provider");
+//            Log.d("GoService", "Disable passive provider");
 //            log.debug("Disable passive provider");
 //        }
 //
 //        if (!locationManager.isProviderEnabled("fused") && Build.VERSION.SDK_INT >= 29
 //                && !RomUtils.isVivo() && !RomUtils.isEmui()) {    // 目前 ViVo 会崩溃
 //            locationManager.setTestProviderEnabled("fused", false);
-//            Log.d("GoGoGoService", "Disable fused provider");
+//            Log.d("GoService", "Disable fused provider");
 //            log.debug("Disable fused provider");
 //        }
 
         try {
             locationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, true,
                     false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_HIGH);
-            Log.d("GoGoGoService", "addTestProvider[GPS_PROVIDER] success");
+            Log.d("GoService", "addTestProvider[GPS_PROVIDER] success");
             log.debug("addTestProvider[GPS_PROVIDER] success");
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("GoGoGoService", "addTestProvider[GPS_PROVIDER] error");
+            Log.d("GoService", "addTestProvider[GPS_PROVIDER] error");
             log.debug("addTestProvider[GPS_PROVIDER] error");
         }
 
@@ -399,7 +402,7 @@ public class GoGoGoService extends Service {
                 locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.d("GoGoGoService", "setTestProviderEnabled[GPS_PROVIDER] error");
+                Log.d("GoService", "setTestProviderEnabled[GPS_PROVIDER] error");
                 log.debug("setTestProviderEnabled[GPS_PROVIDER] error");
             }
         }
@@ -414,11 +417,11 @@ public class GoGoGoService extends Service {
         if (!locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
             try {
                 locationManager.setTestProviderEnabled(LocationManager.PASSIVE_PROVIDER, false);
-                Log.d("GoGoGoService", "Disable passive provider");
+                Log.d("GoService", "Disable passive provider");
                 log.debug("Disable passive provider");
             } catch(Exception e) {
                 e.printStackTrace();
-                Log.d("GoGoGoService", "Disable passive provider error");
+                Log.d("GoService", "Disable passive provider error");
                 log.debug("Disable passive provider error");
             }
         }
@@ -426,11 +429,11 @@ public class GoGoGoService extends Service {
         if (!locationManager.isProviderEnabled("fused") && Build.VERSION.SDK_INT >= 29 && !RomUtils.isVivo() && !RomUtils.isEmui()) {   // 目前 ViVo 会崩溃
             try {
                 locationManager.setTestProviderEnabled("fused", false);
-                Log.d("GoGoGoService", "Disable fused provider");
+                Log.d("GoService", "Disable fused provider");
                 log.debug("Disable fused provider");
             } catch(Exception e) {
                 e.printStackTrace();
-                Log.d("GoGoGoService", "Disable fused provider error");
+                Log.d("GoService", "Disable fused provider error");
                 log.debug("Disable fused provider error");
             }
         }
@@ -481,7 +484,7 @@ public class GoGoGoService extends Service {
 
             if (i >= ntpServerPool.length) {
                 isLimit = true;
-                Log.d("GoGoGoService", "GoSntpClient is error");
+                Log.d("GoService", "GoSntpClient is error");
                 log.debug("GoSntpClient is error");
             }
         }

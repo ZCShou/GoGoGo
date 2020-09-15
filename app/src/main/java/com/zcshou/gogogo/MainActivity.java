@@ -26,7 +26,6 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Gravity;
@@ -114,7 +113,7 @@ import java.util.concurrent.Executors;
 import mapapi.overlayutil.PoiOverlay;
 
 import com.zcshou.log4j.LogUtil;
-import com.zcshou.service.GoGoGoService;
+import com.zcshou.service.GoService;
 import com.zcshou.database.HistoryLocationDataBaseHelper;
 import com.zcshou.database.HistorySearchDataBaseHelper;
 import com.zcshou.service.GoSntpClient;
@@ -125,8 +124,8 @@ import static com.zcshou.gogogo.R.drawable;
 import static com.zcshou.gogogo.R.id;
 import static com.zcshou.gogogo.R.layout;
 import static com.zcshou.gogogo.R.string;
-import static com.zcshou.service.GoGoGoService.RunCode;
-import static com.zcshou.service.GoGoGoService.StopCode;
+import static com.zcshou.service.GoService.RunCode;
+import static com.zcshou.service.GoService.StopCode;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, SensorEventListener {
@@ -248,12 +247,12 @@ public class MainActivity extends BaseActivity
         //http init
         mRequestQueue = Volley.newRequestQueue(this);
 
-        //注册GoGoGoService广播接收器
+        //注册GoService广播接收器
         try {
-            MainActivity.GoGoGoServiceReceiver goGoGoServiceReceiver = new GoGoGoServiceReceiver();
+            MainActivity.GoServiceReceiver GoServiceReceiver = new GoServiceReceiver();
             IntentFilter filter = new IntentFilter();
-            filter.addAction("com.zcshou.service.GoGoGoService");
-            this.registerReceiver(goGoGoServiceReceiver, filter);
+            filter.addAction("com.zcshou.service.GoService");
+            this.registerReceiver(GoServiceReceiver, filter);
         } catch (Exception e) {
             Log.e("UNKNOWN", "registerReceiver error");
             e.printStackTrace();
@@ -1265,7 +1264,7 @@ public class MainActivity extends BaseActivity
                                     markSelectedPosition();
 
                                     //start mock location service
-                                    Intent mockLocServiceIntent = new Intent(MainActivity.this, GoGoGoService.class);
+                                    Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
                                     mockLocServiceIntent.putExtra("CurLatLng", curLatLng);
 
                                     //save record
@@ -1274,12 +1273,12 @@ public class MainActivity extends BaseActivity
                                     //insert end
                                     if (Build.VERSION.SDK_INT >= 26) {
                                         startForegroundService(mockLocServiceIntent);
-                                        Log.d("DEBUG", "startForegroundService: GoGoGoService");
-                                        log.debug("startForegroundService: GoGoGoService");
+                                        Log.d("DEBUG", "startForegroundService: GoService");
+                                        log.debug("startForegroundService: GoService");
                                     } else {
                                         startService(mockLocServiceIntent);
-                                        Log.d("DEBUG", "startService: GoGoGoService");
-                                        log.debug("startService: GoGoGoService");
+                                        Log.d("DEBUG", "startService: GoService");
+                                        log.debug("startService: GoService");
                                     }
 
                                     isMockServStart = true;
@@ -1306,7 +1305,7 @@ public class MainActivity extends BaseActivity
             public void onClick(View v) {
                 if (isMockServStart) {
                     //end mock location
-                    Intent mockLocServiceIntent = new Intent(MainActivity.this, GoGoGoService.class);
+                    Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
                     stopService(mockLocServiceIntent);
                     Snackbar.make(v, "位置模拟服务终止", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
@@ -1671,7 +1670,7 @@ public class MainActivity extends BaseActivity
         Log.d("MainActivity", "onDestroy");
         
         if (isMockServStart) {
-            Intent mockLocServiceIntent = new Intent(MainActivity.this, GoGoGoService.class);
+            Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
             stopService(mockLocServiceIntent);
         }
         
@@ -1962,7 +1961,7 @@ public class MainActivity extends BaseActivity
         }
     }
     
-    public class GoGoGoServiceReceiver extends BroadcastReceiver {
+    public class GoServiceReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             int StatusRun;
