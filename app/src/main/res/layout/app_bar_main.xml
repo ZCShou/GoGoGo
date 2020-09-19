@@ -65,6 +65,7 @@
             android:onClick="goCurrentPosition"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_home_position"
+            android:theme="@style/RippleWhite"
             android:contentDescription="@string/map_home"/>
 
         <LinearLayout

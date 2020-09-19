@@ -41,7 +41,9 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_date"
             android:background="@android:color/transparent"
-            android:contentDescription="@string/register_limit" />
+            android:contentDescription="@string/register_limit"
+            android:clickable="false"
+            android:theme="@style/RippleWhite"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -65,7 +67,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
         android:text="请求码：3333333333333333333333333333333333333333333333333333333"
         android:drawablePadding="10dip"
         app:drawableStartCompat="@drawable/ic_pwd"

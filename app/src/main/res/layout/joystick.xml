@@ -76,7 +76,7 @@
 
     <com.zcshou.joystick.ButtonView
         android:id="@+id/joystick_view"
-        android:padding="3dp"
+        android:padding="1dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
