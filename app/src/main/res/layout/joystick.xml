@@ -87,7 +87,7 @@
 
         <LinearLayout
             android:layout_width="@dimen/joystick_ctrl_btn_width"
-            android:layout_height="28dp"
+            android:layout_height="@dimen/joystick_ctrl_btn_height"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
             android:background="@drawable/circle_shape"

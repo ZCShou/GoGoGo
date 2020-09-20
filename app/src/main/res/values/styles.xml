@@ -18,7 +18,7 @@
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <!-- 参考 https://blog.csdn.net/qq_37299249/article/details/78536772 -->
-    <style name="RippleWhite">
+    <style name="RippleWhite"  parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- 点击后波纹的颜色 -->
         <item name="android:colorControlHighlight">#67899B</item>
         <!-- 效果半径-->

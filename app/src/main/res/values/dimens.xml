@@ -10,6 +10,6 @@
     <dimen name="joystick_btn_width">30dp</dimen>
     <dimen name="joystick_btn_height">30dp</dimen>
     <!-- 摇杆的控制按钮 -->
-    <dimen name="joystick_ctrl_btn_width">26dp</dimen>
-    <dimen name="joystick_ctrl_btn_height">26dp</dimen>
+    <dimen name="joystick_ctrl_btn_width">24dp</dimen>
+    <dimen name="joystick_ctrl_btn_height">24dp</dimen>
 </resources>
