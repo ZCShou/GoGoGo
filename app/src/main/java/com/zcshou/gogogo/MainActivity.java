@@ -76,15 +76,6 @@ import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
-import com.baidu.mapapi.search.core.PoiInfo;
-import com.baidu.mapapi.search.core.SearchResult;
-import com.baidu.mapapi.search.poi.OnGetPoiSearchResultListener;
-import com.baidu.mapapi.search.poi.PoiDetailResult;
-import com.baidu.mapapi.search.poi.PoiDetailSearchOption;
-import com.baidu.mapapi.search.poi.PoiDetailSearchResult;
-import com.baidu.mapapi.search.poi.PoiIndoorResult;
-import com.baidu.mapapi.search.poi.PoiResult;
-import com.baidu.mapapi.search.poi.PoiSearch;
 import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
@@ -109,8 +100,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import mapapi.overlayutil.PoiOverlay;
 
 import com.zcshou.log4j.LogUtil;
 import com.zcshou.service.GoService;
@@ -181,7 +170,6 @@ public class MainActivity extends BaseActivity
     private FloatingActionButton faBtnStop;
 
     //位置搜索相关
-    PoiSearch poiSearch;
     private SearchView searchView;
     private ListView mSearchList;
     private ListView mSearchHistoryList;
@@ -292,18 +280,12 @@ public class MainActivity extends BaseActivity
         // set 开始定位 listener
         setGoBtnListener();
 
-        //poi search 实例化
-        poiSearch = PoiSearch.newInstance();
-
         // 搜索相关
         searchView = findViewById(id.action_search);
         mSearchList = findViewById(id.search_list_view);
         mSearchlinearLayout = findViewById(id.search_linear);
         mSearchHistoryList = findViewById(id.search_history_list_view);
         mHistorylinearLayout = findViewById(id.search_history_linear);
-
-        //初始化POI搜索监听
-        initPoiSearchResultListener();
 
         //搜索结果列表的点击监听
         setSearchResultClickListener();
@@ -786,12 +768,11 @@ public class MainActivity extends BaseActivity
             /**
              * 单击地图中的POI点
              */
-            public boolean onMapPoiClick(MapPoi poi) {
+            public void onMapPoiClick(MapPoi poi) {
                 curMapLatLng = poi.getPosition();
                 //百度坐标系转wgs坐标系
                 transformCoordinate(String.valueOf(poi.getPosition().longitude), String.valueOf(poi.getPosition().latitude));
                 markSelectedPosition();
-                return false;
             }
         });
 
@@ -1497,72 +1478,6 @@ public class MainActivity extends BaseActivity
         });
     }
 
-    //poi搜索初始化
-    private void initPoiSearchResultListener() {
-        OnGetPoiSearchResultListener poiSearchListener = new OnGetPoiSearchResultListener() {
-            @Override
-            public void onGetPoiResult(PoiResult poiResult) {
-                if (poiResult == null || poiResult.error == SearchResult.ERRORNO.RESULT_NOT_FOUND) {// 没有找到检索结果
-                    DisplayToast("没有找到检索结果");
-                    Log.d("BDLOC", "没有找到检索结果");
-                    log.debug("BDLOC: 没有找到检索结果");
-                    return;
-                }
-
-                if (poiResult.error == SearchResult.ERRORNO.NO_ERROR) {// 检索结果正常返回
-                    if (isSubmit) {
-                        // mBaiduMap.clear();
-                        PoiGoOverlay poiOverlay = new PoiGoOverlay(mBaiduMap);
-                        poiOverlay.setData(poiResult);// 设置POI数据
-                        mBaiduMap.setOnMarkerClickListener(poiOverlay);
-                        poiOverlay.addToMap();// 将所有的overlay添加到地图上
-                        poiOverlay.zoomToSpan();
-                        mSearchlinearLayout.setVisibility(View.INVISIBLE);
-                        //标注搜索点 关闭搜索列表
-                        // searchView.clearFocus();  //可以收起键盘
-                        searchItem.collapseActionView(); //关闭搜索视图
-                        isSubmit = false;
-                    } else {
-                        List<Map<String, Object>> data = new ArrayList<>();
-                        int retCnt = poiResult.getAllPoi().size();
-
-                        for (int i = 0; i < retCnt; i++) {
-                            Map<String, Object> testitem = new HashMap<>();
-                            testitem.put("key_name", poiResult.getAllPoi().get(i).name);
-                            testitem.put("key_addr", poiResult.getAllPoi().get(i).address);
-                            testitem.put("key_lng", "" + poiResult.getAllPoi().get(i).location.longitude);
-                            testitem.put("key_lat", "" + poiResult.getAllPoi().get(i).location.latitude);
-                            data.add(testitem);
-                        }
-
-                        simAdapt = new SimpleAdapter(
-                                MainActivity.this,
-                                data,
-                                layout.poi_search_item,
-                                new String[] {"key_name", "key_addr", "key_lng", "key_lat"}, // 与下面数组元素要一一对应
-                                new int[] {id.poi_name, id.poi_addr, id.poi_longitude, id.poi_latitude});
-                        mSearchList.setAdapter(simAdapt);
-                        mSearchlinearLayout.setVisibility(View.VISIBLE);
-                    }
-                }
-            }
-
-            @Override
-            public void onGetPoiDetailResult(PoiDetailResult poiDetailResult) {
-                DisplayToast(poiDetailResult.name);
-            }
-
-            @Override
-            public void onGetPoiDetailResult(PoiDetailSearchResult poiDetailSearchResult) {
-            }
-
-            @Override
-            public void onGetPoiIndoorResult(PoiIndoorResult poiIndoorResult) {
-            }
-        };
-        poiSearch.setOnGetPoiSearchResultListener(poiSearchListener);
-    }
-
     //检索建议
     private void setSearchSuggestListener() {
         mSuggestionSearch = SuggestionSearch.newInstance();
@@ -1574,11 +1489,11 @@ public class MainActivity extends BaseActivity
                     if (isSubmit) {
                         // mBaiduMap.clear();
                         //normal
-                        PoiGoOverlay poiOverlay = new PoiGoOverlay(mBaiduMap);
-                        poiOverlay.setSugData(res);// 设置POI数据
-                        mBaiduMap.setOnMarkerClickListener(poiOverlay);
-                        poiOverlay.addToMap();// 将所有的overlay添加到地图上
-                        poiOverlay.zoomToSpan();
+                        //PoiGoOverlay poiOverlay = new PoiGoOverlay(mBaiduMap);
+                        //poiOverlay.setSugData(res);// 设置POI数据
+                        //mBaiduMap.setOnMarkerClickListener(poiOverlay);
+                        //poiOverlay.addToMap();// 将所有的overlay添加到地图上
+                        //poiOverlay.zoomToSpan();
                         mSearchlinearLayout.setVisibility(View.INVISIBLE);
                         //标注搜索点 关闭搜索列表
                         // searchView.clearFocus();  //可以收起键盘
@@ -1686,7 +1601,6 @@ public class MainActivity extends BaseActivity
         mMapView = null;
 
         //poi search destroy
-        poiSearch.destroy();
         mSuggestionSearch.destroy();
 
         //close db
@@ -1925,42 +1839,6 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    public class PoiGoOverlay extends PoiOverlay {
-        private PoiGoOverlay(BaiduMap arg0) {
-            super(arg0);
-        }
-        
-        @Override
-        public boolean onPoiClick(int arg0) {
-            super.onPoiClick(arg0);
-            PoiResult poiResult = getPoiResult();
-            
-            if (poiResult != null && poiResult.getAllPoi() != null) {
-                PoiInfo poiInfo;
-                poiInfo = poiResult.getAllPoi().get(arg0);
-                curMapLatLng = poiInfo.location;
-                transformCoordinate(Double.toString(curMapLatLng.longitude), Double.toString(curMapLatLng.latitude));
-                // 检索poi详细信息
-                poiSearch.searchPoiDetail(new PoiDetailSearchOption()
-                                          .poiUid(poiInfo.uid));
-            }
-            
-            SuggestionResult suggestionResult = getSugResult();
-            
-            if (suggestionResult != null && suggestionResult.getAllSuggestions() != null) {
-                SuggestionResult.SuggestionInfo suggestionInfo;
-                suggestionInfo = suggestionResult.getAllSuggestions().get(arg0);
-                curMapLatLng = suggestionInfo.pt;
-                transformCoordinate(Double.toString(curMapLatLng.longitude), Double.toString(curMapLatLng.latitude));
-                // 检索sug详细信息
-                poiSearch.searchPoiDetail(new PoiDetailSearchOption()
-                                          .poiUid(suggestionInfo.uid));
-            }
-            
-            return true;
-        }
-    }
-    
     public class GoServiceReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {

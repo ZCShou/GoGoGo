@@ -20,9 +20,9 @@ import java.util.List;
 public class IndoorPoiOverlay extends OverlayManager {
 
     private static final int MAX_POI_SIZE = 10;
-    
+
     private PoiIndoorResult mIndoorPoiResult = null;
-    
+
     /**
      * 构造函数
      *
@@ -32,7 +32,7 @@ public class IndoorPoiOverlay extends OverlayManager {
     public IndoorPoiOverlay(BaiduMap baiduMap) {
         super(baiduMap);
     }
-    
+
     /**
      * 设置IndoorPoi数据
      *
@@ -42,34 +42,31 @@ public class IndoorPoiOverlay extends OverlayManager {
     public void setData(PoiIndoorResult indoorpoiResult) {
         this.mIndoorPoiResult = indoorpoiResult;
     }
-    
+
     @Override
     public final List<OverlayOptions> getOverlayOptions() {
-        if (mIndoorPoiResult == null || mIndoorPoiResult.getmArrayPoiInfo() == null) {
+        if (mIndoorPoiResult == null || mIndoorPoiResult.getArrayPoiInfo() == null) {
             return null;
         }
-        
         List<OverlayOptions> markerList = new ArrayList<OverlayOptions>();
         int markerSize = 0;
-        
-        for (int i = 0; i < mIndoorPoiResult.getmArrayPoiInfo().size()
+        for (int i = 0; i < mIndoorPoiResult.getArrayPoiInfo().size()
                 && markerSize < MAX_POI_SIZE; i++) {
-            if (mIndoorPoiResult.getmArrayPoiInfo().get(i).latLng == null) {
+            if (mIndoorPoiResult.getArrayPoiInfo().get(i).latLng == null) {
                 continue;
             }
-            
             markerSize++;
             Bundle bundle = new Bundle();
             bundle.putInt("index", i);
             markerList.add(new MarkerOptions()
-                           .icon(BitmapDescriptorFactory.fromAssetWithDpi("Icon_mark"
-                                   + markerSize + ".png")).extraInfo(bundle)
-                           .position(mIndoorPoiResult.getmArrayPoiInfo().get(i).latLng));
+                    .icon(BitmapDescriptorFactory.fromAssetWithDpi("Icon_mark"
+                            + markerSize + ".png")).extraInfo(bundle)
+                    .position(mIndoorPoiResult.getArrayPoiInfo().get(i).latLng));
+
         }
-        
         return markerList;
     }
-    
+
     /**
      * 获取该 IndoorPoiOverlay 的 indoorpoi数据
      *
@@ -78,7 +75,7 @@ public class IndoorPoiOverlay extends OverlayManager {
     public PoiIndoorResult getIndoorPoiResult() {
         return mIndoorPoiResult;
     }
-    
+
     /**
      * 覆写此方法以改变默认点击行为
      *
@@ -90,20 +87,18 @@ public class IndoorPoiOverlay extends OverlayManager {
     public boolean onPoiClick(int i) {
         return false;
     }
-    
+
     @Override
     public final boolean onMarkerClick(Marker marker) {
         if (!mOverlayList.contains(marker)) {
             return false;
         }
-        
         if (marker.getExtraInfo() != null) {
             return onPoiClick(marker.getExtraInfo().getInt("index"));
         }
-        
         return false;
     }
-    
+
     @Override
     public boolean onPolylineClick(Polyline polyline) {
         // TODO Auto-generated method stub
