@@ -4,9 +4,12 @@ import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -22,12 +25,12 @@ import android.os.SystemClock;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 import android.util.Log;
 
 import com.baidu.mapapi.model.LatLng;
+import com.zcshou.gogogo.MainActivity;
 import com.zcshou.joystick.JoyStick;
 import com.zcshou.log4j.LogUtil;
 import com.zcshou.gogogo.R;
@@ -58,6 +61,8 @@ public class GoService extends Service {
     private TimeTask timeTask;
     private ExecutorService threadExecutor;
     private TimeCount time;
+
+    NoteActionReceiver acReceiver;
 
     // log debug
     private static final Logger log = Logger.getLogger(GoService.class);
@@ -130,9 +135,14 @@ public class GoService extends Service {
 
         timeTask = new TimeTask();
         threadExecutor = Executors.newSingleThreadExecutor();
+
+        NoteActionReceiver acReceiver = new NoteActionReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("ShowJoyStick");
+        filter.addAction("HideJoyStick");
+        registerReceiver(acReceiver, filter);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("GoService", "onStartCommand");
@@ -145,6 +155,13 @@ public class GoService extends Service {
         String name = "channel_name";
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Notification notification;
+        //准备intent
+        Intent clickIntent = new Intent(this, MainActivity.class);
+        PendingIntent clickPI = PendingIntent.getActivity(this, 1, clickIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent showIntent = new Intent("ShowJoyStick");
+        PendingIntent showPendingPI = PendingIntent.getBroadcast(this, 0, showIntent, PendingIntent.FLAG_CANCEL_CURRENT );
+        Intent hideIntent = new Intent("HideJoyStick");
+        PendingIntent hidePendingPI = PendingIntent.getBroadcast(this, 0, hideIntent, PendingIntent.FLAG_CANCEL_CURRENT );
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel mChannel = new NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_LOW);
@@ -158,12 +175,18 @@ public class GoService extends Service {
                     .setChannelId(channelId)
                     .setContentTitle(getResources().getString(R.string.app_name))
                     .setContentText(getResources().getString(R.string.app_service))
+                    .setContentIntent(clickPI)
+                    .addAction(new NotificationCompat.Action(null, "显示摇杆", showPendingPI))
+                    .addAction(new NotificationCompat.Action(null, "隐藏摇杆", hidePendingPI))
                     .setSmallIcon(R.mipmap.ic_launcher).build();
         } else {
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "M_CH_ID")
                     .setContentTitle(getResources().getString(R.string.app_name))
                     .setContentText(getResources().getString(R.string.app_service))
                     .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentIntent(clickPI)
+                    .addAction(new NotificationCompat.Action(null, "显示摇杆", showPendingPI))
+                    .addAction(new NotificationCompat.Action(null, "隐藏摇杆", hidePendingPI))
                     .setOngoing(true)
                     .setChannelId(channelId);//无效
             notification = notificationBuilder.build();
@@ -240,6 +263,8 @@ public class GoService extends Service {
         handlerThread.quit();
         time.cancel();
         threadExecutor.shutdownNow();
+
+        unregisterReceiver(acReceiver);
 
         //remove test provider
         rmNetworkTestProvider();
@@ -486,6 +511,26 @@ public class GoService extends Service {
                 isLimit = true;
                 Log.d("GoService", "GoSntpClient is error");
                 log.debug("GoSntpClient is error");
+            }
+        }
+    }
+
+    public class NoteActionReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action != null) {
+                if (action.equals("ShowJoyStick")) {
+                    Log.d("GoService", "ShowJoyStick");
+                    log.debug("ShowJoyStick");
+                    mJoyStick.show();
+                }
+
+                if (action.equals("HideJoyStick")) {
+                    mJoyStick.hide();
+                    Log.d("GoService", "HideJoyStick");
+                    log.debug("HideJoyStick");
+                }
             }
         }
     }

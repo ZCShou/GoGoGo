@@ -16,7 +16,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.preference.PreferenceManager;
 
@@ -381,9 +380,4 @@ public class JoyStick extends View {
         }
     }
 
-     public void DisplayToast(String str) {
-         Toast toast = Toast.makeText(mContext, str, Toast.LENGTH_LONG);
-         toast.setGravity(Gravity.TOP, 0, 220);
-         toast.show();
-     }
 }
