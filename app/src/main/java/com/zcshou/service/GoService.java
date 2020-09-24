@@ -34,7 +34,6 @@ import com.zcshou.gogogo.MainActivity;
 import com.zcshou.joystick.JoyStick;
 import com.zcshou.log4j.LogUtil;
 import com.zcshou.gogogo.R;
-import com.zcshou.utils.RomUtils;
 
 import org.apache.log4j.Logger;
 
@@ -136,7 +135,7 @@ public class GoService extends Service {
         timeTask = new TimeTask();
         threadExecutor = Executors.newSingleThreadExecutor();
 
-        NoteActionReceiver acReceiver = new NoteActionReceiver();
+        acReceiver = new NoteActionReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction("ShowJoyStick");
         filter.addAction("HideJoyStick");
@@ -437,32 +436,32 @@ public class GoService extends Service {
                 System.currentTimeMillis());
     }
 
-    // set other provider
-    private void rmOtherTestProvider() {
-        if (!locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
-            try {
-                locationManager.setTestProviderEnabled(LocationManager.PASSIVE_PROVIDER, false);
-                Log.d("GoService", "Disable passive provider");
-                log.debug("Disable passive provider");
-            } catch(Exception e) {
-                e.printStackTrace();
-                Log.d("GoService", "Disable passive provider error");
-                log.debug("Disable passive provider error");
-            }
-        }
-
-        if (!locationManager.isProviderEnabled("fused") && Build.VERSION.SDK_INT >= 29 && !RomUtils.isVivo() && !RomUtils.isEmui()) {   // 目前 ViVo 会崩溃
-            try {
-                locationManager.setTestProviderEnabled("fused", false);
-                Log.d("GoService", "Disable fused provider");
-                log.debug("Disable fused provider");
-            } catch(Exception e) {
-                e.printStackTrace();
-                Log.d("GoService", "Disable fused provider error");
-                log.debug("Disable fused provider error");
-            }
-        }
-    }
+//    // set other provider
+//    private void rmOtherTestProvider() {
+//        if (!locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
+//            try {
+//                locationManager.setTestProviderEnabled(LocationManager.PASSIVE_PROVIDER, false);
+//                Log.d("GoService", "Disable passive provider");
+//                log.debug("Disable passive provider");
+//            } catch(Exception e) {
+//                e.printStackTrace();
+//                Log.d("GoService", "Disable passive provider error");
+//                log.debug("Disable passive provider error");
+//            }
+//        }
+//
+//        if (!locationManager.isProviderEnabled("fused") && Build.VERSION.SDK_INT >= 29 && !RomUtils.isVivo() && !RomUtils.isEmui()) {   // 目前 ViVo 会崩溃
+//            try {
+//                locationManager.setTestProviderEnabled("fused", false);
+//                Log.d("GoService", "Disable fused provider");
+//                log.debug("Disable fused provider");
+//            } catch(Exception e) {
+//                e.printStackTrace();
+//                Log.d("GoService", "Disable fused provider error");
+//                log.debug("Disable fused provider error");
+//            }
+//        }
+//    }
 
     //uuid random
     public static String getUUID() {
