@@ -406,7 +406,7 @@ public class ButtonView extends LinearLayout {
 			@Override
 			public void onClick(View view) {
 				if (isCenter) {
-					if (!isEastSouth) {
+					if (!isWestSouth) {
 						isWestSouth = true;
 						btnWestSouth.setImageResource(R.drawable.ic_left_down_pressed);
 
