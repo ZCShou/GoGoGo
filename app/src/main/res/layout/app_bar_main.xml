@@ -61,7 +61,6 @@
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="130dp"
-            android:gravity="center"
             android:background="@drawable/circle_shape"
             android:orientation="horizontal">
 
