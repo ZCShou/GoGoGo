@@ -55,18 +55,26 @@
             app:srcCompat="@android:drawable/ic_menu_delete"
             android:contentDescription="@string/fabtn_stop" />
 
-        <ImageButton
-            android:id="@+id/pos_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <LinearLayout
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:layout_gravity="bottom|end"
-            android:layout_marginEnd="9dp"
+            android:layout_marginEnd="10dp"
             android:layout_marginBottom="130dp"
-            android:onClick="goCurrentPosition"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_home_position"
-            android:theme="@style/RippleWhite"
-            android:contentDescription="@string/map_home"/>
+            android:gravity="center"
+            android:background="@drawable/circle_shape"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/pos_btn"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:onClick="goCurrentPosition"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:theme="@style/RippleWhite"
+                app:srcCompat="@drawable/ic_home_position"
+                android:contentDescription="@string/map_home"/>
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/search_linear"
