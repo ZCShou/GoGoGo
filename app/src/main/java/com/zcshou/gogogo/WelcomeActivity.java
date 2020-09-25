@@ -1,7 +1,6 @@
 package com.zcshou.gogogo;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +18,6 @@ import androidx.preference.PreferenceManager;
 import android.os.SystemClock;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -95,6 +93,119 @@ public class WelcomeActivity extends BaseActivity {
             showProtocolDialog();
         } else {
             requestNeedPermissions();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        time.cancel();
+        threadExecutor.shutdownNow();
+
+        super.onDestroy();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == SDK_PERMISSION_REQUEST) {
+            int i;
+            for (i = 0; i < ReqPermissions.size(); i++) {
+                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                    break;// Permission Denied 权限被拒绝
+                }
+            }
+
+            if (i >= ReqPermissions.size()) {
+                isPermission = true;
+                if (!isLimit) {
+                    time.start();
+                }
+            } else {
+                isPermission = false;
+                startBtn.setText("权限不足");
+                startBtn.setClickable(true);
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    class TimeCount extends CountDownTimer {
+        public TimeCount(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);//参数依次为总时长,和计时的时间间隔
+        }
+
+        @Override
+        public void onFinish() {//计时完毕时触发
+            startMainActivity();
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) { //计时过程显示
+            startBtn.setText(String.format(Locale.getDefault(), "%d秒", millisUntilFinished / 1000));
+        }
+    }
+
+    private void requestNeedPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            // 定位精确位置
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ReqPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+            }
+
+            if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ReqPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+            }
+
+            //悬浮窗
+            // if (checkSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
+            //     permissions.add(Manifest.permission.SYSTEM_ALERT_WINDOW);
+            // }
+
+            /*
+             * 读写权限和电话状态权限非必要权限(建议授予)只会申请一次，用户同意或者禁止，只会弹一次
+             */
+            // 读写权限
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ReqPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+            }
+
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ReqPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            }
+
+            // 读取电话状态权限
+            if (checkSelfPermission( Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                ReqPermissions.add(Manifest.permission.READ_PHONE_STATE);
+            }
+
+            if (ReqPermissions.size() > 0) {
+                requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
+            } else {
+                isPermission = true;
+                if (!isLimit) {
+                    time.start();
+                }
+            }
+        } else {
+            isPermission = true;
+            if (!isLimit) {
+                time.start();
+            }
         }
     }
 
@@ -240,125 +351,6 @@ public class WelcomeActivity extends BaseActivity {
         }
     }
 
-    @Override
-    protected void onPause() {
-        Log.d("WelcomeActivity", "onPause");
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        Log.d("WelcomeActivity", "onPause");
-        super.onResume();
-    }
-
-    @Override
-    protected void onStop() {
-        Log.d("WelcomeActivity", "onStop");
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.d("WelcomeActivity", "onDestroy");
-        time.cancel();
-        threadExecutor.shutdownNow();
-
-        super.onDestroy();
-    }
-
-    @TargetApi(23)
-    private void requestNeedPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-            // 定位精确位置
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ReqPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-            }
-
-            if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ReqPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-            }
-
-            //悬浮窗
-            // if (checkSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
-            //     permissions.add(Manifest.permission.SYSTEM_ALERT_WINDOW);
-            // }
-
-            /*
-             * 读写权限和电话状态权限非必要权限(建议授予)只会申请一次，用户同意或者禁止，只会弹一次
-             */
-            // 读写权限
-            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ReqPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            }
-
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ReqPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            }
-
-             // 读取电话状态权限
-            if (checkSelfPermission( Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-                ReqPermissions.add(Manifest.permission.READ_PHONE_STATE);
-            }
-
-            if (ReqPermissions.size() > 0) {
-                requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
-            } else {
-                isPermission = true;
-                if (!isLimit) {
-                    time.start();
-                }
-            }
-        } else {
-            isPermission = true;
-            if (!isLimit) {
-                time.start();
-            }
-        }
-    }
-
-    @TargetApi(23)
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == SDK_PERMISSION_REQUEST) {
-            int i;
-            for (i = 0; i < ReqPermissions.size(); i++) {
-                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                    break;// Permission Denied 权限被拒绝
-                }
-            }
-
-            if (i >= ReqPermissions.size()) {
-                isPermission = true;
-                if (!isLimit) {
-                    time.start();
-                }
-            } else {
-                isPermission = false;
-                startBtn.setText("权限不足");
-                startBtn.setClickable(true);
-            }
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    class TimeCount extends CountDownTimer {
-        public TimeCount(long millisInFuture, long countDownInterval) {
-            super(millisInFuture, countDownInterval);//参数依次为总时长,和计时的时间间隔
-        }
-
-        @Override
-        public void onFinish() {//计时完毕时触发
-            startMainActivity();
-        }
-
-        @Override
-        public void onTick(long millisUntilFinished) { //计时过程显示
-            startBtn.setText(String.format(Locale.getDefault(), "%d秒", millisUntilFinished / 1000));
-        }
-    }
-
     private class TimeTask implements Runnable {
         private final String[] ntpServerPool = {"ntp1.aliyun.com", "ntp2.aliyun.com", "ntp3.aliyun.com", "ntp4.aliyun.com", "ntp5.aliyun.com", "ntp6.aliyun.com", "ntp7.aliyun.com",
                 "cn.pool.ntp.org", "cn.ntp.org.cn", "sg.pool.ntp.org", "tw.pool.ntp.org", "jp.pool.ntp.org", "hk.pool.ntp.org", "th.pool.ntp.org",
@@ -383,7 +375,6 @@ public class WelcomeActivity extends BaseActivity {
                     time.start();
                 }
             } else {
-                isLimit = true;
                 startBtn.setClickable(true);
                 startBtn.setText("无法连接服务器");
             }

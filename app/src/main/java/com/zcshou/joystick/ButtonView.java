@@ -1,6 +1,5 @@
 package com.zcshou.joystick;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -32,7 +31,6 @@ public class ButtonView extends LinearLayout {
 	boolean isWestSouth;
 	ImageButton btnWestSouth;
 
-	@SuppressLint("InflateParams")
 	public ButtonView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 		LayoutInflater.from(context).inflate(R.layout.joystick_button, this);
@@ -55,7 +53,6 @@ public class ButtonView extends LinearLayout {
 		initButtonView();
 	}
 
-	@SuppressLint("InflateParams")
 	private void initButtonView() {
 		isCenter = false;
 		btnCenter = findViewById(R.id.btn_center);

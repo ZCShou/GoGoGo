@@ -12,7 +12,7 @@ import com.google.android.gms.ads.initialization.OnInitializationCompleteListene
 
 
 @SuppressLint("Registered")
-public class LocationApplication extends Application {
+public class GoApplication extends Application {
     public Vibrator mVibrator;
     @Override
     public void onCreate() {

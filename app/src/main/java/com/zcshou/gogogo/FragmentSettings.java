@@ -1,25 +1,21 @@
 package com.zcshou.gogogo;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.Preference.OnPreferenceChangeListener;
 
 import com.zcshou.utils.AppUtils;
-import com.zcshou.utils.DeviceIdUtils;
 
 /* */
 public class FragmentSettings extends PreferenceFragmentCompat implements OnPreferenceChangeListener {
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         // Load the preferences from an XML resource

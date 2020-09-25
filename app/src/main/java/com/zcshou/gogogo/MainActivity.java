@@ -1,6 +1,5 @@
 package com.zcshou.gogogo;
 
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -87,7 +86,7 @@ import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
+// import com.google.android.material.snackbar.Snackbar;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -195,7 +194,6 @@ public class MainActivity extends BaseActivity
 
     private InterstitialAd mInterstitialAd;
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -321,6 +319,271 @@ public class MainActivity extends BaseActivity
         initGoogleAD();
     }
 
+    @Override
+    protected void onPause() {
+        Log.d("MainActivity", "onPause");
+        log.debug("MainActivity: onPause");
+        mMapView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.d("MainActivity", "onPause");
+        log.debug("MainActivity: onPause");
+        mMapView.onResume();
+        super.onResume();
+        //为系统的方向传感器注册监听器
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d("MainActivity", "onStop");
+        log.debug("MainActivity: onStop");
+        //取消注册传感器监听
+        mSensorManager.unregisterListener(this);
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d("MainActivity", "onDestroy");
+
+        if (isMockServStart) {
+            Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
+            stopService(mockLocServiceIntent);
+        }
+
+        // 退出时销毁定位
+        if (isMapLoc) {
+            mLocClient.stop();
+        }
+
+        // 关闭定位图层
+        mBaiduMap.setMyLocationEnabled(false);
+        mMapView.onDestroy();
+
+        mMapView = null;
+
+        //poi search destroy
+        mSuggestionSearch.destroy();
+
+        //close db
+        locHistoryDB.close();
+        searchHistoryDB.close();
+
+        super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+//        DrawerLayout drawer = findViewById(id.drawer_layout);
+//
+//        if (drawer.isDrawerOpen(GravityCompat.START)) {
+//            drawer.closeDrawer(GravityCompat.START);
+//        } else {
+//            super.onBackPressed();
+//        }
+        moveTaskToBack(false);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        //找到searchView
+        searchItem = menu.findItem(id.action_search);
+        searchView = (SearchView) searchItem.getActionView();
+        //searchView.setIconified(false);// 设置searchView处于展开状态
+        searchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
+        // searchView.setIconifiedByDefault(true);//默认为true在框内，设置false则在框外
+        //searchView.setSubmitButtonEnabled(false);//显示提交按钮
+        searchItem.setOnActionExpandListener(new  MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                // Do something when collapsed
+                menu.setGroupVisible(0, true);
+                menu.setGroupVisible(1, true);
+                // searchView.setIconified(false);// 设置searchView处于展开状态
+                // mSearchList.setVisibility(View.GONE);
+                mSearchlinearLayout.setVisibility(View.INVISIBLE);
+                mHistorylinearLayout.setVisibility(View.INVISIBLE);
+                return true;  // Return true to collapse action view
+            }
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                // Do something when expanded
+                menu.setGroupVisible(0, false);
+                menu.setGroupVisible(1, false);
+                mSearchlinearLayout.setVisibility(View.INVISIBLE);
+                //展示搜索历史
+                List<Map<String, Object>> data = getSearchHistory();
+
+                if (data.size() > 0) {
+                    simAdapt = new SimpleAdapter(
+                            MainActivity.this,
+                            data,
+                            layout.search_record_item,
+                            new String[] {"search_key", "search_description", "search_timestamp", "search_isLoc", "search_longitude", "search_latitude"}, // 与下面数组元素要一一对应
+                            new int[] {id.search_key, id.search_description, id.search_timestamp, id.search_isLoc, id.search_longitude, id.search_latitude});
+                    mSearchHistoryList.setAdapter(simAdapt);
+                    mHistorylinearLayout.setVisibility(View.VISIBLE);
+                }
+
+                return true;  // Return true to expand action view
+            }
+        });
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                try {
+                    isSubmit = true;
+                    mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
+                            .keyword(query)
+                            .city(mCurrentCity)
+                    );
+                    //搜索历史 插表参数
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put("SearchKey", query);
+                    contentValues.put("Description", "搜索...");
+                    contentValues.put("IsLocate", 0);
+                    contentValues.put("TimeStamp", System.currentTimeMillis() / 1000);
+
+                    if (!saveSelectSearchItem(searchHistoryDB, contentValues)) {
+                        Log.e("DATABASE", "saveSelectSearchItem[SearchHistory] error");
+                        log.error("DATABASE: saveSelectSearchItem[SearchHistory] error");
+                    } else {
+                        Log.d("DATABASE", "saveSelectSearchItem[SearchHistory] success");
+                        log.debug("DATABASE: saveSelectSearchItem[SearchHistory] success");
+                    }
+
+                    mBaiduMap.clear();
+                    mSearchlinearLayout.setVisibility(View.INVISIBLE);
+                } catch (Exception e) {
+                    DisplayToast("搜索失败，请检查网络连接");
+                    Log.d("HTTP", "搜索失败，请检查网络连接");
+                    log.debug("HTTP: 搜索失败，请检查网络连接");
+                    e.printStackTrace();
+                }
+
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //当输入框内容改变的时候回调
+                //搜索历史置为不可见
+                mHistorylinearLayout.setVisibility(View.INVISIBLE);
+
+                if (!newText.equals("")) {
+                    //do search
+                    //WATCH ME
+                    try {
+                        mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
+                                .keyword(newText)
+                                .city(mCurrentCity)
+                        );
+                        // poiSearch.searchInCity((new PoiCitySearchOption())
+                        //         .city(mCurrentCity)
+                        //         .keyword(newText)
+                        //         .pageCapacity(30)
+                        //         .pageNum(0));
+                    } catch (Exception e) {
+                        DisplayToast("搜索失败，请检查网络连接");
+                        Log.d("HTTP", "搜索失败，请检查网络连接");
+                        log.debug("HTTP: 搜索失败，请检查网络连接");
+                        e.printStackTrace();
+                    }
+
+                    //
+                }
+
+                return true;
+            }
+        });
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if (id == R.id.main_menu_action_setting) {
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.main_menu_action_latlng) {
+            showInputLatLngDialog();
+        }  else if (id == R.id.action_faq) {
+            showFaqDialog();
+        } else if (id == R.id.main_menu_action_history) {
+            Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+            startActivity(intent);
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.nav_history) {
+            Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_settings) {
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_contact) {
+            Intent i = new Intent(Intent.ACTION_SEND);
+            // i.setType("text/plain"); //模拟器请使用这行
+            i.setType("message/rfc822"); // 真机上使用这行
+            i.putExtra(Intent.EXTRA_EMAIL,
+                    new String[] {"zcsexp@gmail.com"});
+            i.putExtra(Intent.EXTRA_SUBJECT, "SUGGESTION");
+            startActivity(Intent.createChooser(i,
+                    "Select email application."));
+        } else if (id == R.id.nav_dev) {
+            try {
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+                startActivity(intent);
+            } catch (Exception e) {
+                DisplayToast("无法跳转到开发者选项,请先确保您的设备已处于开发者模式");
+                e.printStackTrace();
+            }
+        }
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+
+        return true;
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        double x = sensorEvent.values[0];
+
+        if (Math.abs(x - lastX) > 1.0) {
+            mCurrentDirection = (int) x;
+            locData = new MyLocationData.Builder()
+                    .accuracy(mCurrentAccracy)
+                    // 此处设置开发者获取到的方向信息，顺时针0-360
+                    .direction(mCurrentDirection).latitude(mCurrentLat)
+                    .longitude(mCurrentLon).build();
+            mBaiduMap.setMyLocationData(locData);
+        }
+
+        lastX = x;
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+    }
+
     private void initGoogleAD() {
         // 横幅广告
         AdView mAdView = findViewById(R.id.ad_view);
@@ -431,7 +694,6 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    @SuppressLint("InflateParams")
     private void setUserLimitInfo() {
         // 从上到下逐级获取
         View navHeaderView = mNavigationView.getHeaderView(0);
@@ -1655,271 +1917,6 @@ public class MainActivity extends BaseActivity
             }
         };
         mSuggestionSearch.setOnGetSuggestionResultListener(listener);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        double x = sensorEvent.values[0];
-
-        if (Math.abs(x - lastX) > 1.0) {
-            mCurrentDirection = (int) x;
-            locData = new MyLocationData.Builder()
-            .accuracy(mCurrentAccracy)
-            // 此处设置开发者获取到的方向信息，顺时针0-360
-            .direction(mCurrentDirection).latitude(mCurrentLat)
-            .longitude(mCurrentLon).build();
-            mBaiduMap.setMyLocationData(locData);
-        }
-        
-        lastX = x;
-    }
-    
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
-    }
-    
-    @Override
-    protected void onPause() {
-        Log.d("MainActivity", "onPause");
-        log.debug("MainActivity: onPause");
-        mMapView.onPause();
-        super.onPause();
-    }
-    
-    @Override
-    protected void onResume() {
-        Log.d("MainActivity", "onPause");
-        log.debug("MainActivity: onPause");
-        mMapView.onResume();
-        super.onResume();
-        //为系统的方向传感器注册监听器
-        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
-    }
-
-    @Override
-    protected void onStop() {
-        Log.d("MainActivity", "onStop");
-        log.debug("MainActivity: onStop");
-        //取消注册传感器监听
-        mSensorManager.unregisterListener(this);
-        super.onStop();
-    }
-    
-    @Override
-    protected void onDestroy() {
-        Log.d("MainActivity", "onDestroy");
-        
-        if (isMockServStart) {
-            Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
-            stopService(mockLocServiceIntent);
-        }
-        
-        // 退出时销毁定位
-        if (isMapLoc) {
-            mLocClient.stop();
-        }
-
-        // 关闭定位图层
-        mBaiduMap.setMyLocationEnabled(false);
-        mMapView.onDestroy();
-
-        mMapView = null;
-
-        //poi search destroy
-        mSuggestionSearch.destroy();
-
-        //close db
-        locHistoryDB.close();
-        searchHistoryDB.close();
-
-        super.onDestroy();
-    }
-
-    @Override
-    public void onBackPressed() {
-//        DrawerLayout drawer = findViewById(id.drawer_layout);
-//
-//        if (drawer.isDrawerOpen(GravityCompat.START)) {
-//            drawer.closeDrawer(GravityCompat.START);
-//        } else {
-//            super.onBackPressed();
-//        }
-        moveTaskToBack(false);
-    }
-    
-    @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        //找到searchView
-        searchItem = menu.findItem(id.action_search);
-        searchView = (SearchView) searchItem.getActionView();
-        //searchView.setIconified(false);// 设置searchView处于展开状态
-        searchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
-       // searchView.setIconifiedByDefault(true);//默认为true在框内，设置false则在框外
-        //searchView.setSubmitButtonEnabled(false);//显示提交按钮
-        searchItem.setOnActionExpandListener(new  MenuItem.OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
-                // Do something when collapsed
-                menu.setGroupVisible(0, true);
-                menu.setGroupVisible(1, true);
-                // searchView.setIconified(false);// 设置searchView处于展开状态
-                // mSearchList.setVisibility(View.GONE);
-                mSearchlinearLayout.setVisibility(View.INVISIBLE);
-                mHistorylinearLayout.setVisibility(View.INVISIBLE);
-                return true;  // Return true to collapse action view
-            }
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
-                // Do something when expanded
-                menu.setGroupVisible(0, false);
-                menu.setGroupVisible(1, false);
-                mSearchlinearLayout.setVisibility(View.INVISIBLE);
-                //展示搜索历史
-                List<Map<String, Object>> data = getSearchHistory();
-                
-                if (data.size() > 0) {
-                    simAdapt = new SimpleAdapter(
-                        MainActivity.this,
-                        data,
-                        layout.search_record_item,
-                        new String[] {"search_key", "search_description", "search_timestamp", "search_isLoc", "search_longitude", "search_latitude"}, // 与下面数组元素要一一对应
-                        new int[] {id.search_key, id.search_description, id.search_timestamp, id.search_isLoc, id.search_longitude, id.search_latitude});
-                    mSearchHistoryList.setAdapter(simAdapt);
-                    mHistorylinearLayout.setVisibility(View.VISIBLE);
-                }
-                
-                return true;  // Return true to expand action view
-            }
-        });
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                try {
-                    isSubmit = true;
-                    mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
-                                                        .keyword(query)
-                                                        .city(mCurrentCity)
-                                                       );
-                    //搜索历史 插表参数
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put("SearchKey", query);
-                    contentValues.put("Description", "搜索...");
-                    contentValues.put("IsLocate", 0);
-                    contentValues.put("TimeStamp", System.currentTimeMillis() / 1000);
-                    
-                    if (!saveSelectSearchItem(searchHistoryDB, contentValues)) {
-                        Log.e("DATABASE", "saveSelectSearchItem[SearchHistory] error");
-                        log.error("DATABASE: saveSelectSearchItem[SearchHistory] error");
-                    } else {
-                        Log.d("DATABASE", "saveSelectSearchItem[SearchHistory] success");
-                        log.debug("DATABASE: saveSelectSearchItem[SearchHistory] success");
-                    }
-                    
-                    mBaiduMap.clear();
-                    mSearchlinearLayout.setVisibility(View.INVISIBLE);
-                } catch (Exception e) {
-                    DisplayToast("搜索失败，请检查网络连接");
-                    Log.d("HTTP", "搜索失败，请检查网络连接");
-                    log.debug("HTTP: 搜索失败，请检查网络连接");
-                    e.printStackTrace();
-                }
-                
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                //当输入框内容改变的时候回调
-                //搜索历史置为不可见
-                mHistorylinearLayout.setVisibility(View.INVISIBLE);
-                
-                if (!newText.equals("")) {
-                    //do search
-                    //WATCH ME
-                    try {
-                        mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
-                                                            .keyword(newText)
-                                                            .city(mCurrentCity)
-                                                           );
-                        // poiSearch.searchInCity((new PoiCitySearchOption())
-                        //         .city(mCurrentCity)
-                        //         .keyword(newText)
-                        //         .pageCapacity(30)
-                        //         .pageNum(0));
-                    } catch (Exception e) {
-                        DisplayToast("搜索失败，请检查网络连接");
-                        Log.d("HTTP", "搜索失败，请检查网络连接");
-                        log.debug("HTTP: 搜索失败，请检查网络连接");
-                        e.printStackTrace();
-                    }
-                    
-                    //
-                }
-                
-                return true;
-            }
-        });
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        
-        if (id == R.id.main_menu_action_setting) {
-            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-            startActivity(intent);
-        } else if (id == R.id.main_menu_action_latlng) {
-            showInputLatLngDialog();
-        }  else if (id == R.id.action_faq) {
-            showFaqDialog();
-        } else if (id == R.id.main_menu_action_history) {
-            Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
-            startActivity(intent);
-        }
-        
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        
-        if (id == R.id.nav_history) {
-            Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
-            startActivity(intent);
-        } else if (id == R.id.nav_settings) {
-            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-            startActivity(intent);
-        } else if (id == R.id.nav_contact) {
-            Intent i = new Intent(Intent.ACTION_SEND);
-            // i.setType("text/plain"); //模拟器请使用这行
-            i.setType("message/rfc822"); // 真机上使用这行
-            i.putExtra(Intent.EXTRA_EMAIL,
-                    new String[] {"zcsexp@gmail.com"});
-            i.putExtra(Intent.EXTRA_SUBJECT, "SUGGESTION");
-            startActivity(Intent.createChooser(i,
-                    "Select email application."));
-        } else if (id == R.id.nav_dev) {
-            try {
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
-                startActivity(intent);
-            } catch (Exception e) {
-                DisplayToast("无法跳转到开发者选项,请先确保您的设备已处于开发者模式");
-                e.printStackTrace();
-            }
-        }
-        
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-
-        return true;
     }
 
     //定位SDK监听函数

@@ -49,15 +49,13 @@ public class HistoryActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.history_list);
-        Log.d("HistoryActivity", "SQLiteDatabase init");
 
         ActionBar actionBar = getSupportActionBar();
-        if(actionBar != null){
+        if(actionBar != null) {
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        //sqlite
         try {
             HistoryLocationDataBaseHelper hisLocDBHelper = new HistoryLocationDataBaseHelper(getApplicationContext());
             sqLiteDatabase = hisLocDBHelper.getWritableDatabase();
@@ -85,6 +83,55 @@ public class HistoryActivity extends BaseActivity {
         setSearchResultClickListener();
 
         setSearchViewListener();
+    }
+
+    @Override
+    protected void onDestroy() {
+        sqLiteDatabase.close();
+        super.onDestroy();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this add items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_history, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == android.R.id.home) {
+            this.finish(); // back button
+            return true;
+        } else if (id ==  R.id.action_delete) {
+            new AlertDialog.Builder(HistoryActivity.this)
+                    .setTitle("Warning")//这里是表头的内容
+                    .setMessage("确定要删除全部历史记录吗?")//这里是中间显示的具体信息
+                    .setPositiveButton("确定",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    boolean deleteRet = deleteRecord(sqLiteDatabase, -1);
+
+                                    if (deleteRet) {
+                                        DisplayToast("删除成功!");
+                                        initListView();
+                                    }
+                                }
+                            })
+                    .setNegativeButton("取消",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            })
+                    .show();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void initListView() {
@@ -329,55 +376,6 @@ public class HistoryActivity extends BaseActivity {
         }
         
         return deleteRet;
-    }
-
-    @Override
-    protected void onDestroy() {
-        sqLiteDatabase.close();
-        super.onDestroy();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this add items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_history, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == android.R.id.home) {
-            this.finish(); // back button
-            return true;
-        } else if (id ==  R.id.action_delete) {
-            new AlertDialog.Builder(HistoryActivity.this)
-                    .setTitle("Warning")//这里是表头的内容
-                    .setMessage("确定要删除全部历史记录吗?")//这里是中间显示的具体信息
-                    .setPositiveButton("确定",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    boolean deleteRet = deleteRecord(sqLiteDatabase, -1);
-
-                                    if (deleteRet) {
-                                        DisplayToast("删除成功!");
-                                        initListView();
-                                    }
-                                }
-                            })
-                    .setNegativeButton("取消",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                }
-                            })
-                    .show();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public void DisplayToast(String str) {
