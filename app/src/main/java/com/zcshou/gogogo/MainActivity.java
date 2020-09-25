@@ -80,6 +80,11 @@ import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -187,6 +192,8 @@ public class MainActivity extends BaseActivity
 
     //log debug
     private static final Logger log = Logger.getLogger(MainActivity.class);
+
+    private InterstitialAd mInterstitialAd;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -311,7 +318,117 @@ public class MainActivity extends BaseActivity
                 .putLong("setting_startup_num", ++num)
                 .apply();
 
-        // sharedPreferences.getString("setting_reg_code", "");
+        initGoogleAD();
+    }
+
+    private void initGoogleAD() {
+        // 横幅广告
+        AdView mAdView = findViewById(R.id.ad_view);
+        // Create an ad request.
+        AdRequest adRequest = new AdRequest.Builder().build();
+        // Start loading the ad in the background.
+        mAdView.loadAd(adRequest);
+        mAdView.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+            }
+
+            @Override
+            public void onAdFailedToLoad(LoadAdError adError) {
+                String error = String.format(Locale.getDefault(),
+                        "domain: %s, code: %d, message: %s",
+                        adError.getDomain(), adError.getCode(), adError.getMessage());
+
+                Log.d("DEBUG", "markSelectedPosition");
+                log.debug("Main Banner onAdFailedToLoad() with error: " + error);
+            }
+
+            @Override
+            public void onAdOpened() {
+                // Code to be executed when an ad opens an overlay that
+                // covers the screen.
+            }
+
+            @Override
+            public void onAdClicked() {
+                // Code to be executed when the user clicks on an ad.
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                // Code to be executed when the user has left the app.
+            }
+
+            @Override
+            public void onAdClosed() {
+                // Code to be executed when the user is about to return
+                // to the app after tapping on an ad.
+            }
+        });
+
+        // 插页广告
+        // Create the InterstitialAd and set the adUnitId.
+        mInterstitialAd = new InterstitialAd(this);
+        // Defined in res/values/strings.xml
+        mInterstitialAd.setAdUnitId(getString(string.ad_unit_id_go_start));
+        mInterstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+            }
+
+            @Override
+            public void onAdFailedToLoad(LoadAdError loadAdError) {
+                // Code to be executed when an ad request fails.
+                String error = String.format(Locale.getDefault(),
+                        "domain: %s, code: %d, message: %s",
+                        loadAdError.getDomain(), loadAdError.getCode(), loadAdError.getMessage());
+
+                Log.d("DEBUG", "markSelectedPosition");
+                log.debug("GoStart onAdFailedToLoad() with error: " + error);
+            }
+
+            @Override
+            public void onAdOpened() {
+                // Code to be executed when the ad is displayed.
+            }
+
+            @Override
+            public void onAdClicked() {
+                // Code to be executed when the user clicks on an ad.
+            }
+
+            @Override
+            public void onAdLeftApplication() {
+                // Code to be executed when the user has left the app.
+            }
+
+            @Override
+            public void onAdClosed() {
+                // Code to be executed when the interstitial ad is closed.
+                requestGoogleAD();
+
+                startGoLocation();
+            }
+        });
+
+        requestGoogleAD();
+    }
+
+    private void showGoogleAD() {
+        if (mInterstitialAd != null && mInterstitialAd.isLoaded()) {
+            mInterstitialAd.show();
+        } else {
+            startGoLocation();
+        }
+    }
+
+    private void requestGoogleAD() {
+        if (mInterstitialAd != null && !mInterstitialAd.isLoading() && !mInterstitialAd.isLoaded()) {
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mInterstitialAd.loadAd(adRequest);
+        }
     }
 
     @SuppressLint("InflateParams")
@@ -1211,6 +1328,85 @@ public class MainActivity extends BaseActivity
         return data;
     }
 
+    private  void startGoLocation() {
+        if (!isLimit && isNetworkAvailable()) {    // 时间限制
+            //悬浮窗权限判断
+            if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(getApplicationContext())) {
+                showEnableFloatWindowDialog();
+            } else {
+                isGPSOpen = isGpsOpened();
+                if (!isGPSOpen) {
+                    showEnableGpsDialog();
+                } else {
+                    //gps是否开启
+                    if (!isMapLoc) {
+                        // 如果GPS定位开启，则打开定位图层
+                        openMapLocateLayer();
+                        isMapLoc = true;
+                    }
+
+                    if (!isAllowMockLocation()) {
+                        showEnableMockLocationDialog();
+                    } else {
+                        if (!isMockServStart && !isServiceRun) {
+                            Log.d("DEBUG", "Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
+                            log.debug("Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
+
+                            markSelectedPosition();
+
+                            //start mock location service
+                            Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
+                            mockLocServiceIntent.putExtra("CurLatLng", curLatLng);
+
+                            //save record
+                            recordGetPositionInfo();
+
+                            //insert end
+                            if (Build.VERSION.SDK_INT >= 26) {
+                                startForegroundService(mockLocServiceIntent);
+                                Log.d("DEBUG", "startForegroundService: GoService");
+                                log.debug("startForegroundService: GoService");
+                            } else {
+                                startService(mockLocServiceIntent);
+                                Log.d("DEBUG", "startService: GoService");
+                                log.debug("startService: GoService");
+                            }
+
+                            isMockServStart = true;
+//                            Snackbar.make(view, "位置模拟已开启", Snackbar.LENGTH_LONG)
+//                                    .setAction("Action", null).show();
+                            faBtnStart.hide();
+                            faBtnStop.show();
+                            //track
+                        } else {
+//                            Snackbar.make(view, "位置模拟已在运行", Snackbar.LENGTH_LONG)
+//                                    .setAction("Action", null).show();
+                            faBtnStart.hide();
+                            faBtnStop.show();
+                            isMockServStart = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void stopGoLocation() {
+        if (isMockServStart) {
+            //end mock location
+            Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
+            stopService(mockLocServiceIntent);
+//            Snackbar.make(v, "位置模拟服务终止", Snackbar.LENGTH_LONG)
+//                    .setAction("Action", null).show();
+            //service finish
+            isMockServStart = false;
+            //faBtnStart.setVisibility(View.VISIBLE);
+            faBtnStart.show();
+            //faBtnStop.setVisibility(View.INVISIBLE);
+            faBtnStop.hide();
+        }
+    }
+
     //set float action button listener
     private void setGoBtnListener() {
         //应用内悬浮按钮
@@ -1219,84 +1415,13 @@ public class MainActivity extends BaseActivity
         faBtnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!isLimit && isNetworkAvailable()) {    // 时间限制
-                    //悬浮窗权限判断
-                    if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(getApplicationContext())) {
-                        showEnableFloatWindowDialog();
-                    } else {
-                        isGPSOpen = isGpsOpened();
-                        if (!isGPSOpen) {
-                            showEnableGpsDialog();
-                        } else {
-                            //gps是否开启
-                            if (!isMapLoc) {
-                                // 如果GPS定位开启，则打开定位图层
-                                openMapLocateLayer();
-                                isMapLoc = true;
-                            }
-
-                            if (!isAllowMockLocation()) {
-                                showEnableMockLocationDialog();
-                            } else {
-                                if (!isMockServStart && !isServiceRun) {
-                                    Log.d("DEBUG", "Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
-                                    log.debug("Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
-
-                                    markSelectedPosition();
-
-                                    //start mock location service
-                                    Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
-                                    mockLocServiceIntent.putExtra("CurLatLng", curLatLng);
-
-                                    //save record
-                                    recordGetPositionInfo();
-
-                                    //insert end
-                                    if (Build.VERSION.SDK_INT >= 26) {
-                                        startForegroundService(mockLocServiceIntent);
-                                        Log.d("DEBUG", "startForegroundService: GoService");
-                                        log.debug("startForegroundService: GoService");
-                                    } else {
-                                        startService(mockLocServiceIntent);
-                                        Log.d("DEBUG", "startService: GoService");
-                                        log.debug("startService: GoService");
-                                    }
-
-                                    isMockServStart = true;
-                                    Snackbar.make(view, "位置模拟已开启", Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                    faBtnStart.hide();
-                                    faBtnStop.show();
-                                    //track
-                                } else {
-                                    Snackbar.make(view, "位置模拟已在运行", Snackbar.LENGTH_LONG)
-                                            .setAction("Action", null).show();
-                                    faBtnStart.hide();
-                                    faBtnStop.show();
-                                    isMockServStart = true;
-                                }
-                            }
-                        }
-                    }
-                }
+                showGoogleAD();
             }
         });
         faBtnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isMockServStart) {
-                    //end mock location
-                    Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
-                    stopService(mockLocServiceIntent);
-                    Snackbar.make(v, "位置模拟服务终止", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    //service finish
-                    isMockServStart = false;
-                    //faBtnStart.setVisibility(View.VISIBLE);
-                    faBtnStart.show();
-                    //faBtnStop.setVisibility(View.INVISIBLE);
-                    faBtnStop.hide();
-                }
+                stopGoLocation();
             }
         });
     }

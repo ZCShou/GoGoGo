@@ -41,7 +41,7 @@ public class FragmentSettings extends PreferenceFragmentCompat implements OnPref
 
         EditTextPreference pfWalk = findPreference("setting_walk");
         if (pfWalk != null) {
-            pfWalk.setSummaryProvider(new Preference.SummaryProvider<EditTextPreference>() {// 使用自定义 SummaryProvider
+            pfWalk.setSummaryProvider( new Preference.SummaryProvider<EditTextPreference>() {// 使用自定义 SummaryProvider
                 @Override
                 public CharSequence provideSummary(EditTextPreference preference) {
                     String text = preference.getText();
@@ -51,18 +51,17 @@ public class FragmentSettings extends PreferenceFragmentCompat implements OnPref
                     return "当前值: " + text;
                 }
             });
-            pfWalk.setOnBindEditTextListener(// 自定义 EditTextPreference 对话框
-                    new EditTextPreference.OnBindEditTextListener() {
-                        @Override
-                        public void onBindEditText(@NonNull EditText editText) {
-                            editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
-                        }
-                    });
+            pfWalk.setOnBindEditTextListener( new EditTextPreference.OnBindEditTextListener() {
+                @Override
+                public void onBindEditText(@NonNull EditText editText) {
+                    editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
+                }
+            });
         }
 
         EditTextPreference pfRun = findPreference("setting_run");
         if (pfRun != null) {
-            pfRun.setSummaryProvider(new Preference.SummaryProvider<EditTextPreference>() {
+            pfRun.setSummaryProvider( new Preference.SummaryProvider<EditTextPreference>() {
                 @Override
                 public CharSequence provideSummary(EditTextPreference preference) {
                     String text = preference.getText();
@@ -72,13 +71,12 @@ public class FragmentSettings extends PreferenceFragmentCompat implements OnPref
                     return "当前值: " + text;
                 }
             });
-            pfRun.setOnBindEditTextListener(
-                    new EditTextPreference.OnBindEditTextListener() {
-                        @Override
-                        public void onBindEditText(@NonNull EditText editText) {
-                            editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
-                        }
-                    });
+            pfRun.setOnBindEditTextListener( new EditTextPreference.OnBindEditTextListener() {
+                @Override
+                public void onBindEditText(@NonNull EditText editText) {
+                    editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
+                }
+            });
         }
         EditTextPreference pfBike = findPreference("setting_bike");
         if (pfBike != null) {
@@ -92,13 +90,12 @@ public class FragmentSettings extends PreferenceFragmentCompat implements OnPref
                     return "当前值: " + text;
                 }
             });
-            pfBike.setOnBindEditTextListener(
-                    new EditTextPreference.OnBindEditTextListener() {
-                        @Override
-                        public void onBindEditText(@NonNull EditText editText) {
-                            editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
-                        }
-                    });
+            pfBike.setOnBindEditTextListener( new EditTextPreference.OnBindEditTextListener() {
+                @Override
+                public void onBindEditText(@NonNull EditText editText) {
+                    editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
+                }
+            });
         }
     }
     

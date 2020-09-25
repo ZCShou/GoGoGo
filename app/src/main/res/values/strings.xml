@@ -43,7 +43,6 @@
     <string name="nav_menu_feedback">问题反馈</string>
     <string name="nav_menu_contact">联系作者</string>
 
-
     <!-- 设置界面 -->
     <string name="title_activity_settings">设置</string>
     <string name="setting_group_move">移动</string>
@@ -80,9 +79,7 @@
     <!-- 摇杆 -->
     <string name="joystick_input_ok">传送</string>
     <string name="joystick_input_cancel">取消</string>
-
-    <string name="ad_unit_id_welcome" translatable="false">ca-app-pub-2117389248426871/1567963500</string>
-
+    <!-- 注册 -->
     <string name="register_title">离线注册</string>
     <string name="register_user_name">用户名</string>
     <string name="register_response">注册码</string>
@@ -91,5 +88,8 @@
     <string name="register_tips">将以上请求码发送给开发者，然后在下面填写获取到的注册码</string>
     <string name="register_cancel">取消</string>
     <string name="register_check">我已阅读免责声明，并同意所有条款</string>
+    <!-- ads -->
+    <string name="ad_unit_id_main_banner" translatable="false">ca-app-pub-2117389248426871/1567963500</string>
+    <string name="ad_unit_id_go_start" translatable="false">ca-app-pub-2117389248426871/2828744710</string>
 
 </resources>
