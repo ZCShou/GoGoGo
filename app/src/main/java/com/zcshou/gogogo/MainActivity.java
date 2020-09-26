@@ -64,6 +64,7 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BaiduMapOptions;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapPoi;
@@ -257,12 +258,7 @@ public class MainActivity extends BaseActivity
             mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         }
 
-        // 地图初始化
-        mMapView = findViewById(id.bmapView);
-        mBaiduMap = mMapView.getMap();
-        mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
-        mBaiduMap.setMyLocationEnabled(true);
-        initMapListener();
+        initBaiduMap();
 
         //网络是否可用
         if (!isNetworkAvailable()) {
@@ -584,6 +580,280 @@ public class MainActivity extends BaseActivity
     public void onAccuracyChanged(Sensor sensor, int i) {
     }
 
+    //判断GPS是否打开
+    private boolean isGpsOpened() {
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    //模拟位置权限是否开启
+    public boolean isAllowMockLocation() {
+        boolean canMockPosition;
+
+        if (Build.VERSION.SDK_INT <= 22) {//6.0以下
+            canMockPosition = Settings.Secure.getInt(this.getContentResolver(), Settings.Secure.ALLOW_MOCK_LOCATION, 0) != 0;
+        } else {
+            try {
+                LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);//获得LocationManager引用
+                String providerStr = LocationManager.GPS_PROVIDER;
+                LocationProvider provider = locationManager.getProvider(providerStr);
+
+                // 为防止在已有testProvider的情况下导致addTestProvider抛出异常，先移除testProvider
+                try {
+                    locationManager.removeTestProvider(providerStr);
+                    Log.d("PERMISSION", "try to move test provider");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.e("PERMISSION", "try to move test provider");
+                }
+
+                if (provider != null) {
+                    try {
+                        locationManager.addTestProvider(
+                                provider.getName()
+                                , provider.requiresNetwork()
+                                , provider.requiresSatellite()
+                                , provider.requiresCell()
+                                , provider.hasMonetaryCost()
+                                , provider.supportsAltitude()
+                                , provider.supportsSpeed()
+                                , provider.supportsBearing()
+                                , provider.getPowerRequirement()
+                                , provider.getAccuracy());
+                        canMockPosition = true;
+                    } catch (Exception e) {
+                        Log.e("FUCK", "add origin gps test provider error");
+                        canMockPosition = false;
+                        e.printStackTrace();
+                    }
+                } else {
+                    try {
+                        locationManager.addTestProvider(
+                                providerStr
+                                , true, true, false, false, true, true, true
+                                , Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
+                        canMockPosition = true;
+                    } catch (Exception e) {
+                        Log.e("FUCK", "add gps test provider error");
+                        canMockPosition = false;
+                        e.printStackTrace();
+                    }
+                }
+
+                // 模拟位置可用
+                if (canMockPosition) {
+                    locationManager.setTestProviderEnabled(providerStr, true);
+                    locationManager.setTestProviderStatus(providerStr, LocationProvider.AVAILABLE, null, System.currentTimeMillis());
+                    //remove test provider
+                    locationManager.setTestProviderEnabled(providerStr, false);
+                    locationManager.removeTestProvider(providerStr);
+                }
+            } catch (SecurityException e) {
+                canMockPosition = false;
+                e.printStackTrace();
+            }
+        }
+
+        return canMockPosition;
+    }
+
+    //WIFI是否可用
+    private boolean isWifiConnected() {
+        ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mWiFiNetworkInfo = mConnectivityManager
+                .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+        if (mWiFiNetworkInfo != null) {
+            return mWiFiNetworkInfo.isAvailable();
+        }
+
+        return false;
+    }
+
+    //MOBILE网络是否可用
+    private boolean isMobileConnected() {
+        ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mMobileNetworkInfo = mConnectivityManager
+                .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+
+        if (mMobileNetworkInfo != null) {
+            return mMobileNetworkInfo.isAvailable();
+        }
+
+        return false;
+    }
+
+    // 断是否有网络连接，但是如果该连接的网络无法上网，也会返回true
+    public boolean isNetworkConnected() {
+        ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+
+        if (mNetworkInfo != null) {
+            return mNetworkInfo.isAvailable();
+        }
+
+        return false;
+    }
+
+    //网络是否可用
+    private boolean isNetworkAvailable() {
+        return ((isWifiConnected() || isMobileConnected()) && isNetworkConnected());
+    }
+
+    //提醒开启位置模拟的弹框
+    private void showEnableMockLocationDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("启用位置模拟")//这里是表头的内容
+                .setMessage("请在\"开发者选项→选择模拟位置信息应用\"中进行设置")//这里是中间显示的具体信息
+                .setPositiveButton("设置",//这个string是设置左边按钮的文字
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+                                    startActivity(intent);
+                                } catch (Exception e) {
+                                    DisplayToast("无法跳转到开发者选项,请先确保您的设备已处于开发者模式");
+                                    e.printStackTrace();
+                                }
+                            }
+                        })//setPositiveButton里面的onClick执行的是左边按钮
+                .setNegativeButton("取消",//这个string是设置右边按钮的文字
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })//setNegativeButton里面的onClick执行的是右边的按钮的操作
+                .show();
+    }
+
+    //提醒开启悬浮窗的弹框
+    private void showEnableFloatWindowDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("启用悬浮窗")//这里是表头的内容
+                .setMessage("为了模拟定位的稳定性，建议开启\"显示悬浮窗\"选项")//这里是中间显示的具体信息
+                .setPositiveButton("设置",//这个string是设置左边按钮的文字
+                        new DialogInterface.OnClickListener() {
+                            @RequiresApi(api = Build.VERSION_CODES.M)
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+                                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+                                    startActivity(intent);
+                                } catch (Exception e) {
+                                    DisplayToast("无法跳转到设置界面，请在权限管理中开启该应用的悬浮窗");
+                                    e.printStackTrace();
+                                }
+                            }
+                        })//setPositiveButton里面的onClick执行的是左边按钮
+                .setNegativeButton("取消",//这个string是设置右边按钮的文字
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })//setNegativeButton里面的onClick执行的是右边的按钮的操作
+                .show();
+    }
+
+    //显示开启GPS的提示
+    private void showEnableGpsDialog() {
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle("Tips")//这里是表头的内容
+                .setMessage("是否开启GPS定位服务?")//这里是中间显示的具体信息
+                .setPositiveButton("确定",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivityForResult(intent, 0);
+                            }
+                        })
+                .setNegativeButton("取消",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                .show();
+    }
+
+    //显示输入经纬度的对话框
+    public void showInputLatLngDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("输入经度和纬度(BD09坐标系)");
+        //    通过LayoutInflater来加载一个xml的布局文件作为一个View对象
+        View view = LayoutInflater.from(MainActivity.this).inflate(layout.latlng_dialog, null);
+        //    设置我们自己定义的布局文件作为弹出框的Content
+        builder.setView(view);
+        final EditText dialog_lng = view.findViewById(id.dialog_longitude);
+        final EditText dialog_lat = view.findViewById(id.dialog_latitude);
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String dialog_lng_str, dialog_lat_str;
+
+                try {
+                    dialog_lng_str = dialog_lng.getText().toString().trim();
+                    dialog_lat_str = dialog_lat.getText().toString().trim();
+                    double dialog_lng_double = Double.parseDouble(dialog_lng_str);
+                    double dialog_lat_double = Double.parseDouble(dialog_lat_str);
+
+                    // DisplayToast("经度: " + dialog_lng_str + ", 纬度: " + dialog_lat_str);
+                    if (dialog_lng_double > 180.0 || dialog_lng_double < -180.0 || dialog_lat_double > 90.0 || dialog_lat_double < -90.0) {
+                        DisplayToast("经纬度超出限制!\n-180.0<经度<180.0\n-90.0<纬度<90.0");
+                    } else {
+                        curMapLatLng = new LatLng(dialog_lat_double, dialog_lng_double);
+                        MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(curMapLatLng);
+                        //对地图的中心点进行更新
+                        mBaiduMap.setMapStatus(mapstatusupdate);
+                        markSelectedPosition();
+                        transformCoordinate(dialog_lng_str, dialog_lat_str);
+                    }
+                } catch (Exception e) {
+                    DisplayToast("获取经纬度出错,请检查输入是否正确");
+                    e.printStackTrace();
+                }
+            }
+        });
+        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        builder.show();
+    }
+
+    private void showFaqDialog() {
+        final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(this).create();
+        alertDialog.show();
+        // alertDialog.setCancelable(false);
+        Window window = alertDialog.getWindow();
+        if (window != null) {
+            window.setContentView(layout.faq);
+            window.setGravity(Gravity.CENTER);
+            window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
+
+            TextView tvContent = window.findViewById(R.id.faq_content);
+            String str = "Q：Android 虚拟定位的实现原理是什么？\n"
+                    + "A：具有 ROOT 权限的，一般直接拦截和位置相关的接口更改位置数据。没有 ROOT 权限的，一种是使用 Android 提供的模拟位置 API，一种基于 VirtualApp。\n"
+                    + "\nQ：为何定位总是闪回真实位置？\n"
+                    + "A：这和虚拟定位的实现方式有关系。Android 提供的模拟位置 API 只能模拟 GPS。而安卓的定位数据会同时使用 GPS、网络/WIFI等来实现更精确的定位\n"
+                    + "\nQ：如何防止虚拟定位闪回真实位置？\n"
+                    + "A：对于多数手机，是可以设置定位数据来源的。可以直接关闭从网络/WIFI定位，只允许 GPS 定位；同时关闭 WIFI，仅使用数据流量来上网可有效防止闪回\n"
+                    + "\nQ：为啥在某些软件上没有效果？\n"
+                    + "A：目前仅适用于百度地图和高德地图的SDK定位. 腾讯系列无法使用\n"
+                    + "\nQ：使用位置的 APP 如何检测有没有虚拟定位？\n"
+                    + "A：对于使用 ROOT 权限的虚拟定位，是无法被检测的（但是会检测到 ROOT 权限）；使用 Android 提供的模拟位置 API，在 Android 6.0 之后，系统也没有挺检测方式。基于 VirtualApp 的检测方式要多一些。但是通常，如果位置变化较大、较快，APP 会认为定位异常\n";
+
+            SpannableStringBuilder ssb = new SpannableStringBuilder();
+            ssb.append(str);
+
+            tvContent.setMovementMethod(LinkMovementMethod.getInstance());
+            tvContent.setText(ssb, TextView.BufferType.SPANNABLE);
+
+        }
+    }
+
     private void initGoogleAD() {
         // 横幅广告
         AdView mAdView = findViewById(R.id.ad_view);
@@ -825,278 +1095,14 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    //判断GPS是否打开
-    private boolean isGpsOpened() {
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-    }
-
-    //模拟位置权限是否开启
-    public boolean isAllowMockLocation() {
-        boolean canMockPosition;
-
-        if (Build.VERSION.SDK_INT <= 22) {//6.0以下
-            canMockPosition = Settings.Secure.getInt(this.getContentResolver(), Settings.Secure.ALLOW_MOCK_LOCATION, 0) != 0;
-        } else {
-            try {
-                LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);//获得LocationManager引用
-                String providerStr = LocationManager.GPS_PROVIDER;
-                LocationProvider provider = locationManager.getProvider(providerStr);
-
-                // 为防止在已有testProvider的情况下导致addTestProvider抛出异常，先移除testProvider
-                try {
-                    locationManager.removeTestProvider(providerStr);
-                    Log.d("PERMISSION", "try to move test provider");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Log.e("PERMISSION", "try to move test provider");
-                }
-
-                if (provider != null) {
-                    try {
-                        locationManager.addTestProvider(
-                                provider.getName()
-                                , provider.requiresNetwork()
-                                , provider.requiresSatellite()
-                                , provider.requiresCell()
-                                , provider.hasMonetaryCost()
-                                , provider.supportsAltitude()
-                                , provider.supportsSpeed()
-                                , provider.supportsBearing()
-                                , provider.getPowerRequirement()
-                                , provider.getAccuracy());
-                        canMockPosition = true;
-                    } catch (Exception e) {
-                        Log.e("FUCK", "add origin gps test provider error");
-                        canMockPosition = false;
-                        e.printStackTrace();
-                    }
-                } else {
-                    try {
-                        locationManager.addTestProvider(
-                                providerStr
-                                , true, true, false, false, true, true, true
-                                , Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
-                        canMockPosition = true;
-                    } catch (Exception e) {
-                        Log.e("FUCK", "add gps test provider error");
-                        canMockPosition = false;
-                        e.printStackTrace();
-                    }
-                }
-
-                // 模拟位置可用
-                if (canMockPosition) {
-                    locationManager.setTestProviderEnabled(providerStr, true);
-                    locationManager.setTestProviderStatus(providerStr, LocationProvider.AVAILABLE, null, System.currentTimeMillis());
-                    //remove test provider
-                    locationManager.setTestProviderEnabled(providerStr, false);
-                    locationManager.removeTestProvider(providerStr);
-                }
-            } catch (SecurityException e) {
-                canMockPosition = false;
-                e.printStackTrace();
-            }
-        }
-
-        return canMockPosition;
-    }
-
-    //WIFI是否可用
-    private boolean isWifiConnected() {
-        ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mWiFiNetworkInfo = mConnectivityManager
-                                       .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-                                       
-        if (mWiFiNetworkInfo != null) {
-            return mWiFiNetworkInfo.isAvailable();
-        }
-        
-        return false;
-    }
-    
-    //MOBILE网络是否可用
-    private boolean isMobileConnected() {
-        ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mMobileNetworkInfo = mConnectivityManager
-                                         .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-                                         
-        if (mMobileNetworkInfo != null) {
-            return mMobileNetworkInfo.isAvailable();
-        }
-        
-        return false;
-    }
-
-    // 断是否有网络连接，但是如果该连接的网络无法上网，也会返回true
-    public boolean isNetworkConnected() {
-        ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
-
-        if (mNetworkInfo != null) {
-            return mNetworkInfo.isAvailable();
-        }
-
-        return false;
-    }
-
-    //网络是否可用
-    private boolean isNetworkAvailable() {
-        return ((isWifiConnected() || isMobileConnected()) && isNetworkConnected());
-    }
-
-    //提醒开启位置模拟的弹框
-    private void showEnableMockLocationDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("启用位置模拟")//这里是表头的内容
-                .setMessage("请在\"开发者选项→选择模拟位置信息应用\"中进行设置")//这里是中间显示的具体信息
-                .setPositiveButton("设置",//这个string是设置左边按钮的文字
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                try {
-                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
-                                    startActivity(intent);
-                                } catch (Exception e) {
-                                    DisplayToast("无法跳转到开发者选项,请先确保您的设备已处于开发者模式");
-                                    e.printStackTrace();
-                                }
-                            }
-                        })//setPositiveButton里面的onClick执行的是左边按钮
-                .setNegativeButton("取消",//这个string是设置右边按钮的文字
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        })//setNegativeButton里面的onClick执行的是右边的按钮的操作
-                .show();
-    }
-
-    //提醒开启悬浮窗的弹框
-    private void showEnableFloatWindowDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("启用悬浮窗")//这里是表头的内容
-                .setMessage("为了模拟定位的稳定性，建议开启\"显示悬浮窗\"选项")//这里是中间显示的具体信息
-                .setPositiveButton("设置",//这个string是设置左边按钮的文字
-                        new DialogInterface.OnClickListener() {
-                            @RequiresApi(api = Build.VERSION_CODES.M)
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                try {
-                                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-                                    startActivity(intent);
-                                } catch (Exception e) {
-                                    DisplayToast("无法跳转到设置界面，请在权限管理中开启该应用的悬浮窗");
-                                    e.printStackTrace();
-                                }
-                            }
-                        })//setPositiveButton里面的onClick执行的是左边按钮
-                .setNegativeButton("取消",//这个string是设置右边按钮的文字
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        })//setNegativeButton里面的onClick执行的是右边的按钮的操作
-                .show();
-    }
-
-    //显示开启GPS的提示
-    private void showEnableGpsDialog() {
-        new AlertDialog.Builder(MainActivity.this)
-                .setTitle("Tips")//这里是表头的内容
-                .setMessage("是否开启GPS定位服务?")//这里是中间显示的具体信息
-                .setPositiveButton("确定",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                startActivityForResult(intent, 0);
-                            }
-                        })
-                .setNegativeButton("取消",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        })
-                .show();
-    }
-
-    //显示输入经纬度的对话框
-    public void showInputLatLngDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle("输入经度和纬度(BD09坐标系)");
-        //    通过LayoutInflater来加载一个xml的布局文件作为一个View对象
-        View view = LayoutInflater.from(MainActivity.this).inflate(layout.latlng_dialog, null);
-        //    设置我们自己定义的布局文件作为弹出框的Content
-        builder.setView(view);
-        final EditText dialog_lng = view.findViewById(id.dialog_longitude);
-        final EditText dialog_lat = view.findViewById(id.dialog_latitude);
-        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String dialog_lng_str, dialog_lat_str;
-
-                try {
-                    dialog_lng_str = dialog_lng.getText().toString().trim();
-                    dialog_lat_str = dialog_lat.getText().toString().trim();
-                    double dialog_lng_double = Double.parseDouble(dialog_lng_str);
-                    double dialog_lat_double = Double.parseDouble(dialog_lat_str);
-
-                    // DisplayToast("经度: " + dialog_lng_str + ", 纬度: " + dialog_lat_str);
-                    if (dialog_lng_double > 180.0 || dialog_lng_double < -180.0 || dialog_lat_double > 90.0 || dialog_lat_double < -90.0) {
-                        DisplayToast("经纬度超出限制!\n-180.0<经度<180.0\n-90.0<纬度<90.0");
-                    } else {
-                        curMapLatLng = new LatLng(dialog_lat_double, dialog_lng_double);
-                        MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(curMapLatLng);
-                        //对地图的中心点进行更新
-                        mBaiduMap.setMapStatus(mapstatusupdate);
-                        markSelectedPosition();
-                        transformCoordinate(dialog_lng_str, dialog_lat_str);
-                    }
-                } catch (Exception e) {
-                    DisplayToast("获取经纬度出错,请检查输入是否正确");
-                    e.printStackTrace();
-                }
-            }
-        });
-        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-        builder.show();
-    }
-
-    private void showFaqDialog() {
-        final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(this).create();
-        alertDialog.show();
-        // alertDialog.setCancelable(false);
-        Window window = alertDialog.getWindow();
-        if (window != null) {
-            window.setContentView(layout.faq);
-            window.setGravity(Gravity.CENTER);
-            window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
-
-            TextView tvContent = window.findViewById(R.id.faq_content);
-            String str = "Q：Android 虚拟定位的实现原理是什么？\n"
-                    + "A：具有 ROOT 权限的，一般直接拦截和位置相关的接口更改位置数据。没有 ROOT 权限的，一种是使用 Android 提供的模拟位置 API，一种基于 VirtualApp。\n"
-                    + "\nQ：为何定位总是闪回真实位置？\n"
-                    + "A：这和虚拟定位的实现方式有关系。Android 提供的模拟位置 API 只能模拟 GPS。而安卓的定位数据会同时使用 GPS、网络/WIFI等来实现更精确的定位\n"
-                    + "\nQ：如何防止虚拟定位闪回真实位置？\n"
-                    + "A：对于多数手机，是可以设置定位数据来源的。可以直接关闭从网络/WIFI定位，只允许 GPS 定位；同时关闭 WIFI，仅使用数据流量来上网可有效防止闪回\n"
-                    + "\nQ：为啥在某些软件上没有效果？\n"
-                    + "A：目前仅适用于百度地图和高德地图的SDK定位. 腾讯系列无法使用\n"
-                    + "\nQ：使用位置的 APP 如何检测有没有虚拟定位？\n"
-                    + "A：对于使用 ROOT 权限的虚拟定位，是无法被检测的（但是会检测到 ROOT 权限）；使用 Android 提供的模拟位置 API，在 Android 6.0 之后，系统也没有挺检测方式。基于 VirtualApp 的检测方式要多一些。但是通常，如果位置变化较大、较快，APP 会认为定位异常\n";
-
-            SpannableStringBuilder ssb = new SpannableStringBuilder();
-            ssb.append(str);
-
-            tvContent.setMovementMethod(LinkMovementMethod.getInstance());
-            tvContent.setText(ssb, TextView.BufferType.SPANNABLE);
-
-        }
+    private void initBaiduMap() {
+        // 地图初始化
+        mMapView = findViewById(id.bmapView);
+        mMapView.showZoomControls(false);
+        mBaiduMap = mMapView.getMap();
+        mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
+        mBaiduMap.setMyLocationEnabled(true);
+        initMapListener();
     }
 
     //开启地图的定位图层
@@ -1125,6 +1131,16 @@ public class MainActivity extends BaseActivity
 
     public void goCurrentPosition(View view) {
         resetMap();
+    }
+
+    //放大地图
+    public void zoomInMap(View view) {
+        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.zoomIn());
+    }
+
+    //缩小地图
+    public void zoomOutMap(View view) {
+        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.zoomOut());
     }
 
     //对地图事件的消息响应

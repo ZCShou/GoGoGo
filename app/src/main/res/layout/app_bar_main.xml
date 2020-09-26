@@ -35,7 +35,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|start"
-            android:layout_margin="@dimen/fab_margin"
+            android:layout_marginStart="30dp"
+            android:layout_marginBottom="80dp"
             android:contentDescription="@string/fabtn_start"
             app:elevation="6dp"
             app:pressedTranslationZ="12dp"
@@ -47,7 +48,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|start"
-            android:layout_margin="@dimen/fab_margin"
+            android:layout_marginStart="30dp"
+            android:layout_marginBottom="80dp"
             android:visibility="invisible"
             app:elevation="6dp"
             app:pressedTranslationZ="12dp"
@@ -60,7 +62,7 @@
             android:layout_height="32dp"
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="10dp"
-            android:layout_marginBottom="130dp"
+            android:layout_marginBottom="174dp"
             android:background="@drawable/circle_shape"
             android:orientation="horizontal">
 
@@ -72,6 +74,46 @@
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:theme="@style/RippleWhite"
                 app:srcCompat="@drawable/ic_home_position"
+                android:contentDescription="@string/map_home"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="137dp"
+            android:background="@drawable/circle_shape"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/zoom_in"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:onClick="zoomInMap"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:theme="@style/RippleWhite"
+                app:srcCompat="@drawable/ic_zoom_in"
+                android:contentDescription="@string/map_home"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="100dp"
+            android:background="@drawable/circle_shape"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/zoom_out"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:onClick="zoomOutMap"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:theme="@style/RippleWhite"
+                app:srcCompat="@drawable/ic_zoom_out"
                 android:contentDescription="@string/map_home"/>
         </LinearLayout>
 
