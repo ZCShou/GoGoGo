@@ -3,9 +3,7 @@ package com.zcshou.gogogo;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.widget.EditText;
 
-import androidx.annotation.NonNull;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -37,61 +35,38 @@ public class FragmentSettings extends PreferenceFragmentCompat implements OnPref
 
         EditTextPreference pfWalk = findPreference("setting_walk");
         if (pfWalk != null) {
-            pfWalk.setSummaryProvider( new Preference.SummaryProvider<EditTextPreference>() {// 使用自定义 SummaryProvider
-                @Override
-                public CharSequence provideSummary(EditTextPreference preference) {
-                    String text = preference.getText();
-                    if (TextUtils.isEmpty(text)) {
-                        return "未设置";
-                    }
-                    return "当前值: " + text;
+            // 使用自定义 SummaryProvider
+            pfWalk.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> {
+                String text = preference.getText();
+                if (TextUtils.isEmpty(text)) {
+                    return "未设置";
                 }
+                return "当前值: " + text;
             });
-            pfWalk.setOnBindEditTextListener( new EditTextPreference.OnBindEditTextListener() {
-                @Override
-                public void onBindEditText(@NonNull EditText editText) {
-                    editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
-                }
-            });
+            pfWalk.setOnBindEditTextListener(editText -> editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER));
         }
 
         EditTextPreference pfRun = findPreference("setting_run");
         if (pfRun != null) {
-            pfRun.setSummaryProvider( new Preference.SummaryProvider<EditTextPreference>() {
-                @Override
-                public CharSequence provideSummary(EditTextPreference preference) {
-                    String text = preference.getText();
-                    if (TextUtils.isEmpty(text)) {
-                        return "未设置";
-                    }
-                    return "当前值: " + text;
+            pfRun.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> {
+                String text = preference.getText();
+                if (TextUtils.isEmpty(text)) {
+                    return "未设置";
                 }
+                return "当前值: " + text;
             });
-            pfRun.setOnBindEditTextListener( new EditTextPreference.OnBindEditTextListener() {
-                @Override
-                public void onBindEditText(@NonNull EditText editText) {
-                    editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
-                }
-            });
+            pfRun.setOnBindEditTextListener(editText -> editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER));
         }
         EditTextPreference pfBike = findPreference("setting_bike");
         if (pfBike != null) {
-            pfBike.setSummaryProvider(new Preference.SummaryProvider<EditTextPreference>() {
-                @Override
-                public CharSequence provideSummary(EditTextPreference preference) {
-                    String text = preference.getText();
-                    if (TextUtils.isEmpty(text)) {
-                        return "未设置";
-                    }
-                    return "当前值: " + text;
+            pfBike.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> {
+                String text = preference.getText();
+                if (TextUtils.isEmpty(text)) {
+                    return "未设置";
                 }
+                return "当前值: " + text;
             });
-            pfBike.setOnBindEditTextListener( new EditTextPreference.OnBindEditTextListener() {
-                @Override
-                public void onBindEditText(@NonNull EditText editText) {
-                    editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
-                }
-            });
+            pfBike.setOnBindEditTextListener(editText -> editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER));
         }
     }
     

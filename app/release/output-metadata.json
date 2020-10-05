@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "com.zcshou.gogogo",
+  "variantName": "release",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "properties": [],
+      "versionCode": 106,
+      "versionName": "1.0.6",
+      "enabled": true,
+      "outputFile": "app-release.apk"
+    }
+  ]
+}

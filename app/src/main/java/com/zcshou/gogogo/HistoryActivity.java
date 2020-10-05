@@ -1,7 +1,6 @@
 package com.zcshou.gogogo;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -110,22 +108,16 @@ public class HistoryActivity extends BaseActivity {
                     .setTitle("Warning")//这里是表头的内容
                     .setMessage("确定要删除全部历史记录吗?")//这里是中间显示的具体信息
                     .setPositiveButton("确定",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    boolean deleteRet = deleteRecord(sqLiteDatabase, -1);
+                            (dialog, which) -> {
+                                boolean deleteRet = deleteRecord(sqLiteDatabase, -1);
 
-                                    if (deleteRet) {
-                                        DisplayToast("删除成功!");
-                                        initListView();
-                                    }
+                                if (deleteRet) {
+                                    DisplayToast("删除成功!");
+                                    initListView();
                                 }
                             })
                     .setNegativeButton("取消",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                }
+                            (dialog, which) -> {
                             })
                     .show();
             return true;
@@ -162,62 +154,50 @@ public class HistoryActivity extends BaseActivity {
     }
 
     private void setSearchResultClickListener() {
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String bd09Longitude;
-                String bd09Latitude;
-                String wgs84Longitude;
-                String wgs84Latitude;
-                //bd09坐标
-                String bd09LatLng = (String) ((TextView) view.findViewById(R.id.BDLatLngText)).getText();
-                bd09LatLng = bd09LatLng.substring(bd09LatLng.indexOf("[") + 1, bd09LatLng.indexOf("]"));
-                String[] latLngStr = bd09LatLng.split(" ");
-                bd09Longitude = latLngStr[0].substring(latLngStr[0].indexOf(":") + 1);
-                bd09Latitude = latLngStr[1].substring(latLngStr[1].indexOf(":") + 1);
-                //wgs84坐标
-                String wgs84LatLng = (String) ((TextView) view.findViewById(R.id.WGSLatLngText)).getText();
-                wgs84LatLng = wgs84LatLng.substring(wgs84LatLng.indexOf("[") + 1, wgs84LatLng.indexOf("]"));
-                String[] latLngStr2 = wgs84LatLng.split(" ");
-                wgs84Longitude = latLngStr2[0].substring(latLngStr2[0].indexOf(":") + 1);
-                wgs84Latitude = latLngStr2[1].substring(latLngStr2[1].indexOf(":") + 1);
+        listView.setOnItemClickListener((adapterView, view, i, l) -> {
+            String bd09Longitude;
+            String bd09Latitude;
+            String wgs84Longitude;
+            String wgs84Latitude;
+            //bd09坐标
+            String bd09LatLng = (String) ((TextView) view.findViewById(R.id.BDLatLngText)).getText();
+            bd09LatLng = bd09LatLng.substring(bd09LatLng.indexOf("[") + 1, bd09LatLng.indexOf("]"));
+            String[] latLngStr = bd09LatLng.split(" ");
+            bd09Longitude = latLngStr[0].substring(latLngStr[0].indexOf(":") + 1);
+            bd09Latitude = latLngStr[1].substring(latLngStr[1].indexOf(":") + 1);
+            //wgs84坐标
+            String wgs84LatLng = (String) ((TextView) view.findViewById(R.id.WGSLatLngText)).getText();
+            wgs84LatLng = wgs84LatLng.substring(wgs84LatLng.indexOf("[") + 1, wgs84LatLng.indexOf("]"));
+            String[] latLngStr2 = wgs84LatLng.split(" ");
+            wgs84Longitude = latLngStr2[0].substring(latLngStr2[0].indexOf(":") + 1);
+            wgs84Latitude = latLngStr2[1].substring(latLngStr2[1].indexOf(":") + 1);
 
-                if (!showHistoryLocation(bd09Longitude, bd09Latitude, wgs84Longitude, wgs84Latitude)) {
-                    DisplayToast("定位失败,请手动选取定位点");
-                }
-
-                returnLastActivity();
+            if (!showHistoryLocation(bd09Longitude, bd09Latitude, wgs84Longitude, wgs84Latitude)) {
+                DisplayToast("定位失败,请手动选取定位点");
             }
+
+            returnLastActivity();
         });
 
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, final View view, int position, long id) {
-                new AlertDialog.Builder(HistoryActivity.this)
-                        .setTitle("Warning")//这里是表头的内容
-                        .setMessage("确定要删除该项历史记录吗?")//这里是中间显示的具体信息
-                        .setPositiveButton("确定",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        String locID = (String) ((TextView) view.findViewById(R.id.LocationID)).getText();
-                                        boolean deleteRet = deleteRecord(sqLiteDatabase, Integer.parseInt(locID));
+        listView.setOnItemLongClickListener((parent, view, position, id) -> {
+            new AlertDialog.Builder(HistoryActivity.this)
+                    .setTitle("Warning")//这里是表头的内容
+                    .setMessage("确定要删除该项历史记录吗?")//这里是中间显示的具体信息
+                    .setPositiveButton("确定",
+                            (dialog, which) -> {
+                                String locID = (String) ((TextView) view.findViewById(R.id.LocationID)).getText();
+                                boolean deleteRet = deleteRecord(sqLiteDatabase, Integer.parseInt(locID));
 
-                                        if (deleteRet) {
-                                            DisplayToast("删除成功!");
-                                            initListView();
-                                        }
-                                    }
-                                })
-                        .setNegativeButton("取消",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                    }
-                                })
-                        .show();
-                return true;
-            }
+                                if (deleteRet) {
+                                    DisplayToast("删除成功!");
+                                    initListView();
+                                }
+                            })
+                    .setNegativeButton("取消",
+                            (dialog, which) -> {
+                            })
+                    .show();
+            return true;
         });
     }
 

@@ -19,7 +19,6 @@ import android.os.SystemClock;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
-import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -66,12 +65,7 @@ public class WelcomeActivity extends BaseActivity {
         int cnt = Integer.parseInt(getResources().getString(R.string.welcome_btn_cnt));
         time = new TimeCount(cnt, 1000);
         startBtn = findViewById(R.id.startButton);
-        startBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startMainActivity();
-            }
-        });
+        startBtn.setOnClickListener(v -> startMainActivity());
 
         startBtn.setClickable(false);        // 放在 setOnClickListener 之后才能生效
 
@@ -321,32 +315,26 @@ public class WelcomeActivity extends BaseActivity {
             tvContent.setMovementMethod(LinkMovementMethod.getInstance());
             tvContent.setText(ssb, TextView.BufferType.SPANNABLE);
 
-            tvCancel.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    alertDialog.cancel();
-                    finish();
-                }
+            tvCancel.setOnClickListener(v -> {
+                alertDialog.cancel();
+                finish();
             });
  
-            tvAgree.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (tvCheck.isChecked()) {
-                        //实例化Editor对象
-                        SharedPreferences.Editor editor = preferences.edit();
-                        //存入数据
-                        editor.putBoolean("isFirstUse", false);
-                        //提交修改
-                        editor.apply();
+            tvAgree.setOnClickListener(v -> {
+                if (tvCheck.isChecked()) {
+                    //实例化Editor对象
+                    SharedPreferences.Editor editor = preferences.edit();
+                    //存入数据
+                    editor.putBoolean("isFirstUse", false);
+                    //提交修改
+                    editor.apply();
 
-                        isFirstUse = false;
-                    }
-
-                    requestNeedPermissions();
-
-                    alertDialog.cancel();
+                    isFirstUse = false;
                 }
+
+                requestNeedPermissions();
+
+                alertDialog.cancel();
             });
         }
     }

@@ -20,10 +20,7 @@ public class GoApplication extends Application {
         mVibrator = (Vibrator)getApplicationContext().getSystemService(Service.VIBRATOR_SERVICE);
         SDKInitializer.initialize(getApplicationContext());
         // 谷歌广告 SDK 初始化
-        MobileAds.initialize(getApplicationContext(), new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
+        MobileAds.initialize(getApplicationContext(), initializationStatus -> {
         });
     }
 }
