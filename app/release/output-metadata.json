@@ -1,19 +1,17 @@
 {
-  "version": 1,
+  "version": 2,
   "artifactType": {
     "type": "APK",
     "kind": "Directory"
   },
   "applicationId": "com.zcshou.gogogo",
-  "variantName": "release",
+  "variantName": "processReleaseResources",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
-      "properties": [],
-      "versionCode": 107,
-      "versionName": "1.0.7",
-      "enabled": true,
+      "versionCode": 108,
+      "versionName": "1.0.8",
       "outputFile": "app-release.apk"
     }
   ]

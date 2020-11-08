@@ -6,10 +6,11 @@ android {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 107
-        versionName "1.0.7"
+        versionCode 108
+        versionName "1.0.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+    ndkVersion '21.3.6528147'
     buildTypes {
         release {
             minifyEnabled false

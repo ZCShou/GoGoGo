@@ -19,6 +19,7 @@ import android.location.LocationProvider;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -64,14 +65,15 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
-import com.baidu.mapapi.map.BaiduMapOptions;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
+//import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+//import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
@@ -129,7 +131,7 @@ public class MainActivity extends BaseActivity
     private boolean isGPSOpen = false;
     private boolean isFirstLoc = true; // 是否首次定位
 
-    private static final long mTS = 1607472000;
+    private static final long mTS = 1609286400;
 
     //位置历史
     private SQLiteDatabase locHistoryDB;
@@ -657,6 +659,14 @@ public class MainActivity extends BaseActivity
         return canMockPosition;
     }
 
+    //WIFI是否开启
+    public boolean isWiFiEnabled() {
+        Context context = this.getApplicationContext();
+        WifiManager wifiManager = (WifiManager) context
+                .getSystemService(Context.WIFI_SERVICE);
+        return wifiManager.isWifiEnabled();
+    }
+
     //WIFI是否可用
     private boolean isWifiConnected() {
         ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -766,6 +776,27 @@ public class MainActivity extends BaseActivity
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                                 startActivityForResult(intent, 0);
+                            }
+                        })
+                .setNegativeButton("取消",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                .show();
+    }
+
+    //显示开启 WIFI 的提示
+    private void showWifiWarningDialog() {
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle("警告")//这里是表头的内容
+                .setMessage("由于实现原理的限制，如果开启 WIFI 将导致位置频繁闪回真实位置，使用数据流量可完美解决闪回的问题")//这里是中间显示的具体信息
+                .setPositiveButton("继续",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                doGoLocation();
                             }
                         })
                 .setNegativeButton("取消",
@@ -1102,6 +1133,17 @@ public class MainActivity extends BaseActivity
         mBaiduMap = mMapView.getMap();
         mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
         mBaiduMap.setMyLocationEnabled(true);
+//        mBaiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+//
+//            @Override
+//            public boolean onMarkerClick(Marker marker) {
+//                View markView = View.inflate(getApplicationContext(), layout.map_overlay, null);
+//                LatLng ll = marker.getPosition();
+//                InfoWindow mInfoWindow = new InfoWindow(BitmapDescriptorFactory.fromView(markView), ll, -47, null);
+//                mBaiduMap.showInfoWindow(mInfoWindow);
+//                return true;
+//            }
+//        });
         initMapListener();
     }
 
@@ -1606,6 +1648,46 @@ public class MainActivity extends BaseActivity
         return data;
     }
 
+    private void doGoLocation() {
+        if (!isMockServStart && !isServiceRun) {
+            Log.d("DEBUG", "Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
+            log.debug("Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
+
+            markSelectedPosition();
+
+            //start mock location service
+            Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
+            mockLocServiceIntent.putExtra("CurLatLng", curLatLng);
+
+            //save record
+            recordGetPositionInfo();
+
+            //insert end
+            if (Build.VERSION.SDK_INT >= 26) {
+                startForegroundService(mockLocServiceIntent);
+                Log.d("DEBUG", "startForegroundService: GoService");
+                log.debug("startForegroundService: GoService");
+            } else {
+                startService(mockLocServiceIntent);
+                Log.d("DEBUG", "startService: GoService");
+                log.debug("startService: GoService");
+            }
+
+            isMockServStart = true;
+//                            Snackbar.make(view, "位置模拟已开启", Snackbar.LENGTH_LONG)
+//                                    .setAction("Action", null).show();
+            faBtnStart.hide();
+            faBtnStop.show();
+            //track
+        } else {
+//                            Snackbar.make(view, "位置模拟已在运行", Snackbar.LENGTH_LONG)
+//                                    .setAction("Action", null).show();
+            faBtnStart.hide();
+            faBtnStop.show();
+            isMockServStart = true;
+        }
+    }
+
     private  void startGoLocation() {
         if (!isLimit && isNetworkAvailable()) {    // 时间限制
             //悬浮窗权限判断
@@ -1626,42 +1708,10 @@ public class MainActivity extends BaseActivity
                     if (!isAllowMockLocation()) {
                         showEnableMockLocationDialog();
                     } else {
-                        if (!isMockServStart && !isServiceRun) {
-                            Log.d("DEBUG", "Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
-                            log.debug("Current Baidu LatLng: " + curMapLatLng.longitude + "  " + curMapLatLng.latitude);
-
-                            markSelectedPosition();
-
-                            //start mock location service
-                            Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
-                            mockLocServiceIntent.putExtra("CurLatLng", curLatLng);
-
-                            //save record
-                            recordGetPositionInfo();
-
-                            //insert end
-                            if (Build.VERSION.SDK_INT >= 26) {
-                                startForegroundService(mockLocServiceIntent);
-                                Log.d("DEBUG", "startForegroundService: GoService");
-                                log.debug("startForegroundService: GoService");
-                            } else {
-                                startService(mockLocServiceIntent);
-                                Log.d("DEBUG", "startService: GoService");
-                                log.debug("startService: GoService");
-                            }
-
-                            isMockServStart = true;
-//                            Snackbar.make(view, "位置模拟已开启", Snackbar.LENGTH_LONG)
-//                                    .setAction("Action", null).show();
-                            faBtnStart.hide();
-                            faBtnStop.show();
-                            //track
+                        if (isWiFiEnabled()) {
+                            showWifiWarningDialog();
                         } else {
-//                            Snackbar.make(view, "位置模拟已在运行", Snackbar.LENGTH_LONG)
-//                                    .setAction("Action", null).show();
-                            faBtnStart.hide();
-                            faBtnStop.show();
-                            isMockServStart = true;
+                            doGoLocation();
                         }
                     }
                 }
