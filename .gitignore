@@ -65,7 +65,3 @@ fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
 fastlane/readme.md
-
-# 未完成部分
-app/src/main/java/com/joystick/
-app/src/main/res/layout/joystick*
