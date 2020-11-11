@@ -1,4 +1,39 @@
-# GoGoGo
+<p></p>
+<p></p>
 
-  
+<p align="center">
+<img src="./docs/LOGO.png" height="80"/>
+</p>
+
+<div align="center">
+
+[![GitHub stars](https://img.shields.io/github/stars/MonkSoul/Fur?logo=github)](https://github.com/MonkSoul/Fur/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/MonkSoul/Fur?logo=github)](https://github.com/MonkSoul/Fur/network)
+[![license](https://img.shields.io/github/license/ZCShou/GoGoGo.svg)](LICENSE)
+[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
+</div>
+
+<div align="center">
+
+影梭 - 用于 Android 6.0+ 的虚拟定位。
+
+</div>
+
+# 🍕 影梭
+影梭 - 用于 Android 6.0+ 的虚拟定位。基于 Android 调试 API 实现。
+
+## 🍕 背景
+最新在玩一款 VR 游戏：一起来捉妖。为了省事（实在是没有时间出去瞎溜达，仅仅是作为休闲游戏，没事的时候就玩玩），就想有没有可以更改位置的 APP。经过一番摸索发现确实有不少可以修改位置的 APP，使用这种 APP 就不用实际跑出去了。但是，绝大多数这种 APP 都是收费的！这就尴尬了，我就偶尔玩玩，再每月花钱买个这个就没必要了，所以准备自己写一个！
+
+## 🍔 关于 LOGO
+
+## 🌭 用法
+
+
+## 🥦 如何贡献
+
+
+
+## 🍟 许可证
+
 
