@@ -371,11 +371,11 @@ public class GoService extends Service {
                 log.debug("setTestProviderEnabled[NETWORK_PROVIDER] error");
             }
         }
-
-        // 根据 google 的文档，API 29 此方法无效。
-        locationManager.setTestProviderStatus(LocationManager.NETWORK_PROVIDER, LocationProvider.AVAILABLE, null,
-                System.currentTimeMillis());
-
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            // 根据 google 的文档，API 29 此方法无效。
+            locationManager.setTestProviderStatus(LocationManager.NETWORK_PROVIDER, LocationProvider.AVAILABLE, null,
+                    System.currentTimeMillis());
+        }
     }
 
     // set GPS provider
@@ -431,9 +431,11 @@ public class GoService extends Service {
             }
         }
 
-        // 根据 google 的文档，API 29 此方法无效。
-        locationManager.setTestProviderStatus(LocationManager.GPS_PROVIDER, LocationProvider.AVAILABLE, null,
-                System.currentTimeMillis());
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            // 根据 google 的文档，API 29 此方法无效。
+            locationManager.setTestProviderStatus(LocationManager.GPS_PROVIDER, LocationProvider.AVAILABLE, null,
+                    System.currentTimeMillis());
+        }
     }
 
 //    // set other provider
