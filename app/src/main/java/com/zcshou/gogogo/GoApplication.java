@@ -18,6 +18,7 @@ public class GoApplication extends Application {
     public void onCreate() {
         super.onCreate();
         mVibrator = (Vibrator)getApplicationContext().getSystemService(Service.VIBRATOR_SERVICE);
+        // 百度地图 SDK 初始化
         SDKInitializer.initialize(getApplicationContext());
         // 谷歌广告 SDK 初始化
         MobileAds.initialize(getApplicationContext(), initializationStatus -> {

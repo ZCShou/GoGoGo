@@ -1,6 +1,5 @@
 package com.zcshou.service;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -16,55 +15,46 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.SystemClock;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import android.util.Log;
-
 import com.baidu.mapapi.model.LatLng;
 import com.zcshou.gogogo.MainActivity;
 import com.zcshou.joystick.JoyStick;
-import com.zcshou.log4j.LogUtil;
 import com.zcshou.gogogo.R;
-
-import org.apache.log4j.Logger;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class GoService extends Service {
-
     public static final int RunCode = 0x01;
     public static final int StopCode = 0x02;
+    private static final int HANDLER_MSG_ID = 0;
     private LocationManager locationManager;
     private HandlerThread handlerThread;
     private Handler handler;
     private boolean isStop = true;  // 是否启动了模拟位置
     private String curLatLng = "117.027707&36.667662";// 模拟位置的经纬度字符串
-    private static final long mTS = 1609286402;
-
     // 摇杆相关
     private JoyStick mJoyStick;
     private boolean isJoyStick = false; // 摇杆是否启动
     double mSpeed;
+    // 限制检测
     private boolean isLimit = false;
+    private static final long mTS = 1609286402;
     private TimeTask timeTask;
     private ExecutorService threadExecutor;
-    private TimeCount time;
-
+    // 通知栏消息
     NoteActionReceiver acReceiver;
-
-    // log debug
-    private static final Logger log = Logger.getLogger(GoService.class);
 
     @Nullable
     @Override
@@ -72,33 +62,20 @@ public class GoService extends Service {
         return null;
     }
 
-    @SuppressLint("WrongConstant")
     @Override
     public void onCreate() {
-        LogUtil.configLog();
-
-        Log.d("GoService", "onCreate");
-        log.debug("onCreate");
-
         super.onCreate();
 
-        time = new TimeCount(1000 * 60 * 20, 1000);
-
+        mSpeed = 0.00003;
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
-        //remove default network location provider
-        rmNetworkTestProvider();
-        //remove gps provider
-        rmGPSTestProvider();
-        //remove other provider
-        //rmOtherTestProvider();
+        removeTestProviderNetwork();
+        removeTestProviderGPS();
 
-        //add a new test network location provider
-        setNetworkTestProvider();
-        // add a new GPS test Provider
-        setGPSTestProvider();
+        addTestProviderNetwork();
+        addTestProviderGPS();
 
-        //thread
+        // thread
         handlerThread = new HandlerThread(getUUID(), -2);
         handlerThread.start();
 
@@ -111,26 +88,22 @@ public class GoService extends Service {
                         setNetworkLocation();
                         setGPSLocation();
 
-                        sendEmptyMessage(0);
+                        sendEmptyMessage(HANDLER_MSG_ID);
 
                         // broadcast to MainActivity
                         Intent intent = new Intent();
                         intent.putExtra("StatusRun", RunCode);
-                        // intent.putExtra("CurLatLng", curLatLng);
                         intent.setAction("com.zcshou.service.GoService");
                         sendBroadcast(intent);
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     Log.d("GoService", "handleMessage error");
-                    log.debug("handleMessage error");
                     Thread.currentThread().interrupt();
                 }
             }
         };
-        handler.sendEmptyMessage(0);
-
-        mSpeed = 0.00003;
+        handler.sendEmptyMessage(HANDLER_MSG_ID);
 
         timeTask = new TimeTask();
         threadExecutor = Executors.newSingleThreadExecutor();
@@ -145,10 +118,8 @@ public class GoService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("GoService", "onStartCommand");
-        log.debug("onStartCommand");
 
         threadExecutor.submit(timeTask);
-        time.start();
 
         String channelId = "channel_01";
         String name = "channel_name";
@@ -193,15 +164,10 @@ public class GoService extends Service {
 
         startForeground(1, notification);
 
-        // get location info from mainActivity
         curLatLng = intent.getStringExtra("CurLatLng");
-
         Log.d("GoService", "LatLng from Main is " + curLatLng);
-        log.debug("LatLng from Main is " + curLatLng);
 
-        //start to refresh location
         isStop = false;
-
         // 开启摇杆
         if (!isJoyStick) {
             mJoyStick = new JoyStick(this);
@@ -228,8 +194,7 @@ public class GoService extends Service {
                         double lat = Double.parseDouble(latLngStr[1]) + latDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
                         curLatLng = lng + "&" + lat;
                     } else {
-                        Log.d("GoService", "isLimit " + isLimit);
-                        log.debug("isLimit " + isLimit);
+                        Log.d("GoService", "isLimit ");
                     }
                 }
 
@@ -237,11 +202,8 @@ public class GoService extends Service {
                 public void setCurrentSpeed(double speed) {
                     mSpeed = speed * 3.6;   // 转换为 km/h, 1米/秒(m/s)=3.6千米/时(km/h)
                 }
-
             });
-
             mJoyStick.show();
-
             isJoyStick = true;
         }
 
@@ -251,23 +213,18 @@ public class GoService extends Service {
     @Override
     public void onDestroy() {
         Log.d("GoService", "onDestroy");
-        log.debug("onDestroy");
-
         isStop = true;
-
         mJoyStick.hide();
         isJoyStick = false;
 
-        handler.removeMessages(0);
+        handler.removeMessages(HANDLER_MSG_ID);
         handlerThread.quit();
-        time.cancel();
         threadExecutor.shutdownNow();
 
         unregisterReceiver(acReceiver);
 
-        //remove test provider
-        rmNetworkTestProvider();
-        rmGPSTestProvider();
+        removeTestProviderNetwork();
+        removeTestProviderGPS();
         //rmOtherTestProvider();
 
         stopForeground(true);
@@ -281,7 +238,6 @@ public class GoService extends Service {
         super.onDestroy();
     }
 
-    //generate a location
     public Location generateLocation(LatLng latLng) {
         Location loc = new Location("gps");
         loc.setAccuracy(2.0F);                  // 精度（米）
@@ -299,7 +255,6 @@ public class GoService extends Service {
         return loc;
     }
 
-    //添加网络定位
     private void setNetworkLocation() {
         String[] latLngStr = curLatLng.split("&");
         LatLng latLng = new LatLng(Double.parseDouble(latLngStr[1]), Double.parseDouble(latLngStr[0]));
@@ -310,12 +265,10 @@ public class GoService extends Service {
             locationManager.setTestProviderLocation(providerStr, generateLocation(latLng));
         } catch (Exception e) {
             Log.d("GoService", "setNetworkLocation error");
-            log.debug("setNetworkLocation error");
             e.printStackTrace();
         }
     }
 
-    //set gps location
     private void setGPSLocation() {
         String[] latLngStr = curLatLng.split("&");
         LatLng latLng = new LatLng(Double.parseDouble(latLngStr[1]), Double.parseDouble(latLngStr[0]));
@@ -325,41 +278,31 @@ public class GoService extends Service {
             locationManager.setTestProviderLocation(providerStr, generateLocation(latLng));
         } catch (Exception e) {
             Log.d("GoService", "setGPSLocation error");
-            log.debug("setGPSLocation error");
             e.printStackTrace();
         }
     }
 
-    //remove network provider
-    private void rmNetworkTestProvider() {
+    private void removeTestProviderNetwork() {
         try {
             if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                Log.d("GoService", "now remove NetworkProvider");
-                log.debug("now remove NetworkProvider");
                 locationManager.removeTestProvider(LocationManager.NETWORK_PROVIDER);
             } else {
                 Log.d("GoService", "NetworkProvider is not enabled");
-                log.debug("NetworkProvider is not enabled");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("GoService", "rmNetworkProvider error");
-            log.debug("rmNetworkProvider error");
+            Log.d("GoService", "ERROR:removeTestProviderNetwork");
         }
     }
 
-    //set network provider
-    private void setNetworkTestProvider() {
+    private void addTestProviderNetwork() {
         try {
             locationManager.addTestProvider(LocationManager.NETWORK_PROVIDER, true, false,
                     false, false, false, false,
                     false, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
-            Log.d("GoService", "addTestProvider[NETWORK_PROVIDER] success");
-            log.debug("addTestProvider[NETWORK_PROVIDER] success");
         } catch (SecurityException e) {
             e.printStackTrace();
-            Log.d("GoService", "addTestProvider[NETWORK_PROVIDER] error");
-            log.debug("addTestProvider[NETWORK_PROVIDER] error");
+            Log.d("GoService", "ERROR:addTestProviderNetwork");
         }
 
         if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
@@ -368,7 +311,6 @@ public class GoService extends Service {
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.d("GoService", "setTestProviderEnabled[NETWORK_PROVIDER] error");
-                log.debug("setTestProviderEnabled[NETWORK_PROVIDER] error");
             }
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -378,47 +320,26 @@ public class GoService extends Service {
         }
     }
 
-    // set GPS provider
-    private void rmGPSTestProvider() {
+    private void removeTestProviderGPS() {
         try {
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                Log.d("GoService", "now remove GPSProvider");
-                log.debug("now remove GPSProvider");
                 locationManager.removeTestProvider(LocationManager.GPS_PROVIDER);
             } else {
                 Log.d("GoService", "GPSProvider is not enabled");
-                log.debug("GPSProvider is not enabled");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("GoService", "rmGPSProvider error");
-            log.debug("rmGPSProvider error");
+            Log.d("GoService", "ERROR:removeTestProviderGPS");
         }
     }
 
-    private void setGPSTestProvider() {
-//        if (!locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER)) {
-//            locationManager.setTestProviderEnabled(LocationManager.PASSIVE_PROVIDER, false);
-//            Log.d("GoService", "Disable passive provider");
-//            log.debug("Disable passive provider");
-//        }
-//
-//        if (!locationManager.isProviderEnabled("fused") && Build.VERSION.SDK_INT >= 29
-//                && !RomUtils.isVivo() && !RomUtils.isEmui()) {    // 目前 ViVo 会崩溃
-//            locationManager.setTestProviderEnabled("fused", false);
-//            Log.d("GoService", "Disable fused provider");
-//            log.debug("Disable fused provider");
-//        }
-
+    private void addTestProviderGPS() {
         try {
             locationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, true,
-                    false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_HIGH);
-            Log.d("GoService", "addTestProvider[GPS_PROVIDER] success");
-            log.debug("addTestProvider[GPS_PROVIDER] success");
+                    false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_MEDIUM);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("GoService", "addTestProvider[GPS_PROVIDER] error");
-            log.debug("addTestProvider[GPS_PROVIDER] error");
+            Log.d("GoService", "ERROR:addTestProviderGPS");
         }
 
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -427,7 +348,6 @@ public class GoService extends Service {
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.d("GoService", "setTestProviderEnabled[GPS_PROVIDER] error");
-                log.debug("setTestProviderEnabled[GPS_PROVIDER] error");
             }
         }
 
@@ -444,11 +364,9 @@ public class GoService extends Service {
 //            try {
 //                locationManager.setTestProviderEnabled(LocationManager.PASSIVE_PROVIDER, false);
 //                Log.d("GoService", "Disable passive provider");
-//                log.debug("Disable passive provider");
 //            } catch(Exception e) {
 //                e.printStackTrace();
 //                Log.d("GoService", "Disable passive provider error");
-//                log.debug("Disable passive provider error");
 //            }
 //        }
 //
@@ -456,35 +374,16 @@ public class GoService extends Service {
 //            try {
 //                locationManager.setTestProviderEnabled("fused", false);
 //                Log.d("GoService", "Disable fused provider");
-//                log.debug("Disable fused provider");
 //            } catch(Exception e) {
 //                e.printStackTrace();
 //                Log.d("GoService", "Disable fused provider error");
-//                log.debug("Disable fused provider error");
 //            }
 //        }
 //    }
 
-    //uuid random
+    // uuid random
     public static String getUUID() {
         return UUID.randomUUID().toString();
-    }
-
-    class TimeCount extends CountDownTimer {
-        public TimeCount(long millisInFuture, long countDownInterval) {
-            super(millisInFuture, countDownInterval);//参数依次为总时长,和计时的时间间隔
-        }
-
-        @Override
-        public void onFinish() {//计时完毕时触发
-            threadExecutor.submit(timeTask);
-            time.start();
-        }
-
-        @Override
-        public void onTick(long millisUntilFinished) { //计时过程显示
-
-        }
     }
 
     private class TimeTask implements Runnable {
@@ -511,7 +410,6 @@ public class GoService extends Service {
             if (i >= ntpServerPool.length) {
                 isLimit = true;
                 Log.d("GoService", "GoSntpClient is error");
-                log.debug("GoSntpClient is error");
             }
         }
     }
@@ -523,14 +421,12 @@ public class GoService extends Service {
             if (action != null) {
                 if (action.equals("ShowJoyStick")) {
                     Log.d("GoService", "ShowJoyStick");
-                    log.debug("ShowJoyStick");
                     mJoyStick.show();
                 }
 
                 if (action.equals("HideJoyStick")) {
                     mJoyStick.hide();
                     Log.d("GoService", "HideJoyStick");
-                    log.debug("HideJoyStick");
                 }
             }
         }

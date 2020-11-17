@@ -200,11 +200,9 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(layout.activity_main);
 
         Toolbar toolbar = findViewById(id.toolbar);
-
         setSupportActionBar(toolbar);
 
         try {
@@ -592,68 +590,64 @@ public class MainActivity extends BaseActivity
     public boolean isAllowMockLocation() {
         boolean canMockPosition;
 
-        if (Build.VERSION.SDK_INT <= 22) {//6.0以下
-            canMockPosition = Settings.Secure.getInt(this.getContentResolver(), Settings.Secure.ALLOW_MOCK_LOCATION, 0) != 0;
-        } else {
+        try {
+            LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);//获得LocationManager引用
+            String providerStr = LocationManager.GPS_PROVIDER;
+            LocationProvider provider = locationManager.getProvider(providerStr);
+
+            // 为防止在已有testProvider的情况下导致addTestProvider抛出异常，先移除testProvider
             try {
-                LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);//获得LocationManager引用
-                String providerStr = LocationManager.GPS_PROVIDER;
-                LocationProvider provider = locationManager.getProvider(providerStr);
-
-                // 为防止在已有testProvider的情况下导致addTestProvider抛出异常，先移除testProvider
-                try {
-                    locationManager.removeTestProvider(providerStr);
-                    Log.d("PERMISSION", "try to move test provider");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Log.e("PERMISSION", "try to move test provider");
-                }
-
-                if (provider != null) {
-                    try {
-                        locationManager.addTestProvider(
-                                provider.getName()
-                                , provider.requiresNetwork()
-                                , provider.requiresSatellite()
-                                , provider.requiresCell()
-                                , provider.hasMonetaryCost()
-                                , provider.supportsAltitude()
-                                , provider.supportsSpeed()
-                                , provider.supportsBearing()
-                                , provider.getPowerRequirement()
-                                , provider.getAccuracy());
-                        canMockPosition = true;
-                    } catch (Exception e) {
-                        Log.e("FUCK", "add origin gps test provider error");
-                        canMockPosition = false;
-                        e.printStackTrace();
-                    }
-                } else {
-                    try {
-                        locationManager.addTestProvider(
-                                providerStr
-                                , true, true, false, false, true, true, true
-                                , Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
-                        canMockPosition = true;
-                    } catch (Exception e) {
-                        Log.e("FUCK", "add gps test provider error");
-                        canMockPosition = false;
-                        e.printStackTrace();
-                    }
-                }
-
-                // 模拟位置可用
-                if (canMockPosition) {
-                    locationManager.setTestProviderEnabled(providerStr, true);
-                    locationManager.setTestProviderStatus(providerStr, LocationProvider.AVAILABLE, null, System.currentTimeMillis());
-                    //remove test provider
-                    locationManager.setTestProviderEnabled(providerStr, false);
-                    locationManager.removeTestProvider(providerStr);
-                }
-            } catch (SecurityException e) {
-                canMockPosition = false;
+                locationManager.removeTestProvider(providerStr);
+                Log.d("PERMISSION", "try to move test provider");
+            } catch (Exception e) {
                 e.printStackTrace();
+                Log.e("PERMISSION", "try to move test provider");
             }
+
+            if (provider != null) {
+                try {
+                    locationManager.addTestProvider(
+                            provider.getName()
+                            , provider.requiresNetwork()
+                            , provider.requiresSatellite()
+                            , provider.requiresCell()
+                            , provider.hasMonetaryCost()
+                            , provider.supportsAltitude()
+                            , provider.supportsSpeed()
+                            , provider.supportsBearing()
+                            , provider.getPowerRequirement()
+                            , provider.getAccuracy());
+                    canMockPosition = true;
+                } catch (Exception e) {
+                    Log.e("FUCK", "add origin gps test provider error");
+                    canMockPosition = false;
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    locationManager.addTestProvider(
+                            providerStr
+                            , true, true, false, false, true, true, true
+                            , Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
+                    canMockPosition = true;
+                } catch (Exception e) {
+                    Log.e("FUCK", "add gps test provider error");
+                    canMockPosition = false;
+                    e.printStackTrace();
+                }
+            }
+
+            // 模拟位置可用
+            if (canMockPosition) {
+                locationManager.setTestProviderEnabled(providerStr, true);
+                locationManager.setTestProviderStatus(providerStr, LocationProvider.AVAILABLE, null, System.currentTimeMillis());
+                //remove test provider
+                locationManager.setTestProviderEnabled(providerStr, false);
+                locationManager.removeTestProvider(providerStr);
+            }
+        } catch (SecurityException e) {
+            canMockPosition = false;
+            e.printStackTrace();
         }
 
         return canMockPosition;
@@ -670,10 +664,9 @@ public class MainActivity extends BaseActivity
     //WIFI是否可用
     private boolean isWifiConnected() {
         ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mWiFiNetworkInfo = mConnectivityManager
-                .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        NetworkInfo mWiFiNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
 
-        if (mWiFiNetworkInfo != null) {
+        if (mWiFiNetworkInfo != null && mWiFiNetworkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
             return mWiFiNetworkInfo.isAvailable();
         }
 
@@ -683,10 +676,9 @@ public class MainActivity extends BaseActivity
     //MOBILE网络是否可用
     private boolean isMobileConnected() {
         ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mMobileNetworkInfo = mConnectivityManager
-                .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        NetworkInfo mMobileNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
 
-        if (mMobileNetworkInfo != null) {
+        if (mMobileNetworkInfo != null && mMobileNetworkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
             return mMobileNetworkInfo.isAvailable();
         }
 
@@ -699,7 +691,7 @@ public class MainActivity extends BaseActivity
         NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
 
         if (mNetworkInfo != null) {
-            return mNetworkInfo.isAvailable();
+            return mNetworkInfo.isConnected();
         }
 
         return false;
@@ -1691,7 +1683,7 @@ public class MainActivity extends BaseActivity
     private  void startGoLocation() {
         if (!isLimit && isNetworkAvailable()) {    // 时间限制
             //悬浮窗权限判断
-            if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(getApplicationContext())) {
+            if (!Settings.canDrawOverlays(getApplicationContext())) {
                 showEnableFloatWindowDialog();
             } else {
                 isGPSOpen = isGpsOpened();

@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 
@@ -154,47 +153,39 @@ public class WelcomeActivity extends BaseActivity {
     }
 
     private void requestNeedPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        // 定位精确位置
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ReqPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
 
-            // 定位精确位置
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ReqPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-            }
+        if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ReqPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+        }
 
-            if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ReqPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-            }
+        //悬浮窗
+        // if (checkSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
+        //     permissions.add(Manifest.permission.SYSTEM_ALERT_WINDOW);
+        // }
 
-            //悬浮窗
-            // if (checkSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
-            //     permissions.add(Manifest.permission.SYSTEM_ALERT_WINDOW);
-            // }
+        /*
+         * 读写权限和电话状态权限非必要权限(建议授予)只会申请一次，用户同意或者禁止，只会弹一次
+         */
+        // 读写权限
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ReqPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
 
-            /*
-             * 读写权限和电话状态权限非必要权限(建议授予)只会申请一次，用户同意或者禁止，只会弹一次
-             */
-            // 读写权限
-            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ReqPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            }
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ReqPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
 
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ReqPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            }
+        // 读取电话状态权限
+        if (checkSelfPermission( Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            ReqPermissions.add(Manifest.permission.READ_PHONE_STATE);
+        }
 
-            // 读取电话状态权限
-            if (checkSelfPermission( Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-                ReqPermissions.add(Manifest.permission.READ_PHONE_STATE);
-            }
-
-            if (ReqPermissions.size() > 0) {
-                requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
-            } else {
-                isPermission = true;
-                if (!isLimit) {
-                    time.start();
-                }
-            }
+        if (ReqPermissions.size() > 0) {
+            requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
         } else {
             isPermission = true;
             if (!isLimit) {
@@ -206,10 +197,9 @@ public class WelcomeActivity extends BaseActivity {
     //WIFI是否可用
     private boolean isWifiConnected() {
         ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mWiFiNetworkInfo = mConnectivityManager
-                .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        NetworkInfo mWiFiNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
 
-        if (mWiFiNetworkInfo != null) {
+        if (mWiFiNetworkInfo != null && mWiFiNetworkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
             return mWiFiNetworkInfo.isAvailable();
         }
 
@@ -219,10 +209,9 @@ public class WelcomeActivity extends BaseActivity {
     //MOBILE网络是否可用
     private boolean isMobileConnected() {
         ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mMobileNetworkInfo = mConnectivityManager
-                .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        NetworkInfo mMobileNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
 
-        if (mMobileNetworkInfo != null) {
+        if (mMobileNetworkInfo != null && mMobileNetworkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
             return mMobileNetworkInfo.isAvailable();
         }
 
@@ -235,7 +224,7 @@ public class WelcomeActivity extends BaseActivity {
         NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
 
         if (mNetworkInfo != null) {
-            return mNetworkInfo.isAvailable();
+            return mNetworkInfo.isConnected();
         }
 
         return false;

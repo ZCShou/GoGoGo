@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 29
     defaultConfig {
         applicationId "com.zcshou.gogogo"
-        minSdkVersion 21
-        targetSdkVersion 30
-        versionCode 108
-        versionName "1.0.8"
+        minSdkVersion 26
+        targetSdkVersion 29
+        versionCode 110
+        versionName "1.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     ndkVersion '21.3.6528147'

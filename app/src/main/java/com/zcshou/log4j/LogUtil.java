@@ -1,6 +1,7 @@
 package com.zcshou.log4j;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Locale;
 import java.text.SimpleDateFormat;
@@ -62,7 +63,7 @@ public class LogUtil {
     /**
      * 配置log4j参数
      */
-    public static void configLog() {
+    public static void configLog() throws IOException {
         LogConfig logConfig = new LogConfig();
         /** 设置Log等级，生产环境下调用setLogToProduce()，发布后调用setLogToRelease() **/
         setLogToProduce(logConfig);
