@@ -4,7 +4,7 @@ android {
     compileSdkVersion 29
     defaultConfig {
         applicationId "com.zcshou.gogogo"
-        minSdkVersion 26
+        minSdkVersion 24
         targetSdkVersion 29
         versionCode 110
         versionName "1.1.0"
@@ -54,5 +54,5 @@ dependencies {
     })
     implementation files('libs/BaiduLBS_Android.jar')
     implementation files('libs/log4j-1.2.17.jar')
-    implementation 'com.google.android.gms:play-services-ads:19.5.0'
+    implementation 'com.google.android.gms:play-services-ads:19.6.0'
 }
