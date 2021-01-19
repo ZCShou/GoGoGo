@@ -19,7 +19,6 @@ import android.location.LocationProvider;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -653,14 +652,6 @@ public class MainActivity extends BaseActivity
         return canMockPosition;
     }
 
-    //WIFI是否开启
-    public boolean isWiFiEnabled() {
-        Context context = this.getApplicationContext();
-        WifiManager wifiManager = (WifiManager) context
-                .getSystemService(Context.WIFI_SERVICE);
-        return wifiManager.isWifiEnabled();
-    }
-
     //WIFI是否可用
     private boolean isWifiConnected() {
         ConnectivityManager mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -768,27 +759,6 @@ public class MainActivity extends BaseActivity
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                                 startActivityForResult(intent, 0);
-                            }
-                        })
-                .setNegativeButton("取消",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        })
-                .show();
-    }
-
-    //显示开启 WIFI 的提示
-    private void showWifiWarningDialog() {
-        new AlertDialog.Builder(MainActivity.this)
-                .setTitle("警告")//这里是表头的内容
-                .setMessage("由于实现原理的限制，如果开启 WIFI 将导致位置频繁闪回真实位置，使用数据流量可完美解决闪回的问题")//这里是中间显示的具体信息
-                .setPositiveButton("继续",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                doGoLocation();
                             }
                         })
                 .setNegativeButton("取消",
@@ -1700,11 +1670,7 @@ public class MainActivity extends BaseActivity
                     if (!isAllowMockLocation()) {
                         showEnableMockLocationDialog();
                     } else {
-                        if (isWiFiEnabled()) {
-                            showWifiWarningDialog();
-                        } else {
-                            doGoLocation();
-                        }
+                        doGoLocation();
                     }
                 }
             }

@@ -6,8 +6,8 @@ android {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 24
         targetSdkVersion 29
-        versionCode 110
-        versionName "1.1.0"
+        versionCode 120
+        versionName '1.2.0'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     ndkVersion '21.3.6528147'
@@ -17,7 +17,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    buildToolsVersion '29.0.2'
+    buildToolsVersion '29.0.3'
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
