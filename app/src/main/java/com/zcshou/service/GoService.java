@@ -50,7 +50,7 @@ public class GoService extends Service {
     double mSpeed;
     // 限制检测
     private boolean isLimit = false;
-    private static final long mTS = 1638230402;
+    private static final long mTS = 1622419202;
     private TimeTask timeTask;
     private ExecutorService threadExecutor;
     // 通知栏消息

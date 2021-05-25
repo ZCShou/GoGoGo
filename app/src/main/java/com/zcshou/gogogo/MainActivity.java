@@ -130,7 +130,7 @@ public class MainActivity extends BaseActivity
     private boolean isGPSOpen = false;
     private boolean isFirstLoc = true; // 是否首次定位
 
-    private static final long mTS = 1638230400;
+    private static final long mTS = 1622419200;
 
     //位置历史
     private SQLiteDatabase locHistoryDB;
