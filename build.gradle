@@ -9,11 +9,9 @@ buildscript {
         maven {
             url 'https://maven.aliyun.com/repository/google'
         }
-        google()
-        jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.2'
+        classpath 'com.android.tools.build:gradle:4.2.1'
         
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -32,8 +30,6 @@ allprojects {
         maven {
             url 'https://maven.aliyun.com/repository/google'
         }
-        google()
-        jcenter()
     }
 //    gradle.projectsEvaluated {
 //        tasks.withType(JavaCompile) { // 用于显示过时 API 的详细信息
