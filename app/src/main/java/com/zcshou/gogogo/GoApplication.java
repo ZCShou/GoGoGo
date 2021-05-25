@@ -7,9 +7,6 @@ import android.os.Vibrator;
 
 import com.baidu.mapapi.SDKInitializer;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
-
 
 @SuppressLint("Registered")
 public class GoApplication extends Application {

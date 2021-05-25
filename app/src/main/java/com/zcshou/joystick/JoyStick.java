@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
-import android.os.Build;
 import android.os.CountDownTimer;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -23,7 +22,7 @@ import com.zcshou.gogogo.R;
 
 public class JoyStick extends View {
 
-    private Context mContext;
+    final private Context mContext;
     private WindowManager.LayoutParams mWindowParams;
     private WindowManager mWindowManager;
     private final LayoutInflater inflater;
@@ -107,13 +106,7 @@ public class JoyStick extends View {
     private void initWindowManager() {
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mWindowParams = new WindowManager.LayoutParams();
-
-        if (Build.VERSION.SDK_INT >= 26) {//8.0新特性
-            mWindowParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        } else {
-            mWindowParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
-        }
-
+        mWindowParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         mWindowParams.format = PixelFormat.RGBA_8888;
         mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         mWindowParams.gravity = Gravity.START | Gravity.TOP;
@@ -139,113 +132,97 @@ public class JoyStick extends View {
         mJoystickView.setOnTouchListener(new JoyStickOnTouchListener());
 
         btnInput = mJoystickView.findViewById(R.id.joystick_input);
-        btnInput.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mJoystickView != null) {
-                    mWindowManager.removeView(mJoystickView);
-                }
+        btnInput.setOnClickListener(v -> {
+            if (mJoystickView != null) {
+                mWindowManager.removeView(mJoystickView);
+            }
 
-                if (mLatLngView.getParent() == null) {
-                    mWindowParams.format = PixelFormat.RGBA_8888;
-                    mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                    mWindowParams.gravity = Gravity.START | Gravity.TOP;
-                    mWindowParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-                    mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                    mWindowParams.x = 300;
-                    mWindowParams.y = 300;
-                    mWindowManager.addView(mLatLngView, mWindowParams);
-                }
+            if (mLatLngView.getParent() == null) {
+                mWindowParams.format = PixelFormat.RGBA_8888;
+                mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                mWindowParams.gravity = Gravity.START | Gravity.TOP;
+                mWindowParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+                mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                mWindowParams.x = 300;
+                mWindowParams.y = 300;
+                mWindowManager.addView(mLatLngView, mWindowParams);
             }
         });
 
         isWalk = true;
         btnWalk = mJoystickView.findViewById(R.id.joystick_walk);
-        btnWalk.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!isWalk) {
-                    btnWalk.setImageResource(R.drawable.ic_walk_pressed);
-                    isWalk = true;
-                    btnRun.setImageResource(R.drawable.ic_run);
-                    isRun = false;
-                    btnBike.setImageResource(R.drawable.ic_bike);
-                    isBike = false;
-                    String sSpeed = sharedPreferences.getString("setting_walk", "");
-                    if (sSpeed == null) {
-                        mSpeed = Double.parseDouble(getResources().getString(R.string.setting_walk_default));
-                    } else {
-                        mSpeed = Double.parseDouble(sSpeed);
-                    }
-                    mListener.setCurrentSpeed(mSpeed);
+        btnWalk.setOnClickListener(v -> {
+            if (!isWalk) {
+                btnWalk.setImageResource(R.drawable.ic_walk_pressed);
+                isWalk = true;
+                btnRun.setImageResource(R.drawable.ic_run);
+                isRun = false;
+                btnBike.setImageResource(R.drawable.ic_bike);
+                isBike = false;
+                String sSpeed1 = sharedPreferences.getString("setting_walk", "");
+                if (sSpeed1 == null) {
+                    mSpeed = Double.parseDouble(getResources().getString(R.string.setting_walk_default));
+                } else {
+                    mSpeed = Double.parseDouble(sSpeed1);
                 }
+                mListener.setCurrentSpeed(mSpeed);
             }
         });
 
         isRun = false;
         btnRun = mJoystickView.findViewById(R.id.joystick_run);
-        btnRun.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!isRun) {
-                    btnRun.setImageResource(R.drawable.ic_run_pressed);
-                    isRun = true;
-                    btnWalk.setImageResource(R.drawable.ic_walk);
-                    isWalk = false;
-                    btnBike.setImageResource(R.drawable.ic_bike);
-                    isBike = false;
-                    String sSpeed = sharedPreferences.getString("setting_run", "");
-                    if (sSpeed == null) {
-                        mSpeed = Double.parseDouble(getResources().getString(R.string.setting_run_default));
-                    } else {
-                        mSpeed = Double.parseDouble(sSpeed);
-                    }
-                    mListener.setCurrentSpeed(mSpeed);
+        btnRun.setOnClickListener(v -> {
+            if (!isRun) {
+                btnRun.setImageResource(R.drawable.ic_run_pressed);
+                isRun = true;
+                btnWalk.setImageResource(R.drawable.ic_walk);
+                isWalk = false;
+                btnBike.setImageResource(R.drawable.ic_bike);
+                isBike = false;
+                String sSpeed12 = sharedPreferences.getString("setting_run", "");
+                if (sSpeed12 == null) {
+                    mSpeed = Double.parseDouble(getResources().getString(R.string.setting_run_default));
+                } else {
+                    mSpeed = Double.parseDouble(sSpeed12);
                 }
+                mListener.setCurrentSpeed(mSpeed);
             }
         });
 
         isBike = false;
         btnBike = mJoystickView.findViewById(R.id.joystick_bike);
-        btnBike.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!isBike) {
-                    btnBike.setImageResource(R.drawable.ic_bike_pressed);
-                    isBike = true;
-                    btnWalk.setImageResource(R.drawable.ic_walk);
-                    isWalk = false;
-                    btnRun.setImageResource(R.drawable.ic_run);
-                    isRun = false;
-                    String sSpeed = sharedPreferences.getString("setting_bike", "");
-                    if (sSpeed == null) {
-                        mSpeed = Double.parseDouble(getResources().getString(R.string.setting_bike_default));
-                    } else {
-                        mSpeed = Double.parseDouble(sSpeed);
-                    }
-                    mListener.setCurrentSpeed(mSpeed);
+        btnBike.setOnClickListener(v -> {
+            if (!isBike) {
+                btnBike.setImageResource(R.drawable.ic_bike_pressed);
+                isBike = true;
+                btnWalk.setImageResource(R.drawable.ic_walk);
+                isWalk = false;
+                btnRun.setImageResource(R.drawable.ic_run);
+                isRun = false;
+                String sSpeed13 = sharedPreferences.getString("setting_bike", "");
+                if (sSpeed13 == null) {
+                    mSpeed = Double.parseDouble(getResources().getString(R.string.setting_bike_default));
+                } else {
+                    mSpeed = Double.parseDouble(sSpeed13);
                 }
+                mListener.setCurrentSpeed(mSpeed);
             }
         });
 
         ButtonView btnView = mJoystickView.findViewById(R.id.joystick_view);
-        btnView.setListener(new ButtonView.ButtonViewClickListener() {
-            @Override
-            public void clickAngleInfo(Boolean auto, double angle, double r) {
-                if (r <= 0) {
-                    time.cancel();
+        btnView.setListener((auto, angle, r) -> {
+            if (r <= 0) {
+                time.cancel();
+            } else {
+                mAngle = angle;
+                mSpeed = mSpeed * r;
+                if (auto) {
+                    time.start();
                 } else {
-                    mAngle = angle;
-                    mSpeed = mSpeed * r;
-                    if (auto) {
-                        time.start();
-                    } else {
-                        time.cancel();
-                        mListener.clickAngleInfo(mAngle, mSpeed);
-                    }
+                    time.cancel();
+                    mListener.clickAngleInfo(mAngle, mSpeed);
                 }
             }
-
         });
     }
 
@@ -256,46 +233,40 @@ public class JoyStick extends View {
 
 
         Button btnOk = mLatLngView.findViewById(R.id.joystick_latlng_ok);
-        btnOk.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mLatLngView.getParent() != null) {
-                    mWindowManager.removeView(mLatLngView);
-                }
-
-                if (mJoystickView.getParent() == null) {
-                    mWindowParams.format = PixelFormat.RGBA_8888;
-                    mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                    mWindowParams.gravity = Gravity.START | Gravity.TOP;
-                    mWindowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-                    mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                    mWindowParams.x = 300;
-                    mWindowParams.y = 300;
-
-                    mWindowManager.addView(mJoystickView, mWindowParams);
-                }
-
+        btnOk.setOnClickListener(v -> {
+            if (mLatLngView.getParent() != null) {
+                mWindowManager.removeView(mLatLngView);
             }
+
+            if (mJoystickView.getParent() == null) {
+                mWindowParams.format = PixelFormat.RGBA_8888;
+                mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                mWindowParams.gravity = Gravity.START | Gravity.TOP;
+                mWindowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
+                mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                mWindowParams.x = 300;
+                mWindowParams.y = 300;
+
+                mWindowManager.addView(mJoystickView, mWindowParams);
+            }
+
         });
         Button btnCancel = mLatLngView.findViewById(R.id.joystick_latlng_cancel);
-        btnCancel.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mLatLngView.getParent() != null) {
-                    mWindowManager.removeView(mLatLngView);
-                }
+        btnCancel.setOnClickListener(v -> {
+            if (mLatLngView.getParent() != null) {
+                mWindowManager.removeView(mLatLngView);
+            }
 
-                if (mJoystickView.getParent() == null) {
-                    mWindowParams.format = PixelFormat.RGBA_8888;
-                    mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                    mWindowParams.gravity = Gravity.START | Gravity.TOP;
-                    mWindowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-                    mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                    mWindowParams.x = 300;
-                    mWindowParams.y = 300;
+            if (mJoystickView.getParent() == null) {
+                mWindowParams.format = PixelFormat.RGBA_8888;
+                mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+                mWindowParams.gravity = Gravity.START | Gravity.TOP;
+                mWindowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
+                mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                mWindowParams.x = 300;
+                mWindowParams.y = 300;
 
-                    mWindowManager.addView(mJoystickView, mWindowParams);
-                }
+                mWindowManager.addView(mJoystickView, mWindowParams);
             }
         });
 

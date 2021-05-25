@@ -133,34 +133,21 @@ public class GoService extends Service {
         Intent hideIntent = new Intent("HideJoyStick");
         PendingIntent hidePendingPI = PendingIntent.getBroadcast(this, 0, hideIntent, PendingIntent.FLAG_CANCEL_CURRENT );
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel mChannel = new NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_LOW);
-            Log.i("GoService", mChannel.toString());
+        NotificationChannel mChannel = new NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_LOW);
+        Log.i("GoService", mChannel.toString());
 
-            if (notificationManager != null) {
-                notificationManager.createNotificationChannel(mChannel);
-            }
-
-            notification = new NotificationCompat.Builder(this, channelId)
-                    .setChannelId(channelId)
-                    .setContentTitle(getResources().getString(R.string.app_name))
-                    .setContentText(getResources().getString(R.string.app_service))
-                    .setContentIntent(clickPI)
-                    .addAction(new NotificationCompat.Action(null, "显示摇杆", showPendingPI))
-                    .addAction(new NotificationCompat.Action(null, "隐藏摇杆", hidePendingPI))
-                    .setSmallIcon(R.mipmap.ic_launcher).build();
-        } else {
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "M_CH_ID")
-                    .setContentTitle(getResources().getString(R.string.app_name))
-                    .setContentText(getResources().getString(R.string.app_service))
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentIntent(clickPI)
-                    .addAction(new NotificationCompat.Action(null, "显示摇杆", showPendingPI))
-                    .addAction(new NotificationCompat.Action(null, "隐藏摇杆", hidePendingPI))
-                    .setOngoing(true)
-                    .setChannelId(channelId);//无效
-            notification = notificationBuilder.build();
+        if (notificationManager != null) {
+            notificationManager.createNotificationChannel(mChannel);
         }
+
+        notification = new NotificationCompat.Builder(this, channelId)
+                .setChannelId(channelId)
+                .setContentTitle(getResources().getString(R.string.app_name))
+                .setContentText(getResources().getString(R.string.app_service))
+                .setContentIntent(clickPI)
+                .addAction(new NotificationCompat.Action(null, "显示摇杆", showPendingPI))
+                .addAction(new NotificationCompat.Action(null, "隐藏摇杆", hidePendingPI))
+                .setSmallIcon(R.mipmap.ic_launcher).build();
 
         startForeground(1, notification);
 
