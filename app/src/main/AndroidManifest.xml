@@ -76,7 +76,7 @@
             android:enabled="true"
             android:process=":remote" />
 
-        <service android:name="com.zcshou.service.GoService" />
+        <service android:name="com.zcshou.service.ServiceGo" />
 
         <activity
             android:name=".WelcomeActivity"
@@ -107,7 +107,7 @@
             android:screenOrientation="portrait"/>
 
         <receiver
-            android:name=".MainActivity$GoServiceReceiver"
+            android:name=".MainActivity$ServiceGoReceiver"
             tools:ignore="Instantiatable" />
 
     </application>

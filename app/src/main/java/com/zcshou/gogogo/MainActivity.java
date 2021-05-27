@@ -108,7 +108,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.zcshou.log4j.LogUtil;
-import com.zcshou.service.GoService;
+import com.zcshou.service.ServiceGo;
 import com.zcshou.database.HistoryLocationDataBaseHelper;
 import com.zcshou.database.HistorySearchDataBaseHelper;
 import com.zcshou.service.GoSntpClient;
@@ -119,8 +119,6 @@ import static com.zcshou.gogogo.R.drawable;
 import static com.zcshou.gogogo.R.id;
 import static com.zcshou.gogogo.R.layout;
 import static com.zcshou.gogogo.R.string;
-import static com.zcshou.service.GoService.RunCode;
-import static com.zcshou.service.GoService.StopCode;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, SensorEventListener {
@@ -240,12 +238,12 @@ public class MainActivity extends BaseActivity
         //http init
         mRequestQueue = Volley.newRequestQueue(this);
 
-        //注册GoService广播接收器
+        //注册ServiceGo广播接收器
         try {
-            MainActivity.GoServiceReceiver GoServiceReceiver = new GoServiceReceiver();
+            ServiceGoReceiver ServiceGoReceiver = new ServiceGoReceiver();
             IntentFilter filter = new IntentFilter();
-            filter.addAction("com.zcshou.service.GoService");
-            this.registerReceiver(GoServiceReceiver, filter);
+            filter.addAction(ServiceGo.SERVICE_NAME);
+            this.registerReceiver(ServiceGoReceiver, filter);
         } catch (Exception e) {
             Log.e("UNKNOWN", "registerReceiver error");
             e.printStackTrace();
@@ -346,7 +344,7 @@ public class MainActivity extends BaseActivity
         Log.d("MainActivity", "onDestroy");
 
         if (isMockServStart) {
-            Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
+            Intent mockLocServiceIntent = new Intent(MainActivity.this, ServiceGo.class);
             stopService(mockLocServiceIntent);
         }
 
@@ -1618,7 +1616,7 @@ public class MainActivity extends BaseActivity
             markSelectedPosition();
 
             //start mock location service
-            Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
+            Intent mockLocServiceIntent = new Intent(MainActivity.this, ServiceGo.class);
             mockLocServiceIntent.putExtra("CurLatLng", curLatLng);
 
             //save record
@@ -1627,12 +1625,12 @@ public class MainActivity extends BaseActivity
             //insert end
             if (Build.VERSION.SDK_INT >= 26) {
                 startForegroundService(mockLocServiceIntent);
-                Log.d("DEBUG", "startForegroundService: GoService");
-                log.debug("startForegroundService: GoService");
+                Log.d("DEBUG", "startForegroundService: ServiceGo");
+                log.debug("startForegroundService: ServiceGo");
             } else {
                 startService(mockLocServiceIntent);
-                Log.d("DEBUG", "startService: GoService");
-                log.debug("startService: GoService");
+                Log.d("DEBUG", "startService: ServiceGo");
+                log.debug("startService: ServiceGo");
             }
 
             isMockServStart = true;
@@ -1680,7 +1678,7 @@ public class MainActivity extends BaseActivity
     private void stopGoLocation() {
         if (isMockServStart) {
             //end mock location
-            Intent mockLocServiceIntent = new Intent(MainActivity.this, GoService.class);
+            Intent mockLocServiceIntent = new Intent(MainActivity.this, ServiceGo.class);
             stopService(mockLocServiceIntent);
 //            Snackbar.make(v, "位置模拟服务终止", Snackbar.LENGTH_LONG)
 //                    .setAction("Action", null).show();
@@ -1985,7 +1983,7 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    public class GoServiceReceiver extends BroadcastReceiver {
+    public class ServiceGoReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             int StatusRun;
@@ -1993,11 +1991,11 @@ public class MainActivity extends BaseActivity
             Bundle bundle = intent.getExtras();
             assert bundle != null;
 
-            StatusRun = bundle.getInt("StatusRun");
+            StatusRun = bundle.getInt(ServiceGo.SERVICE_STATUS);
 
-            if (StatusRun == RunCode) {
+            if (StatusRun == ServiceGo.SERVICE_GO_RUNNING) {
                 isServiceRun = true;
-            } else if (StatusRun == StopCode) {
+            } else if (StatusRun == ServiceGo.SERVICE_GO_STOPPED) {
                 isServiceRun = false;
             }
         }
