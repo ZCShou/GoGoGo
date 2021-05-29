@@ -19,11 +19,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.Process;
 import android.os.SystemClock;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import com.baidu.mapapi.model.LatLng;
@@ -31,7 +29,7 @@ import com.zcshou.gogogo.MainActivity;
 import com.zcshou.joystick.JoyStick;
 import com.zcshou.gogogo.R;
 
-//import android.annotation.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -51,9 +49,9 @@ public class ServiceGo extends Service {
 
     private boolean isStop = true;  // 是否启动了模拟位置
     private String curLatLng = "117.027707&36.667662";// 模拟位置的经纬度字符串
-
     // 摇杆相关
     private JoyStick mJoyStick;
+    private boolean isJoyStick = false;
     double mSpeed;
     // 限制检测
     private boolean isLimit = false;
@@ -82,13 +80,13 @@ public class ServiceGo extends Service {
         addTestProviderGPS();
 
         // 创建 HandlerThread 实例，第一个参数是线程的名字
-        handlerThread = new HandlerThread(getUUID(), Process.THREAD_PRIORITY_FOREGROUND);
+        handlerThread = new HandlerThread(getUUID(), -2);
         // 启动 HandlerThread 线程
         handlerThread.start();
         // Handler 对象与 HandlerThread 的 Looper 对象的绑定
         handler = new Handler(handlerThread.getLooper()) {
             // 这里的Handler对象可以看作是绑定在HandlerThread子线程中，所以handlerMessage里的操作是在子线程中运行的
-            public void handleMessage(@NonNull Message msg) {
+            public void handleMessage(@NotNull Message msg) {
                 try {
                     Thread.sleep(80);
 
@@ -121,40 +119,6 @@ public class ServiceGo extends Service {
         filter.addAction("ShowJoyStick");
         filter.addAction("HideJoyStick");
         registerReceiver(acReceiver, filter);
-
-        mJoyStick = new JoyStick(this);
-        mJoyStick.setListener(new JoyStick.JoyStickClickListener() {
-            @Override
-            public void clickAngleInfo(double angle, double speed) {
-                mSpeed = speed * 3.6;   // 转换为 km/h, 1米/秒(m/s)=3.6千米/时(km/h)
-                if (!isLimit) {
-                    // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）
-                    double x = Math.cos(angle * 2 * Math.PI / 360);   // 注意安卓使用的是弧度
-                    double y = Math.sin(angle * 2 * Math.PI / 360);   // 注意安卓使用的是弧度
-
-                    // 根据当前的经纬度和距离，计算下一个经纬度
-                    // Latitude: 1 deg = 110.574 km // 纬度的每度的距离大约为 110.574km
-                    // Longitude: 1 deg = 111.320*cos(latitude) km  // 经度的每度的距离从0km到111km不等
-                    // 具体见：http://wp.mlab.tw/?p=2200
-
-                    String[] latLngStr = curLatLng.split("&");
-
-                    double lngDegree = mSpeed * x / (111.320 * Math.cos(Math.abs(Double.parseDouble(latLngStr[1])) * Math.PI / 180));
-                    double latDegree = mSpeed * y / 110.574;
-
-                    double lng = Double.parseDouble(latLngStr[0]) + lngDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
-                    double lat = Double.parseDouble(latLngStr[1]) + latDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
-                    curLatLng = lng + "&" + lat;
-                } else {
-                    Log.d("ServiceGo", "isLimit ");
-                }
-            }
-
-            @Override
-            public void setCurrentSpeed(double speed) {
-                mSpeed = speed * 3.6;   // 转换为 km/h, 1米/秒(m/s)=3.6千米/时(km/h)
-            }
-        });
     }
 
     @Override
@@ -197,7 +161,44 @@ public class ServiceGo extends Service {
         Log.d("ServiceGo", "LatLng from Main is " + curLatLng);
 
         isStop = false;
-        mJoyStick.show();
+        // 开启摇杆
+        if (!isJoyStick) {
+            mJoyStick = new JoyStick(this);
+            mJoyStick.setListener(new JoyStick.JoyStickClickListener() {
+                @Override
+                public void clickAngleInfo(double angle, double speed) {
+                    mSpeed = speed * 3.6;   // 转换为 km/h, 1米/秒(m/s)=3.6千米/时(km/h)
+                    if (!isLimit) {
+                        // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）
+                        double x = Math.cos(angle * 2 * Math.PI / 360);   // 注意安卓使用的是弧度
+                        double y = Math.sin(angle * 2 * Math.PI / 360);   // 注意安卓使用的是弧度
+
+                        // 根据当前的经纬度和距离，计算下一个经纬度
+                        // Latitude: 1 deg = 110.574 km // 纬度的每度的距离大约为 110.574km
+                        // Longitude: 1 deg = 111.320*cos(latitude) km  // 经度的每度的距离从0km到111km不等
+                        // 具体见：http://wp.mlab.tw/?p=2200
+
+                        String[] latLngStr = curLatLng.split("&");
+
+                        double lngDegree = mSpeed * x / (111.320 * Math.cos(Math.abs(Double.parseDouble(latLngStr[1])) * Math.PI / 180));
+                        double latDegree = mSpeed * y / 110.574;
+
+                        double lng = Double.parseDouble(latLngStr[0]) + lngDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
+                        double lat = Double.parseDouble(latLngStr[1]) + latDegree / 1000;   // 为啥 / 1000 ? 按照速度算下来，这里偏大
+                        curLatLng = lng + "&" + lat;
+                    } else {
+                        Log.d("ServiceGo", "isLimit ");
+                    }
+                }
+
+                @Override
+                public void setCurrentSpeed(double speed) {
+                    mSpeed = speed * 3.6;   // 转换为 km/h, 1米/秒(m/s)=3.6千米/时(km/h)
+                }
+            });
+            mJoyStick.show();
+            isJoyStick = true;
+        }
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -206,6 +207,8 @@ public class ServiceGo extends Service {
     public void onDestroy() {
         Log.d("ServiceGo", "onDestroy");
         isStop = true;
+        mJoyStick.hide();
+        isJoyStick = false;
 
         handler.removeMessages(HANDLER_MSG_ID);
         handlerThread.quit();
@@ -290,14 +293,24 @@ public class ServiceGo extends Service {
             locationManager.addTestProvider(LocationManager.NETWORK_PROVIDER, true, false,
                     false, false, true, false,
                     true, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
-            if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                locationManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
-            }
         } catch (SecurityException e) {
             e.printStackTrace();
             Log.d("ServiceGo", "ERROR:addTestProviderNetwork");
         }
 
+        if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            try {
+                locationManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d("ServiceGo", "setTestProviderEnabled[NETWORK_PROVIDER] error");
+            }
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            // 根据 google 的文档，API 29 此方法无效。
+            locationManager.setTestProviderStatus(LocationManager.NETWORK_PROVIDER, LocationProvider.AVAILABLE, null,
+                    System.currentTimeMillis());
+        }
     }
 
     private void removeTestProviderGPS() {
@@ -317,12 +330,24 @@ public class ServiceGo extends Service {
         try {
             locationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, true,
                     false, true, false, true, Criteria.POWER_HIGH, Criteria.ACCURACY_MEDIUM);
-            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
-            }
         } catch (Exception e) {
             e.printStackTrace();
             Log.d("ServiceGo", "ERROR:addTestProviderGPS");
+        }
+
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            try {
+                locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d("ServiceGo", "setTestProviderEnabled[GPS_PROVIDER] error");
+            }
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            // 根据 google 的文档，API 29 此方法无效。
+            locationManager.setTestProviderStatus(LocationManager.GPS_PROVIDER, LocationProvider.AVAILABLE, null,
+                    System.currentTimeMillis());
         }
     }
 
