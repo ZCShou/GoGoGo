@@ -37,5 +37,4 @@ public class SettingsActivity extends BaseActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
 }

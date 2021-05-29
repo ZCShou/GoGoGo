@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    xmlns:ads="http://schemas.android.com/apk/res-auto"
     tools:context=".MainActivity"
     tools:showIn="@layout/app_bar_main">
 
@@ -115,14 +114,5 @@
             android:textSize="10sp"
             android:text="@string/app_statement"
             tools:ignore="SmallSp" />
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/ad_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:gravity="center_horizontal|center_vertical"
-            ads:adSize="BANNER"
-            ads:adUnitId="@string/ad_unit_id_main_banner" />
-
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -60,7 +60,7 @@
             android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/map_home"
-            android:src="@drawable/ic_lock_open"
+            android:src="@drawable/ic_lock_close"
             android:theme="@style/RippleWhite" />
 
         <ImageButton

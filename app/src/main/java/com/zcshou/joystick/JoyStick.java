@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.CountDownTimer;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -21,8 +20,9 @@ import androidx.preference.PreferenceManager;
 import com.zcshou.gogogo.R;
 
 public class JoyStick extends View {
-
+    private static final int DivGo = 1000;    /* 移动的时间间隔，单位 ms */
     final private Context mContext;
+
     private WindowManager.LayoutParams mWindowParams;
     private WindowManager mWindowManager;
     private final LayoutInflater inflater;
@@ -40,8 +40,11 @@ public class JoyStick extends View {
 
     // 移动
     private TimeCount time;
-    double mAngle;
-    double mSpeed;
+    double mSpeed = 1.2;        /* 默认的速度，单位 m/s */
+    double mAngle = 0;
+    double mR = 0;
+    double disLng = 0;
+    double disLat = 0;
     SharedPreferences sharedPreferences;
 
     public JoyStick(Context context) {
@@ -114,23 +117,19 @@ public class JoyStick extends View {
         mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
         mWindowParams.x = 300;
         mWindowParams.y = 300;
-
-        Log.d("FLOAT", "initFloatWindow finish");
     }
 
     @SuppressLint("InflateParams")
     private void initJoyStickView() {
-        time = new TimeCount(1000, 1000);
-        String sSpeed = sharedPreferences.getString("setting_walk", "");
-        if (sSpeed == null) {
-            mSpeed = Double.parseDouble(getResources().getString(R.string.setting_walk_default));
-        } else {
-            mSpeed = Double.parseDouble(sSpeed);
-        }
+        /* 移动计时器 */
+        time = new TimeCount(DivGo, DivGo);
+        // 获取参数区设置的速度
+        mSpeed = Double.parseDouble(sharedPreferences.getString("setting_walk", getResources().getString(R.string.setting_walk_default)));
 
         mJoystickView = inflater.inflate(R.layout.joystick, null);
+        /* 整个摇杆拖动事件处理 */
         mJoystickView.setOnTouchListener(new JoyStickOnTouchListener());
-
+        /* 输入按钮点击事件处理 */
         btnInput = mJoystickView.findViewById(R.id.joystick_input);
         btnInput.setOnClickListener(v -> {
             if (mJoystickView != null) {
@@ -148,7 +147,7 @@ public class JoyStick extends View {
                 mWindowManager.addView(mLatLngView, mWindowParams);
             }
         });
-
+        /* 步行按键的点击处理 */
         isWalk = true;
         btnWalk = mJoystickView.findViewById(R.id.joystick_walk);
         btnWalk.setOnClickListener(v -> {
@@ -159,16 +158,10 @@ public class JoyStick extends View {
                 isRun = false;
                 btnBike.setImageResource(R.drawable.ic_bike);
                 isBike = false;
-                String sSpeed1 = sharedPreferences.getString("setting_walk", "");
-                if (sSpeed1 == null) {
-                    mSpeed = Double.parseDouble(getResources().getString(R.string.setting_walk_default));
-                } else {
-                    mSpeed = Double.parseDouble(sSpeed1);
-                }
-                mListener.setCurrentSpeed(mSpeed);
+                mSpeed = Double.parseDouble(sharedPreferences.getString("setting_walk", getResources().getString(R.string.setting_walk_default)));
             }
         });
-
+        /* 跑步按键的点击处理 */
         isRun = false;
         btnRun = mJoystickView.findViewById(R.id.joystick_run);
         btnRun.setOnClickListener(v -> {
@@ -179,16 +172,10 @@ public class JoyStick extends View {
                 isWalk = false;
                 btnBike.setImageResource(R.drawable.ic_bike);
                 isBike = false;
-                String sSpeed12 = sharedPreferences.getString("setting_run", "");
-                if (sSpeed12 == null) {
-                    mSpeed = Double.parseDouble(getResources().getString(R.string.setting_run_default));
-                } else {
-                    mSpeed = Double.parseDouble(sSpeed12);
-                }
-                mListener.setCurrentSpeed(mSpeed);
+                mSpeed = Double.parseDouble(sharedPreferences.getString("setting_run", getResources().getString(R.string.setting_run_default)));
             }
         });
-
+        /* 自行车按键的点击处理 */
         isBike = false;
         btnBike = mJoystickView.findViewById(R.id.joystick_bike);
         btnBike.setOnClickListener(v -> {
@@ -199,28 +186,25 @@ public class JoyStick extends View {
                 isWalk = false;
                 btnRun.setImageResource(R.drawable.ic_run);
                 isRun = false;
-                String sSpeed13 = sharedPreferences.getString("setting_bike", "");
-                if (sSpeed13 == null) {
-                    mSpeed = Double.parseDouble(getResources().getString(R.string.setting_bike_default));
-                } else {
-                    mSpeed = Double.parseDouble(sSpeed13);
-                }
-                mListener.setCurrentSpeed(mSpeed);
+                mSpeed = Double.parseDouble(sharedPreferences.getString("setting_bike", getResources().getString(R.string.setting_bike_default)));
             }
         });
-
+        /* 方向键点击处理 */
         ButtonView btnView = mJoystickView.findViewById(R.id.joystick_view);
         btnView.setListener((auto, angle, r) -> {
             if (r <= 0) {
                 time.cancel();
             } else {
                 mAngle = angle;
-                mSpeed = mSpeed * r;
+                mR = r;
                 if (auto) {
                     time.start();
                 } else {
                     time.cancel();
-                    mListener.clickAngleInfo(mAngle, mSpeed);
+                    // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）且转换为 km
+                    disLng = mSpeed * (double)(DivGo / 1000) * mR * Math.cos(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
+                    disLat = mSpeed * (double)(DivGo / 1000) * mR * Math.sin(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
+                    mListener.moveInfo(disLng, disLat);
                 }
             }
         });
@@ -230,7 +214,6 @@ public class JoyStick extends View {
     private void initJoyStickLatLngView() {
         mLatLngView = (LinearLayout)inflater.inflate(R.layout.joystick_latlng, null);
         mLatLngView.setOnTouchListener(new JoyStickOnTouchListener());
-
 
         Button btnOk = mLatLngView.findViewById(R.id.joystick_latlng_ok);
         btnOk.setOnClickListener(v -> {
@@ -249,7 +232,6 @@ public class JoyStick extends View {
 
                 mWindowManager.addView(mJoystickView, mWindowParams);
             }
-
         });
         Button btnCancel = mLatLngView.findViewById(R.id.joystick_latlng_cancel);
         btnCancel.setOnClickListener(v -> {
@@ -329,9 +311,7 @@ public class JoyStick extends View {
     }
 
     public interface JoyStickClickListener {
-        void clickAngleInfo(double angle, double speed);
-
-        void setCurrentSpeed(double speed);
+        void moveInfo(double disLng, double disLat);
     }
 
     class TimeCount extends CountDownTimer {
@@ -341,7 +321,10 @@ public class JoyStick extends View {
 
         @Override
         public void onFinish() {//计时完毕时触发
-            mListener.clickAngleInfo(mAngle, mSpeed);
+            // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）且转换为 km
+            disLng = mSpeed * (double)(DivGo / 1000) * mR * Math.cos(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
+            disLat = mSpeed * (double)(DivGo / 1000) * mR * Math.sin(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
+            mListener.moveInfo(disLng, disLat);
             time.start();
         }
 
@@ -350,5 +333,4 @@ public class JoyStick extends View {
 
         }
     }
-
 }

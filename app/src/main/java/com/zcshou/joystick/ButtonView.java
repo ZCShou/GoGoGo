@@ -11,7 +11,7 @@ import com.zcshou.gogogo.R;
 public class ButtonView extends LinearLayout {
 
 	private ButtonViewClickListener mListener;
-	boolean isCenter;
+	boolean isCenter = true;
 	ImageButton btnCenter;
 	boolean isNorth;
 	ImageButton btnNorth;
@@ -53,7 +53,7 @@ public class ButtonView extends LinearLayout {
 	}
 
 	private void initButtonView() {
-		isCenter = false;
+		isCenter = true;
 		btnCenter = findViewById(R.id.btn_center);
 		btnCenter.setOnClickListener(view -> {
 			if (!isCenter) {
@@ -254,7 +254,6 @@ public class ButtonView extends LinearLayout {
 			}
 		});
 
-
 		isEastNorth = false;
 		btnEastNorth = findViewById(R.id.btn_north_east);
 		btnEastNorth.setOnClickListener(view -> {
@@ -420,8 +419,6 @@ public class ButtonView extends LinearLayout {
 		/**
 		 * 点击的角度信息
 		 */
-		void clickAngleInfo(Boolean auto, double angle, double r);
-
+		void clickAngleInfo(boolean auto, double angle, double r);
 	}
-
 }
