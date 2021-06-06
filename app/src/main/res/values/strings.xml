@@ -59,6 +59,8 @@
     <!-- 设置界面 -->
     <string name="title_activity_settings">设置</string>
     <string name="setting_group_move">移动</string>
+    <string name="setting_joystick">摇杆类型</string>
+    <string name="setting_joystick_tips">重启摇杆后生效</string>
     <string name="setting_walk">步行速度(米/秒)</string>
     <string name="setting_walk_default">1.2</string>
     <string name="setting_run">跑步速度(米/秒)</string>

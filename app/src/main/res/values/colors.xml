@@ -149,16 +149,11 @@
     <color name="darkblue">#00008b</color> <!-- 暗蓝色 -->
     <color name="navy">#000080</color> <!-- 海军色 -->
     <color name="black">#000000</color> <!-- 黑色 -->
-
-
     <color name="half_black">#808080</color>
     <color name="white_pressed">#f1f1f1</color>
     <color name="blue_semi_transparent">#805677fc</color>
     <color name="blue_semi_transparent_pressed">#80738ffe</color>
     <color name="black_semi_transparent">#B2000000</color>
-
-
-
     <color name="saffron">#F4B63E</color>
     <color name="eggplant">#663D4E</color>
 </resources>

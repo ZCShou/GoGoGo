@@ -5,6 +5,7 @@ import android.text.InputType;
 import android.text.TextUtils;
 
 import androidx.preference.EditTextPreference;
+import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.Preference.OnPreferenceChangeListener;
@@ -27,10 +28,17 @@ public class FragmentSettings extends PreferenceFragmentCompat implements OnPref
             pfVersion.setSummary(verName);
         }
 
-        // 设置作者
-        Preference pfAuthor = findPreference("setting_author");
-        if (pfAuthor != null) {
-            pfAuthor.setSummary(R.string.author);
+        ListPreference pfJoystick = findPreference("joystick_type");
+        if (pfJoystick != null) {
+            // 使用自定义 SummaryProvider
+            pfJoystick.setSummaryProvider((Preference.SummaryProvider<ListPreference>) preference -> {
+                CharSequence cs = preference.getEntry();
+                String text = cs.toString();
+                if (TextUtils.isEmpty(text)) {
+                    return "未设置";
+                }
+                return "当前类型: " + text;
+            });
         }
 
         EditTextPreference pfWalk = findPreference("setting_walk");

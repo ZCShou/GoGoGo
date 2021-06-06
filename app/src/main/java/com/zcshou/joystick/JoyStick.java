@@ -29,23 +29,22 @@ public class JoyStick extends View {
     private View mJoystickView;
     private LinearLayout mLatLngView;
     private JoyStickClickListener mListener;
-    // 控制按键相关
-    ImageButton btnInput;
-    boolean isWalk;
-    ImageButton btnWalk;
-    boolean isRun;
-    ImageButton btnRun;
-    boolean isBike;
-    ImageButton btnBike;
+    private boolean isWalk;
+    private ImageButton btnWalk;
+    private boolean isRun;
+    private ImageButton btnRun;
+    private boolean isBike;
+    private ImageButton btnBike;
 
     // 移动
     private TimeCount time;
-    double mSpeed = 1.2;        /* 默认的速度，单位 m/s */
-    double mAngle = 0;
-    double mR = 0;
-    double disLng = 0;
-    double disLat = 0;
-    SharedPreferences sharedPreferences;
+    private boolean isMove;
+    private double mSpeed = 1.2;        /* 默认的速度，单位 m/s */
+    private double mAngle = 0;
+    private double mR = 0;
+    private double disLng = 0;
+    private double disLat = 0;
+    private SharedPreferences sharedPreferences;
 
     public JoyStick(Context context) {
         super(context);
@@ -130,7 +129,8 @@ public class JoyStick extends View {
         /* 整个摇杆拖动事件处理 */
         mJoystickView.setOnTouchListener(new JoyStickOnTouchListener());
         /* 输入按钮点击事件处理 */
-        btnInput = mJoystickView.findViewById(R.id.joystick_input);
+        // 控制按键相关
+        ImageButton btnInput = mJoystickView.findViewById(R.id.joystick_input);
         btnInput.setOnClickListener(v -> {
             if (mJoystickView != null) {
                 mWindowManager.removeView(mJoystickView);
@@ -190,24 +190,21 @@ public class JoyStick extends View {
             }
         });
         /* 方向键点击处理 */
-        ButtonView btnView = mJoystickView.findViewById(R.id.joystick_view);
-        btnView.setListener((auto, angle, r) -> {
-            if (r <= 0) {
-                time.cancel();
-            } else {
-                mAngle = angle;
-                mR = r;
-                if (auto) {
-                    time.start();
-                } else {
-                    time.cancel();
-                    // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）且转换为 km
-                    disLng = mSpeed * (double)(DivGo / 1000) * mR * Math.cos(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
-                    disLat = mSpeed * (double)(DivGo / 1000) * mR * Math.sin(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
-                    mListener.moveInfo(disLng, disLat);
-                }
-            }
-        });
+        RockerView rckView = mJoystickView.findViewById(R.id.joystick_rocker);
+        rckView.setListener(this::processDirection);
+
+        /* 方向键点击处理 */
+        ButtonView btnView = mJoystickView.findViewById(R.id.joystick_button);
+        btnView.setListener(this::processDirection);
+
+        /* 这里用来绝对摇杆类型 */
+        if (sharedPreferences.getString("joystick_type", "0").equals("0")) {
+            rckView.setVisibility(VISIBLE);
+            btnView.setVisibility(GONE);
+        } else {
+            rckView.setVisibility(GONE);
+            btnView.setVisibility(VISIBLE);
+        }
     }
 
     @SuppressLint({"InflateParams", "ClickableViewAccessibility"})
@@ -251,7 +248,29 @@ public class JoyStick extends View {
                 mWindowManager.addView(mJoystickView, mWindowParams);
             }
         });
+    }
 
+    private void processDirection(boolean auto, double angle, double r) {
+        if (r <= 0) {
+            time.cancel();
+            isMove = false;
+        } else {
+            mAngle = angle;
+            mR = r;
+            if (auto) {
+                if (!isMove) {
+                    time.start();
+                    isMove = true;
+                }
+            } else {
+                time.cancel();
+                isMove = false;
+                // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）且转换为 km
+                disLng = mSpeed * (double)(DivGo / 1000) * mR * Math.cos(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
+                disLat = mSpeed * (double)(DivGo / 1000) * mR * Math.sin(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
+                mListener.moveInfo(disLng, disLat);
+            }
+        }
     }
 
     public void show() {
