@@ -29,13 +29,15 @@ import com.zcshou.joystick.JoyStick;
 
 public class ServiceGo extends Service {
     // 定位相关变量
+    public static final double DEFAULT_LAT = 36.667662;
+    public static final double DEFAULT_LNG = 117.027707;
+    private double curLat = DEFAULT_LAT;
+    private double curLng = DEFAULT_LNG;
     private static final int HANDLER_MSG_ID = 0;
     private static final String SERVICE_GO_HANDLER_NAME = "ServiceGoLocation";
     private LocationManager locationManager;
     private HandlerThread handlerThread;
     private Handler handler;
-    private double curLat = 36.667662;
-    private double curLng = 117.027707;
     // 通知栏消息
     private static final int SERVICE_GO_NOTE_ID = 1;
     private static final String SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW = "ShowJoyStick";
@@ -72,12 +74,15 @@ public class ServiceGo extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String curLatLng = intent.getStringExtra("CurLatLng");
-        if (curLatLng != null) {
-            String[] latLngStr = curLatLng.split("&");
-            curLng = Double.parseDouble(latLngStr[0]);
-            curLat = Double.parseDouble(latLngStr[1]);
-        }
+        curLng = intent.getDoubleExtra(MainActivity.LNG_MSG_ID, DEFAULT_LNG);
+        curLat = intent.getDoubleExtra(MainActivity.LAT_MSG_ID, DEFAULT_LAT);
+
+//        String curLatLng = intent.getStringExtra("CurLatLng");
+//        if (curLatLng != null) {
+//            String[] latLngStr = curLatLng.split("&");
+//            curLng = Double.parseDouble(latLngStr[0]);
+//            curLat = Double.parseDouble(latLngStr[1]);
+//        }
 
         return super.onStartCommand(intent, flags, startId);
     }

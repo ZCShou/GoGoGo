@@ -103,6 +103,12 @@ import static com.zcshou.gogogo.R.string;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, SensorEventListener {
+    /* 对外 */
+    public static final String LAT_MSG_ID = "LAT_VALUE";
+    public static final String LNG_MSG_ID = "LNG_VALUE";
+    private static double mCurLat = ServiceGo.DEFAULT_LAT;  /* WGS84 坐标系的纬度 */
+    private static double mCurLng = ServiceGo.DEFAULT_LNG;  /* WGS84 坐标系的经度 */
+
     private static final long mTS = 1636588801;
 
     private boolean isMockServStart = false;
@@ -132,8 +138,6 @@ public class MainActivity extends BaseActivity
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
-    // 当前经度&纬度
-    private static String curLatLng = "117.027707&36.667662";
     // 当前地点击的点
     public static LatLng curMapLatLng = new LatLng(36.547743718042415, 117.07018449827267);
     public static BitmapDescriptor bdA = BitmapDescriptorFactory
@@ -299,8 +303,8 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onDestroy() {
         if (isMockServStart) {
-            Intent mockLocServiceIntent = new Intent(MainActivity.this, ServiceGo.class);
-            stopService(mockLocServiceIntent);
+            Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
+            stopService(serviceGoIntent);
         }
 
         // 退出时销毁定位
@@ -1034,14 +1038,16 @@ public class MainActivity extends BaseActivity
                             //如果bd09转gcj02 结果误差很小  认为该坐标在国外
                             if ((Math.abs(gcj02LongitudeDouble - bd09LongitudeDouble)) <= error && (Math.abs(gcj02LatitudeDouble - bd09LatitudeDouble)) <= error) {
                                 //不进行坐标转换
-                                curLatLng = longitude + "&" + latitude;
+                                mCurLat = Double.parseDouble(latitude);
+                                mCurLng = Double.parseDouble(longitude);
                                 log.debug("OUT OF CHN, NO NEED TO TRANSFORM COORDINATE");
                                 // DisplayToast("OUT OF CHN, NO NEED TO TRANSFORM COORDINATE");
                             } else {
                                 //离线转换坐标系
                                 // double latLng[] = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
                                 double[] latLng = MapUtils.gcj02towgs84(Double.parseDouble(gcj02Longitude), Double.parseDouble(gcj02Latitude));
-                                curLatLng = latLng[0] + "&" + latLng[1];
+                                mCurLng = latLng[0];
+                                mCurLat = latLng[1];
                                 log.debug("IN CHN, NEED TO TRANSFORM COORDINATE");
                                 // DisplayToast("IN CHN, NEED TO TRANSFORM COORDINATE");
                             }
@@ -1050,7 +1056,8 @@ public class MainActivity extends BaseActivity
                         else {
                             //离线转换坐标系
                             double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
-                            curLatLng = latLng[0] + "&" + latLng[1];
+                            mCurLng = latLng[0];
+                            mCurLat = latLng[1];
                             log.debug("IN CHN, NEED TO TRANSFORM COORDINATE");
                             // DisplayToast("BD Map Api Return not Zero, ASSUME IN CHN, NEED TO TRANSFORM COORDINATE");
                         }
@@ -1059,7 +1066,8 @@ public class MainActivity extends BaseActivity
                         e.printStackTrace();
                         //离线转换坐标系
                         double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
-                        curLatLng = latLng[0] + "&" + latLng[1];
+                        mCurLng = latLng[0];
+                        mCurLat = latLng[1];
                         log.debug("IN CHN, NEED TO TRANSFORM COORDINATE");
                         // DisplayToast("Resolve JSON Error, ASSUME IN CHN, NEED TO TRANSFORM COORDINATE");
                     }
@@ -1068,7 +1076,8 @@ public class MainActivity extends BaseActivity
                     log.error("HTTP: HTTP GET FAILED");
                     //离线转换坐标系
                     double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
-                    curLatLng = latLng[0] + "&" + latLng[1];
+                    mCurLng = latLng[0];
+                    mCurLat = latLng[1];
                     log.debug("IN CHN, NEED TO TRANSFORM COORDINATE");
                     // DisplayToast("HTTP Get Failed, ASSUME IN CHN, NEED TO TRANSFORM COORDINATE");
                 });
@@ -1101,9 +1110,8 @@ public class MainActivity extends BaseActivity
                     //插表参数
                     ContentValues contentValues = new ContentValues();
                     contentValues.put("Location", formatted_address);
-                    String[] latLngStr = curLatLng.split("&");
-                    contentValues.put("WGS84Longitude", latLngStr[0]);
-                    contentValues.put("WGS84Latitude", latLngStr[1]);
+                    contentValues.put("WGS84Longitude", String.valueOf(mCurLng));
+                    contentValues.put("WGS84Latitude", String.valueOf(mCurLat));
                     contentValues.put("TimeStamp", System.currentTimeMillis() / 1000);
                     contentValues.put("BD09Longitude", "" + curMapLatLng.longitude);
                     contentValues.put("BD09Latitude", "" + curMapLatLng.latitude);
@@ -1117,9 +1125,8 @@ public class MainActivity extends BaseActivity
                     //插表参数
                     ContentValues contentValues = new ContentValues();
                     contentValues.put("Location", "NULL");
-                    String[] latLngStr = curLatLng.split("&");
-                    contentValues.put("WGS84Longitude", latLngStr[0]);
-                    contentValues.put("WGS84Latitude", latLngStr[1]);
+                    contentValues.put("WGS84Longitude", String.valueOf(mCurLng));
+                    contentValues.put("WGS84Latitude", String.valueOf(mCurLat));
                     contentValues.put("TimeStamp", System.currentTimeMillis() / 1000);
                     contentValues.put("BD09Longitude", "" + curMapLatLng.longitude);
                     contentValues.put("BD09Latitude", "" + curMapLatLng.latitude);
@@ -1135,9 +1142,8 @@ public class MainActivity extends BaseActivity
                 //插表参数
                 ContentValues contentValues = new ContentValues();
                 contentValues.put("Location", "NULL");
-                String[] latLngStr = curLatLng.split("&");
-                contentValues.put("WGS84Longitude", latLngStr[0]);
-                contentValues.put("WGS84Latitude", latLngStr[1]);
+                contentValues.put("WGS84Longitude", String.valueOf(mCurLng));
+                contentValues.put("WGS84Latitude", String.valueOf(mCurLat));
                 contentValues.put("TimeStamp", System.currentTimeMillis() / 1000);
                 contentValues.put("BD09Longitude", "" + curMapLatLng.longitude);
                 contentValues.put("BD09Latitude", "" + curMapLatLng.latitude);
@@ -1156,9 +1162,8 @@ public class MainActivity extends BaseActivity
             //插表参数
             ContentValues contentValues = new ContentValues();
             contentValues.put("Location", "NULL");
-            String[] latLngStr = curLatLng.split("&");
-            contentValues.put("WGS84Longitude", latLngStr[0]);
-            contentValues.put("WGS84Latitude", latLngStr[1]);
+            contentValues.put("WGS84Longitude", String.valueOf(mCurLng));
+            contentValues.put("WGS84Latitude", String.valueOf(mCurLat));
             contentValues.put("TimeStamp", System.currentTimeMillis() / 1000);
             contentValues.put("BD09Longitude", "" + curMapLatLng.longitude);
             contentValues.put("BD09Latitude", "" + curMapLatLng.latitude);
@@ -1187,7 +1192,8 @@ public class MainActivity extends BaseActivity
                 mBaiduMap.addOverlay(ooA);
                 MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(curMapLatLng);
                 mBaiduMap.setMapStatus(mapstatusupdate);
-                curLatLng = wgs84Longitude + "&" + wgs84Latitude;
+                mCurLng = Double.parseDouble(wgs84Longitude);
+                mCurLat = Double.parseDouble(wgs84Latitude);
             }
         } catch (Exception e) {
             ret = false;
@@ -1272,14 +1278,15 @@ public class MainActivity extends BaseActivity
             markSelectedPosition();
 
             //start mock location service
-            Intent mockLocServiceIntent = new Intent(MainActivity.this, ServiceGo.class);
-            mockLocServiceIntent.putExtra("CurLatLng", curLatLng);
+            Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
+            serviceGoIntent.putExtra(LNG_MSG_ID, mCurLng);
+            serviceGoIntent.putExtra(LAT_MSG_ID, mCurLat);
 
             //save record
             recordGetPositionInfo();
 
             //insert end
-            startForegroundService(mockLocServiceIntent);
+            startForegroundService(serviceGoIntent);
             log.debug("startForegroundService: ServiceGo");
 
             isMockServStart = true;
@@ -1327,8 +1334,8 @@ public class MainActivity extends BaseActivity
     private void stopGoLocation() {
         if (isMockServStart) {
             //end mock location
-            Intent mockLocServiceIntent = new Intent(MainActivity.this, ServiceGo.class);
-            stopService(mockLocServiceIntent);
+            Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
+            stopService(serviceGoIntent);
 //            Snackbar.make(v, "位置模拟服务终止", Snackbar.LENGTH_LONG)
 //                    .setAction("Action", null).show();
             //service finish
@@ -1372,9 +1379,8 @@ public class MainActivity extends BaseActivity
             contentValues.put("IsLocate", 1);
             contentValues.put("BD09Longitude", lng);
             contentValues.put("BD09Latitude", lat);
-            String[] wgsLatLngStr = curLatLng.split("&");
-            contentValues.put("WGS84Longitude", wgsLatLngStr[0]);
-            contentValues.put("WGS84Latitude", wgsLatLngStr[1]);
+            contentValues.put("WGS84Longitude", String.valueOf(mCurLng));
+            contentValues.put("WGS84Latitude", String.valueOf(mCurLat));
             contentValues.put("TimeStamp", System.currentTimeMillis() / 1000);
 
             if (saveSelectSearchItem(searchHistoryDB, contentValues)) {
@@ -1419,9 +1425,8 @@ public class MainActivity extends BaseActivity
                 contentValues.put("IsLocate", 1);
                 contentValues.put("BD09Longitude", lng);
                 contentValues.put("BD09Latitude", lat);
-                String[] wgsLatLngStr = curLatLng.split("&");
-                contentValues.put("WGS84Longitude", wgsLatLngStr[0]);
-                contentValues.put("WGS84Latitude", wgsLatLngStr[1]);
+                contentValues.put("WGS84Longitude", String.valueOf(mCurLng));
+                contentValues.put("WGS84Latitude", String.valueOf(mCurLat));
                 contentValues.put("TimeStamp", System.currentTimeMillis() / 1000);
 
                 if (saveSelectSearchItem(searchHistoryDB, contentValues)) {
@@ -1586,8 +1591,9 @@ public class MainActivity extends BaseActivity
 
                 // 这里将百度地图位置转换为 GPS 坐标。实际使用GPS 返回的坐标会更好点
                 double[] latLng = MapUtils.bd2wgs(curMapLatLng.longitude, curMapLatLng.latitude);
-                curLatLng = latLng[0] + "&" + latLng[1];
-                log.debug("First LatLng: " + curLatLng);
+                mCurLng = latLng[0];
+                mCurLat = latLng[1];
+                log.debug("First LatLng: " + mCurLng + "   " + mCurLat);
             }
         }
     }
