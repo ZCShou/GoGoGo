@@ -31,20 +31,20 @@ public class ServiceGo extends Service {
     // 定位相关变量
     public static final double DEFAULT_LAT = 36.667662;
     public static final double DEFAULT_LNG = 117.027707;
-    private double curLat = DEFAULT_LAT;
-    private double curLng = DEFAULT_LNG;
+    private double mCurLat = DEFAULT_LAT;
+    private double mCurLng = DEFAULT_LNG;
     private static final int HANDLER_MSG_ID = 0;
     private static final String SERVICE_GO_HANDLER_NAME = "ServiceGoLocation";
-    private LocationManager locationManager;
-    private HandlerThread handlerThread;
-    private Handler handler;
+    private LocationManager mLocManager;
+    private HandlerThread mLocHandlerThread;
+    private Handler mLocHandler;
     // 通知栏消息
     private static final int SERVICE_GO_NOTE_ID = 1;
     private static final String SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW = "ShowJoyStick";
     private static final String SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE = "HideJoyStick";
     private static final String SERVICE_GO_NOTE_CHANNEL_ID = "SERVICE_GO_NOTE";
     private static final String SERVICE_GO_NOTE_CHANNEL_NAME = "SERVICE_GO_NOTE";
-    private NoteActionReceiver acReceiver;
+    private NoteActionReceiver mActReceiver;
     // 摇杆相关
     private JoyStick mJoyStick;
     
@@ -57,7 +57,7 @@ public class ServiceGo extends Service {
     public void onCreate() {
         super.onCreate();
 
-        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        mLocManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         removeTestProviderNetwork();
         removeTestProviderGPS();
@@ -74,16 +74,9 @@ public class ServiceGo extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        curLng = intent.getDoubleExtra(MainActivity.LNG_MSG_ID, DEFAULT_LNG);
-        curLat = intent.getDoubleExtra(MainActivity.LAT_MSG_ID, DEFAULT_LAT);
-
-//        String curLatLng = intent.getStringExtra("CurLatLng");
-//        if (curLatLng != null) {
-//            String[] latLngStr = curLatLng.split("&");
-//            curLng = Double.parseDouble(latLngStr[0]);
-//            curLat = Double.parseDouble(latLngStr[1]);
-//        }
-
+        mCurLng = intent.getDoubleExtra(MainActivity.LNG_MSG_ID, DEFAULT_LNG);
+        mCurLat = intent.getDoubleExtra(MainActivity.LAT_MSG_ID, DEFAULT_LAT);
+        
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -91,24 +84,24 @@ public class ServiceGo extends Service {
     public void onDestroy() {
         mJoyStick.hide();
 
-        handlerThread.quit();
-        handler.removeMessages(HANDLER_MSG_ID);
+        mLocHandlerThread.quit();
+        mLocHandler.removeMessages(HANDLER_MSG_ID);
 
         removeTestProviderNetwork();
         removeTestProviderGPS();
 
-        unregisterReceiver(acReceiver);
+        unregisterReceiver(mActReceiver);
         stopForeground(true);
 
         super.onDestroy();
     }
 
     private void initNotification() {
-        acReceiver = new NoteActionReceiver();
+        mActReceiver = new NoteActionReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW);
         filter.addAction(SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE);
-        registerReceiver(acReceiver, filter);
+        registerReceiver(mActReceiver, filter);
 
         NotificationChannel mChannel = new NotificationChannel(SERVICE_GO_NOTE_CHANNEL_ID, SERVICE_GO_NOTE_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -146,19 +139,19 @@ public class ServiceGo extends Service {
             // Latitude: 1 deg = 110.574 km // 纬度的每度的距离大约为 110.574km
             // Longitude: 1 deg = 111.320*cos(latitude) km  // 经度的每度的距离从0km到111km不等
             // 具体见：http://wp.mlab.tw/?p=2200
-            curLng += disLng / (111.320 * Math.cos(Math.abs(curLat) * Math.PI / 180));
-            curLat += disLat / 110.574;
+            mCurLng += disLng / (111.320 * Math.cos(Math.abs(mCurLat) * Math.PI / 180));
+            mCurLat += disLat / 110.574;
         });
         mJoyStick.show();
     }
 
     private void initGoLocation() {
         // 创建 HandlerThread 实例，第一个参数是线程的名字
-        handlerThread = new HandlerThread(SERVICE_GO_HANDLER_NAME, Process.THREAD_PRIORITY_FOREGROUND);
+        mLocHandlerThread = new HandlerThread(SERVICE_GO_HANDLER_NAME, Process.THREAD_PRIORITY_FOREGROUND);
         // 启动 HandlerThread 线程
-        handlerThread.start();
+        mLocHandlerThread.start();
         // Handler 对象与 HandlerThread 的 Looper 对象的绑定
-        handler = new Handler(handlerThread.getLooper()) {
+        mLocHandler = new Handler(mLocHandlerThread.getLooper()) {
             // 这里的Handler对象可以看作是绑定在HandlerThread子线程中，所以handlerMessage里的操作是在子线程中运行的
             public void handleMessage(@NonNull Message msg) {
                 try {
@@ -175,7 +168,7 @@ public class ServiceGo extends Service {
             }
         };
 
-        handler.sendEmptyMessage(HANDLER_MSG_ID);
+        mLocHandler.sendEmptyMessage(HANDLER_MSG_ID);
     }
 
     public Location makeLocation() {
@@ -183,8 +176,8 @@ public class ServiceGo extends Service {
         loc.setAccuracy(Criteria.ACCURACY_FINE);                    // 设定此位置的估计水平精度，以米为单位。
         loc.setAltitude(55.0D);                 // 设置高度，在 WGS 84 参考坐标系中的米
         loc.setBearing(1.0F);                   // 方向（度）
-        loc.setLatitude(curLat);                // 纬度（度）
-        loc.setLongitude(curLng);               // 经度（度）
+        loc.setLatitude(mCurLat);                // 纬度（度）
+        loc.setLongitude(mCurLng);               // 经度（度）
         loc.setTime(System.currentTimeMillis());    // 本地时间
         loc.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
         Bundle bundle = new Bundle();
@@ -196,8 +189,8 @@ public class ServiceGo extends Service {
 
     private void removeTestProviderGPS() {
         try {
-            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                locationManager.removeTestProvider(LocationManager.GPS_PROVIDER);
+            if (mLocManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                mLocManager.removeTestProvider(LocationManager.GPS_PROVIDER);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -206,10 +199,10 @@ public class ServiceGo extends Service {
 
     private void addTestProviderGPS() {
         try {
-            locationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, true,
+            mLocManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, true,
                     false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_MEDIUM);
-            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
+            if (!mLocManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                mLocManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -218,7 +211,7 @@ public class ServiceGo extends Service {
 
     private void setLocationGPS() {
         try {
-            locationManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, makeLocation());
+            mLocManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, makeLocation());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -226,8 +219,8 @@ public class ServiceGo extends Service {
 
     private void removeTestProviderNetwork() {
         try {
-            if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                locationManager.removeTestProvider(LocationManager.NETWORK_PROVIDER);
+            if (mLocManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                mLocManager.removeTestProvider(LocationManager.NETWORK_PROVIDER);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -236,11 +229,11 @@ public class ServiceGo extends Service {
 
     private void addTestProviderNetwork() {
         try {
-            locationManager.addTestProvider(LocationManager.NETWORK_PROVIDER, true, false,
+            mLocManager.addTestProvider(LocationManager.NETWORK_PROVIDER, true, false,
                     false, false, true, false,
                     true, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
-            if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                locationManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
+            if (!mLocManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                mLocManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
             }
         } catch (SecurityException e) {
             e.printStackTrace();
@@ -249,7 +242,7 @@ public class ServiceGo extends Service {
 
     private void setLocationNetwork() {
         try {
-            locationManager.setTestProviderLocation(LocationManager.NETWORK_PROVIDER, makeLocation());
+            mLocManager.setTestProviderLocation(LocationManager.NETWORK_PROVIDER, makeLocation());
         } catch (Exception e) {
             e.printStackTrace();
         }
