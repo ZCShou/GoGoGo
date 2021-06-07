@@ -87,8 +87,8 @@ import java.util.concurrent.Executors;
 
 import com.zcshou.log4j.LogUtil;
 import com.zcshou.service.ServiceGo;
-import com.zcshou.database.HistoryLocationDataBaseHelper;
-import com.zcshou.database.HistorySearchDataBaseHelper;
+import com.zcshou.database.DataBaseHistoryLocation;
+import com.zcshou.database.DataBaseHistorySearch;
 import com.zcshou.service.GoSntpClient;
 import com.zcshou.utils.GoUtils;
 import com.zcshou.utils.MapUtils;
@@ -128,7 +128,7 @@ public class MainActivity extends BaseActivity
     //位置历史
     private SQLiteDatabase locHistoryDB;
     //搜索历史
-    private HistorySearchDataBaseHelper mHistorySearchHelper;
+    private DataBaseHistorySearch mHistorySearchHelper;
     private SQLiteDatabase searchHistoryDB;
     private boolean isMockServStart = false;
     private boolean isGPSOpen = false;
@@ -175,10 +175,10 @@ public class MainActivity extends BaseActivity
         //sqlite相关
         try {
             //定位历史
-            HistoryLocationDataBaseHelper HistoryLocationDataBaseHelper = new HistoryLocationDataBaseHelper(getApplicationContext());
-            locHistoryDB = HistoryLocationDataBaseHelper.getWritableDatabase();
+            DataBaseHistoryLocation DataBaseHistoryLocation = new DataBaseHistoryLocation(getApplicationContext());
+            locHistoryDB = DataBaseHistoryLocation.getWritableDatabase();
             // 搜索历史
-            mHistorySearchHelper = new HistorySearchDataBaseHelper(getApplicationContext());
+            mHistorySearchHelper = new DataBaseHistorySearch(getApplicationContext());
             searchHistoryDB = mHistorySearchHelper.getWritableDatabase();
         } catch (Exception e) {
             log.error("DATABASE: sqlite init error");
@@ -1066,7 +1066,7 @@ public class MainActivity extends BaseActivity
                         String searchKey = ((TextView) view.findViewById(R.id.search_key)).getText().toString();
 
                         try {
-                            searchHistoryDB.delete(HistorySearchDataBaseHelper.TABLE_NAME, "SearchKey = ?", new String[] {searchKey});
+                            searchHistoryDB.delete(DataBaseHistorySearch.TABLE_NAME, "SearchKey = ?", new String[] {searchKey});
                             //删除成功
                             //展示搜索历史
                             List<Map<String, Object>> data = getSearchHistory();
@@ -1375,8 +1375,8 @@ public class MainActivity extends BaseActivity
         try {
             // 先删除原来的记录，再插入新记录
             String location = contentValues.get("Location").toString();
-            sqLiteDatabase.delete(HistoryLocationDataBaseHelper.TABLE_NAME, "Location = ?", new String[] {location});
-            sqLiteDatabase.insert(HistoryLocationDataBaseHelper.TABLE_NAME, null, contentValues);
+            sqLiteDatabase.delete(DataBaseHistoryLocation.TABLE_NAME, "Location = ?", new String[] {location});
+            sqLiteDatabase.insert(DataBaseHistoryLocation.TABLE_NAME, null, contentValues);
         } catch (Exception e) {
             log.error("DATABASE: insert error");
             insertRet = false;
@@ -1393,8 +1393,8 @@ public class MainActivity extends BaseActivity
         try {
             // 先删除原来的记录，再插入新记录
             String searchKey = contentValues.get("SearchKey").toString();
-            sqLiteDatabase.delete(HistorySearchDataBaseHelper.TABLE_NAME, "SearchKey = ?", new String[] {searchKey});
-            sqLiteDatabase.insert(HistorySearchDataBaseHelper.TABLE_NAME, null, contentValues);
+            sqLiteDatabase.delete(DataBaseHistorySearch.TABLE_NAME, "SearchKey = ?", new String[] {searchKey});
+            sqLiteDatabase.insert(DataBaseHistorySearch.TABLE_NAME, null, contentValues);
         } catch (Exception e) {
             log.error("DATABASE: insert error");
             insertRet = false;
@@ -1409,7 +1409,7 @@ public class MainActivity extends BaseActivity
         List<Map<String, Object>> data = new ArrayList<>();
 
         try {
-            Cursor cursor = mHistorySearchHelper.getWritableDatabase().query(HistorySearchDataBaseHelper.TABLE_NAME, null,
+            Cursor cursor = mHistorySearchHelper.getWritableDatabase().query(DataBaseHistorySearch.TABLE_NAME, null,
                     "ID > ?", new String[] {"0"},
                     null, null, "TimeStamp DESC", null);
 

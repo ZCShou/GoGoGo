@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.zcshou.database.HistoryLocationDataBaseHelper;
+import com.zcshou.database.DataBaseHistoryLocation;
 
 import static com.zcshou.gogogo.MainActivity.showHistoryLocation;
 
@@ -59,7 +59,7 @@ public class HistoryActivity extends BaseActivity {
         }
 
         try {
-            HistoryLocationDataBaseHelper hisLocDBHelper = new HistoryLocationDataBaseHelper(getApplicationContext());
+            DataBaseHistoryLocation hisLocDBHelper = new DataBaseHistoryLocation(getApplicationContext());
             sqLiteDatabase = hisLocDBHelper.getWritableDatabase();
         } catch (Exception e) {
             Log.e("HistoryActivity", "SQLiteDatabase init error");
@@ -232,7 +232,7 @@ public class HistoryActivity extends BaseActivity {
     private void initRecordListView() {
         TextView noRecordText = findViewById(R.id.record_no_textview);
         recordListView = findViewById(R.id.record_list_view);
-        allHistoryRecord = fetchAllRecord(sqLiteDatabase);
+        allHistoryRecord = fetchAllRecord();
 
         if (allHistoryRecord.size() == 0) {
             recordListView.setVisibility(View.GONE);
@@ -259,11 +259,11 @@ public class HistoryActivity extends BaseActivity {
     }
 
     //sqlite 操作 查询所有记录
-    private List<Map<String, Object>> fetchAllRecord(SQLiteDatabase sqLiteDatabase) {
+    private List<Map<String, Object>> fetchAllRecord() {
         List<Map<String, Object>> data = new ArrayList<>();
         
         try {
-            Cursor cursor = sqLiteDatabase.query(HistoryLocationDataBaseHelper.TABLE_NAME, null,
+            Cursor cursor = sqLiteDatabase.query(DataBaseHistoryLocation.TABLE_NAME, null,
                                                  "ID > ?", new String[] {"0"},
                                                  null, null, "TimeStamp DESC", null);
                                                  
@@ -323,7 +323,7 @@ public class HistoryActivity extends BaseActivity {
         final long weekSecond = 7 * 24 * 60 * 60;
         
         try {
-            sqLiteDatabase.delete(HistoryLocationDataBaseHelper.TABLE_NAME,
+            sqLiteDatabase.delete(DataBaseHistoryLocation.TABLE_NAME,
                                   "TimeStamp < ?", new String[] {Long.toString(System.currentTimeMillis() / 1000 - weekSecond)});
         } catch (Exception e) {
             Log.e("SQLITE", "archive error");
@@ -339,9 +339,9 @@ public class HistoryActivity extends BaseActivity {
         
         try {
             if (ID <= -1) {
-                sqLiteDatabase.delete(HistoryLocationDataBaseHelper.TABLE_NAME,null, null);
+                sqLiteDatabase.delete(DataBaseHistoryLocation.TABLE_NAME,null, null);
             } else {
-                sqLiteDatabase.delete(HistoryLocationDataBaseHelper.TABLE_NAME,
+                sqLiteDatabase.delete(DataBaseHistoryLocation.TABLE_NAME,
                         "ID = ?", new String[] {Integer.toString(ID)});
             }
         } catch (Exception e) {
