@@ -36,8 +36,6 @@ public class ServiceGo extends Service {
     private Handler handler;
     private double curLat = 36.667662;
     private double curLng = 117.027707;
-    // 摇杆相关
-    private JoyStick mJoyStick;
     // 通知栏消息
     private static final int SERVICE_GO_NOTE_ID = 1;
     private static final String SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW = "ShowJoyStick";
@@ -45,7 +43,9 @@ public class ServiceGo extends Service {
     private static final String SERVICE_GO_NOTE_CHANNEL_ID = "SERVICE_GO_NOTE";
     private static final String SERVICE_GO_NOTE_CHANNEL_NAME = "SERVICE_GO_NOTE";
     private NoteActionReceiver acReceiver;
-
+    // 摇杆相关
+    private JoyStick mJoyStick;
+    
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -105,8 +105,13 @@ public class ServiceGo extends Service {
         filter.addAction(SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE);
         registerReceiver(acReceiver, filter);
 
+        NotificationChannel mChannel = new NotificationChannel(SERVICE_GO_NOTE_CHANNEL_ID, SERVICE_GO_NOTE_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Notification notification;
+
+        if (notificationManager != null) {
+            notificationManager.createNotificationChannel(mChannel);
+        }
+
         //准备intent
         Intent clickIntent = new Intent(this, MainActivity.class);
         PendingIntent clickPI = PendingIntent.getActivity(this, 1, clickIntent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -115,20 +120,16 @@ public class ServiceGo extends Service {
         Intent hideIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE);
         PendingIntent hidePendingPI = PendingIntent.getBroadcast(this, 0, hideIntent, PendingIntent.FLAG_CANCEL_CURRENT );
 
-        NotificationChannel mChannel = new NotificationChannel(SERVICE_GO_NOTE_CHANNEL_ID, SERVICE_GO_NOTE_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW);
-
-        if (notificationManager != null) {
-            notificationManager.createNotificationChannel(mChannel);
-        }
-
-        notification = new NotificationCompat.Builder(this, SERVICE_GO_NOTE_CHANNEL_ID)
+        Notification notification = new NotificationCompat.Builder(this, SERVICE_GO_NOTE_CHANNEL_ID)
                 .setChannelId(SERVICE_GO_NOTE_CHANNEL_ID)
                 .setContentTitle(getResources().getString(R.string.app_name))
-                .setContentText(getResources().getString(R.string.app_service))
+                // .setContentText(getResources().getString(R.string.app_service))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(getResources().getString(R.string.app_service)))
                 .setContentIntent(clickPI)
                 .addAction(new NotificationCompat.Action(null, getResources().getString(R.string.note_show), showPendingPI))
                 .addAction(new NotificationCompat.Action(null, getResources().getString(R.string.note_hide), hidePendingPI))
-                .setSmallIcon(R.mipmap.ic_launcher).build();
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .build();
 
         startForeground(SERVICE_GO_NOTE_ID, notification);
     }
@@ -158,8 +159,8 @@ public class ServiceGo extends Service {
                 try {
                     Thread.sleep(80);
 
-                    setNetworkLocation();
-                    setGPSLocation();
+                    setLocationNetwork();
+                    setLocationGPS();
 
                     sendEmptyMessage(HANDLER_MSG_ID);
                 } catch (InterruptedException e) {
@@ -172,14 +173,13 @@ public class ServiceGo extends Service {
         handler.sendEmptyMessage(HANDLER_MSG_ID);
     }
 
-    // 生成一个位置
     public Location makeLocation() {
-        Location loc = new Location(LocationManager.GPS_PROVIDER);  // 这里只能填写 GPS
-        loc.setAccuracy(Criteria.ACCURACY_FINE);                  // 设定此位置的估计水平精度，以米为单位。
+        Location loc = new Location(LocationManager.GPS_PROVIDER);  // 这里只能填写 GPS，否则导致位置不生效
+        loc.setAccuracy(Criteria.ACCURACY_FINE);                    // 设定此位置的估计水平精度，以米为单位。
         loc.setAltitude(55.0D);                 // 设置高度，在 WGS 84 参考坐标系中的米
         loc.setBearing(1.0F);                   // 方向（度）
-        loc.setLatitude(curLat);            // 纬度（度）
-        loc.setLongitude(curLng);           // 经度（度）
+        loc.setLatitude(curLat);                // 纬度（度）
+        loc.setLongitude(curLng);               // 经度（度）
         loc.setTime(System.currentTimeMillis());    // 本地时间
         loc.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
         Bundle bundle = new Bundle();
@@ -211,7 +211,7 @@ public class ServiceGo extends Service {
         }
     }
 
-    private void setGPSLocation() {
+    private void setLocationGPS() {
         try {
             locationManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, makeLocation());
         } catch (Exception e) {
@@ -242,7 +242,7 @@ public class ServiceGo extends Service {
         }
     }
 
-    private void setNetworkLocation() {
+    private void setLocationNetwork() {
         try {
             locationManager.setTestProviderLocation(LocationManager.NETWORK_PROVIDER, makeLocation());
         } catch (Exception e) {
