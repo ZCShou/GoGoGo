@@ -18,7 +18,6 @@
             android:layout_height="fill_parent"
             android:clickable="true"
             android:focusable="true" >
-
         </com.baidu.mapapi.map.MapView>
 
         <RadioGroup
@@ -105,6 +104,48 @@
             android:onClick="setBaiduHeatMap"
             android:text="@string/map_pic_hot"
             tools:ignore="RelativeOverlap" />
+
+        <ImageButton
+            android:id="@+id/pos_btn"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="460dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:onClick="goCurrentPosition"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:theme="@style/AppTheme"
+            app:srcCompat="@drawable/ic_home_position"
+            android:contentDescription="@string/map_home"
+            app:tint="@color/colorAccent"/>
+
+        <ImageButton
+            android:id="@+id/zoom_in"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="493dp"
+            android:onClick="zoomInMap"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:theme="@style/AppTheme"
+            app:srcCompat="@drawable/ic_zoom_in"
+            android:contentDescription="@string/map_home"
+            app:tint="@color/colorAccent"/>
+
+        <ImageButton
+            android:id="@+id/zoom_out"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="526dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:onClick="zoomOutMap"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:theme="@style/AppTheme"
+            app:srcCompat="@drawable/ic_zoom_out"
+            android:contentDescription="@string/map_home"
+            app:tint="@color/colorAccent" />
 
         <TextView
             android:layout_width="match_parent"
