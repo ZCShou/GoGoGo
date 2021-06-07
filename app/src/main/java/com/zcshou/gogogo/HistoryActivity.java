@@ -35,11 +35,15 @@ import static com.zcshou.gogogo.MainActivity.showHistoryLocation;
 
 
 public class HistoryActivity extends BaseActivity {
-    private ListView listView;
-    private TextView noRecordText;
+    private static final String KEY_ID = "KEY_ID";
+    private static final String KEY_LOCATION = "KEY_LOCATION";
+    private static final String KEY_TIME = "KEY_TIME";
+    private static final String KEY_LNG_LAT_WGS = "KEY_LNG_LAT_WGS";
+    private static final String KEY_LNG_LAT_BD = "KEY_LNG_LAT_BD";
+
+    private ListView recordListView;
     private SearchView mSearchView;
     private LinearLayout mSearchLayout;
-
     private SQLiteDatabase sqLiteDatabase;
     private List<Map<String, Object>> allHistoryRecord;
     
@@ -61,26 +65,12 @@ public class HistoryActivity extends BaseActivity {
             Log.e("HistoryActivity", "SQLiteDatabase init error");
             e.printStackTrace();
         }
-        
-        listView = findViewById(R.id.record_list_view);
-        noRecordText = findViewById(R.id.record_no_textview);
-        mSearchLayout = findViewById(R.id.search_linear);
-        mSearchView = findViewById(R.id.searchView);
-        mSearchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
-        mSearchView.setSubmitButtonEnabled(false);//显示提交按钮
-        mSearchView.setFocusable(false);
-        mSearchView.requestFocusFromTouch();
-        mSearchView.clearFocus();
 
-        if (recordArchive(sqLiteDatabase)) {
-            Log.d("HistoryActivity", "archive success");
-        }
-        
-        initListView();
+        recordArchive();
 
-        setSearchResultClickListener();
+        initSearchView();
 
-        setSearchViewListener();
+        initRecordListView();
     }
 
     @Override
@@ -109,11 +99,11 @@ public class HistoryActivity extends BaseActivity {
                     .setMessage("确定要删除全部历史记录吗?")//这里是中间显示的具体信息
                     .setPositiveButton("确定",
                             (dialog, which) -> {
-                                boolean deleteRet = deleteRecord(sqLiteDatabase, -1);
+                                boolean deleteRet = deleteRecord(-1);
 
                                 if (deleteRet) {
                                     DisplayToast("删除成功!");
-                                    initListView();
+                                    initRecordListView();
                                 }
                             })
                     .setNegativeButton("取消",
@@ -126,35 +116,22 @@ public class HistoryActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void initListView() {
-        allHistoryRecord = fetchAllRecord(sqLiteDatabase);
+    private void initSearchView() {
+        mSearchLayout = findViewById(R.id.search_linear);
+        mSearchView = findViewById(R.id.searchView);
+        mSearchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
+        mSearchView.setSubmitButtonEnabled(false);//显示提交按钮
+        mSearchView.setFocusable(false);
+        mSearchView.requestFocusFromTouch();
+        mSearchView.clearFocus();
 
-        if (allHistoryRecord.size() == 0) {
-            listView.setVisibility(View.GONE);
-            mSearchLayout.setVisibility(View.GONE);
-            noRecordText.setVisibility(View.VISIBLE);
-        } else {
-            noRecordText.setVisibility(View.GONE);
-            listView.setVisibility(View.VISIBLE);
-            mSearchLayout.setVisibility(View.VISIBLE);
+        setSearchResultClickListener();
 
-            try {
-                // 与下面数组元素要一一对应
-                SimpleAdapter simAdapt = new SimpleAdapter(
-                        this,
-                        allHistoryRecord,
-                        R.layout.history_item,
-                        new String[]{"key_id", "key_location", "key_time", "key_wgslatlng", "kdy_bdlatlng"}, // 与下面数组元素要一一对应
-                        new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
-                listView.setAdapter(simAdapt);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+        setSearchViewListener();
     }
 
     private void setSearchResultClickListener() {
-        listView.setOnItemClickListener((adapterView, view, i, l) -> {
+        recordListView.setOnItemClickListener((adapterView, view, i, l) -> {
             String bd09Longitude;
             String bd09Latitude;
             String wgs84Longitude;
@@ -175,22 +152,21 @@ public class HistoryActivity extends BaseActivity {
             if (!showHistoryLocation(bd09Longitude, bd09Latitude, wgs84Longitude, wgs84Latitude)) {
                 DisplayToast("定位失败,请手动选取定位点");
             }
-
-            returnLastActivity();
+            this.finish();
         });
 
-        listView.setOnItemLongClickListener((parent, view, position, id) -> {
+        recordListView.setOnItemLongClickListener((parent, view, position, id) -> {
             new AlertDialog.Builder(HistoryActivity.this)
                     .setTitle("Warning")//这里是表头的内容
                     .setMessage("确定要删除该项历史记录吗?")//这里是中间显示的具体信息
                     .setPositiveButton("确定",
                             (dialog, which) -> {
                                 String locID = (String) ((TextView) view.findViewById(R.id.LocationID)).getText();
-                                boolean deleteRet = deleteRecord(sqLiteDatabase, Integer.parseInt(locID));
+                                boolean deleteRet = deleteRecord(Integer.parseInt(locID));
 
                                 if (deleteRet) {
                                     DisplayToast("删除成功!");
-                                    initListView();
+                                    initRecordListView();
                                 }
                             })
                     .setNegativeButton("取消",
@@ -218,9 +194,9 @@ public class HistoryActivity extends BaseActivity {
                             HistoryActivity.this.getBaseContext(),
                             allHistoryRecord,
                             R.layout.history_item,
-                            new String[]{"key_id", "key_location", "key_time", "key_wgslatlng", "kdy_bdlatlng"}, // 与下面数组元素要一一对应
+                            new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_BD}, // 与下面数组元素要一一对应
                             new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
-                    listView.setAdapter(simAdapt);
+                    recordListView.setAdapter(simAdapt);
                 } else {
                     List<Map<String, Object>> searchRet = new ArrayList<>();
                     for (int i = 0; i < allHistoryRecord.size(); i++){
@@ -233,18 +209,18 @@ public class HistoryActivity extends BaseActivity {
                                 HistoryActivity.this.getBaseContext(),
                                 searchRet,
                                 R.layout.history_item,
-                                new String[]{"key_id", "key_location", "key_time", "key_wgslatlng", "kdy_bdlatlng"}, // 与下面数组元素要一一对应
+                                new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_BD}, // 与下面数组元素要一一对应
                                 new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
-                        listView.setAdapter(simAdapt);
+                        recordListView.setAdapter(simAdapt);
                     } else {
                         DisplayToast("未搜索到指定内容");
                         SimpleAdapter simAdapt = new SimpleAdapter(
                                 HistoryActivity.this.getBaseContext(),
                                 allHistoryRecord,
                                 R.layout.history_item,
-                                new String[]{"key_id", "key_location", "key_time", "key_wgslatlng", "kdy_bdlatlng"}, // 与下面数组元素要一一对应
+                                new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_BD}, // 与下面数组元素要一一对应
                                 new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
-                        listView.setAdapter(simAdapt);
+                        recordListView.setAdapter(simAdapt);
                     }
                 }
 
@@ -253,10 +229,35 @@ public class HistoryActivity extends BaseActivity {
         });
     }
 
-    public void returnLastActivity() {
-        this.finish();
+    private void initRecordListView() {
+        TextView noRecordText = findViewById(R.id.record_no_textview);
+        recordListView = findViewById(R.id.record_list_view);
+        allHistoryRecord = fetchAllRecord(sqLiteDatabase);
+
+        if (allHistoryRecord.size() == 0) {
+            recordListView.setVisibility(View.GONE);
+            mSearchLayout.setVisibility(View.GONE);
+            noRecordText.setVisibility(View.VISIBLE);
+        } else {
+            noRecordText.setVisibility(View.GONE);
+            recordListView.setVisibility(View.VISIBLE);
+            mSearchLayout.setVisibility(View.VISIBLE);
+
+            try {
+                // 与下面数组元素要一一对应
+                SimpleAdapter simAdapt = new SimpleAdapter(
+                        this,
+                        allHistoryRecord,
+                        R.layout.history_item,
+                        new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_BD}, // 与下面数组元素要一一对应
+                        new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
+                recordListView.setAdapter(simAdapt);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
-    
+
     //sqlite 操作 查询所有记录
     private List<Map<String, Object>> fetchAllRecord(SQLiteDatabase sqLiteDatabase) {
         List<Map<String, Object>> data = new ArrayList<>();
@@ -284,18 +285,17 @@ public class HistoryActivity extends BaseActivity {
                 double doubleLatitude = bigDecimalLatitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
                 double doubleBDLongitude = bigDecimalBDLongitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
                 double doubleBDLatitude = bigDecimalBDLatitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
-                item.put("key_id", "" + ID);
-                item.put("key_location", Location);
-                item.put("key_time", timeStamp2Date(Long.toString(TimeStamp), null));
-                item.put("key_wgslatlng", "[经度:" + doubleLongitude + " 纬度:" + doubleLatitude + "]");
-                item.put("kdy_bdlatlng", "[经度:" + doubleBDLongitude + " 纬度:" + doubleBDLatitude + "]");
+                item.put(KEY_ID, "" + ID);
+                item.put(KEY_LOCATION, Location);
+                item.put(KEY_TIME, timeStamp2Date(Long.toString(TimeStamp), null));
+                item.put(KEY_LNG_LAT_WGS, "[经度:" + doubleLongitude + " 纬度:" + doubleLatitude + "]");
+                item.put(KEY_LNG_LAT_BD, "[经度:" + doubleBDLongitude + " 纬度:" + doubleBDLatitude + "]");
                 data.add(item);
             }
             
             // 关闭光标
             cursor.close();
         } catch (Exception e) {
-            Log.e("SQLITE", "query error");
             data.clear();
             e.printStackTrace();
         }
@@ -319,8 +319,7 @@ public class HistoryActivity extends BaseActivity {
     }
     
     //sqlite 操作 保留七天的数据
-    private boolean recordArchive(SQLiteDatabase sqLiteDatabase) {
-        boolean archiveRet = true;
+    private void recordArchive() {
         final long weekSecond = 7 * 24 * 60 * 60;
         
         try {
@@ -328,17 +327,14 @@ public class HistoryActivity extends BaseActivity {
                                   "TimeStamp < ?", new String[] {Long.toString(System.currentTimeMillis() / 1000 - weekSecond)});
         } catch (Exception e) {
             Log.e("SQLITE", "archive error");
-            archiveRet = false;
             e.printStackTrace();
         }
         
         Log.d("SQLITE", "archive success");
-
-        return archiveRet;
     }
     
     //sqlite 操作 删除记录
-    private boolean deleteRecord(SQLiteDatabase sqLiteDatabase, int ID) {
+    private boolean deleteRecord(int ID) {
         boolean deleteRet = true;
         
         try {
@@ -348,7 +344,6 @@ public class HistoryActivity extends BaseActivity {
                 sqLiteDatabase.delete(HistoryLocationDataBaseHelper.TABLE_NAME,
                         "ID = ?", new String[] {Integer.toString(ID)});
             }
-            Log.d("DDDDDD", "delete success");
         } catch (Exception e) {
             Log.e("SQLITE", "delete error");
             deleteRet = false;
