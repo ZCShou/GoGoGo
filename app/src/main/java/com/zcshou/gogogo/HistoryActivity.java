@@ -1,6 +1,5 @@
 package com.zcshou.gogogo;
 
-import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -27,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.zcshou.database.DataBaseHistoryLocation;
@@ -128,16 +128,14 @@ public class HistoryActivity extends BaseActivity {
 
     private void setSearchViewListener() {
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            // 当点击搜索按钮时触发该方法
             @Override
-            public boolean onQueryTextSubmit(String query) {
+            public boolean onQueryTextSubmit(String query) {// 当点击搜索按钮时触发该方法
                 // DisplayToast("click submit");
                 return false;
             }
 
-            // 当搜索内容改变时触发该方法
             @Override
-            public boolean onQueryTextChange(String newText) {
+            public boolean onQueryTextChange(String newText) {// 当搜索内容改变时触发该方法
                 if (TextUtils.isEmpty(newText)) {
                     SimpleAdapter simAdapt = new SimpleAdapter(
                             HistoryActivity.this.getBaseContext(),
@@ -194,7 +192,6 @@ public class HistoryActivity extends BaseActivity {
             mSearchLayout.setVisibility(View.VISIBLE);
 
             try {
-                // 与下面数组元素要一一对应
                 SimpleAdapter simAdapt = new SimpleAdapter(
                         this,
                         mAllRecord,
@@ -290,8 +287,6 @@ public class HistoryActivity extends BaseActivity {
                 item.put(KEY_LNG_LAT_BD, "[经度:" + doubleBDLongitude + " 纬度:" + doubleBDLatitude + "]");
                 data.add(item);
             }
-            
-            // 关闭光标
             cursor.close();
         } catch (Exception e) {
             data.clear();
@@ -310,8 +305,7 @@ public class HistoryActivity extends BaseActivity {
             format = "yyyy-MM-dd HH:mm:ss";
         }
 
-        @SuppressLint("SimpleDateFormat")
-        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
 
         return sdf.format(new Date(Long.parseLong(seconds + "000")));
     }
