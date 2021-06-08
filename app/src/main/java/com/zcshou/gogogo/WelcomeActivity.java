@@ -60,7 +60,6 @@ public class WelcomeActivity extends BaseActivity {
         time = new TimeCount(cnt, 1000);
         startBtn = findViewById(R.id.startButton);
         startBtn.setOnClickListener(v -> startMainActivity());
-
         startBtn.setClickable(false);        // 放在 setOnClickListener 之后才能生效
 
         if (!GoUtils.isNetworkAvailable(this)) {

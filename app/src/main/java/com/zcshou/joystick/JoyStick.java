@@ -44,7 +44,7 @@ public class JoyStick extends View {
     private double mR = 0;
     private double disLng = 0;
     private double disLat = 0;
-    private SharedPreferences sharedPreferences;
+    private final SharedPreferences sharedPreferences;
 
     public JoyStick(Context context) {
         super(context);
@@ -61,14 +61,6 @@ public class JoyStick extends View {
 
             initJoyStickLatLngView();
         }
-
-        // 这里记录启动次数
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        long num = sharedPreferences.getLong("setting_startup_num", 0);
-        sharedPreferences.edit()
-                .putLong("setting_startup_num", ++num)
-                .apply();
-
     }
 
     public JoyStick(Context context, AttributeSet attrs, int defStyleAttr) {
