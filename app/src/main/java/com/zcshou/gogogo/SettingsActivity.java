@@ -18,7 +18,8 @@ public class SettingsActivity extends BaseActivity {
             .replace(R.id.settings, new FragmentSettings())
             .commit();
         }
-        
+
+        /* 获取默认的顶部的标题栏（安卓称为 ActionBar）*/
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayShowHomeEnabled(true);
