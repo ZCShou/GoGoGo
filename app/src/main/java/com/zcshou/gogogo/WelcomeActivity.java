@@ -26,11 +26,13 @@ import java.util.Locale;
 public class WelcomeActivity extends BaseActivity {
     private Button startBtn;
     private TimeCount time;
-    private boolean isPermission;
     private boolean isNetwork = false;
+
+    private boolean isPermission;
     private static final int SDK_PERMISSION_REQUEST = 127;
-    ArrayList<String> ReqPermissions = new ArrayList<>();
-    private boolean isFirstUse;
+    private final ArrayList<String> ReqPermissions = new ArrayList<>();
+
+    private static final String KEY_IS_FIRST_USAGE = "KEY_IS_FIRST_USAGE";
     private SharedPreferences preferences;
 
     @Override
@@ -62,10 +64,9 @@ public class WelcomeActivity extends BaseActivity {
             startBtn.setText(getResources().getString(R.string.welcome_network_error));
         } else {
             isNetwork = true;
-            preferences = getSharedPreferences("isFirstUse", MODE_PRIVATE);
-            isFirstUse = preferences.getBoolean("isFirstUse", true);
+            preferences = getSharedPreferences(KEY_IS_FIRST_USAGE, MODE_PRIVATE);
 
-            if (isFirstUse) {
+            if (preferences.getBoolean(KEY_IS_FIRST_USAGE, true)) {
                 showProtocolDialog();
             } else {
                 requestNeedPermissions();
@@ -162,9 +163,7 @@ public class WelcomeActivity extends BaseActivity {
             if (isPermission) {
                 Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
                 startActivity(intent);
-            }
-            else
-            {
+            } else {
                 requestNeedPermissions();
             }
         }
@@ -201,11 +200,9 @@ public class WelcomeActivity extends BaseActivity {
                     //实例化Editor对象
                     SharedPreferences.Editor editor = preferences.edit();
                     //存入数据
-                    editor.putBoolean("isFirstUse", false);
+                    editor.putBoolean(KEY_IS_FIRST_USAGE, false);
                     //提交修改
                     editor.apply();
-
-                    isFirstUse = false;
                 }
 
                 requestNeedPermissions();

@@ -43,7 +43,6 @@ public class HistoryActivity extends BaseActivity {
 
     private ListView mRecordListView;
     private SearchView mSearchView;
-    private LinearLayout mSearchLayout;
     private SQLiteDatabase mSqliteDB;
     private List<Map<String, Object>> mAllRecord;
     
@@ -181,7 +180,7 @@ public class HistoryActivity extends BaseActivity {
 
     private void initRecordListView() {
         TextView noRecordText = findViewById(R.id.record_no_textview);
-        mSearchLayout = findViewById(R.id.search_linear);
+        LinearLayout mSearchLayout = findViewById(R.id.search_linear);
         mRecordListView = findViewById(R.id.record_list_view);
         mAllRecord = fetchAllRecord();
 
