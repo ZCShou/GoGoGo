@@ -1,13 +1,11 @@
 package com.zcshou.gogogo;
 
-import android.annotation.SuppressLint;
 import android.app.Application;
 import android.app.Service;
 import android.os.Vibrator;
 
 import com.baidu.mapapi.SDKInitializer;
 
-@SuppressLint("Registered")
 public class GoApplication extends Application {
     public Vibrator mVibrator;
     @Override

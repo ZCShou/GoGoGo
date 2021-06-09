@@ -12,7 +12,7 @@
 
     <!-- 欢迎页 -->
     <string name="welcome_btn_txt">进入应用</string>
-    <string name="welcome_btn_cnt">5000</string>
+    <string name="welcome_btn_cnt">3000</string>
     <string name="welcome_desc">世界这么大，我想去看看</string>
     <string name="welcome_protocol_title">免责声明</string>
     <string name="welcome_protocol_agree">同意并继续</string>

@@ -25,7 +25,7 @@
         </com.google.android.material.appbar.AppBarLayout>
 
         <include
-            layout="@layout/content_main"
+            layout="@layout/content_map_baidu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="?attr/actionBarSize" />
@@ -56,66 +56,6 @@
             app:rippleColor="#a9a9a9"
             app:srcCompat="@android:drawable/ic_menu_delete"
             android:contentDescription="@string/fabtn_stop" />
-
-        <LinearLayout
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="bottom|end"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="174dp"
-            android:background="@drawable/circle_shape"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/pos_btn"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:onClick="goCurrentPosition"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:theme="@style/RippleWhite"
-                app:srcCompat="@drawable/ic_home_position"
-                android:contentDescription="@string/map_home"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="bottom|end"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="137dp"
-            android:background="@drawable/circle_shape"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/zoom_in"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:onClick="zoomInMap"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:theme="@style/RippleWhite"
-                app:srcCompat="@drawable/ic_zoom_in"
-                android:contentDescription="@string/map_home"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="bottom|end"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="100dp"
-            android:background="@drawable/circle_shape"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/zoom_out"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:onClick="zoomOutMap"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:theme="@style/RippleWhite"
-                app:srcCompat="@drawable/ic_zoom_out"
-                android:contentDescription="@string/map_home"/>
-        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/search_linear"
