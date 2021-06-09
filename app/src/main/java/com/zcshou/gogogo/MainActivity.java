@@ -62,11 +62,11 @@ import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
+import com.elvishew.xlog.XLog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 // import com.google.android.material.snackbar.Snackbar;
 
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,7 +83,6 @@ import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.zcshou.log4j.LogUtil;
 import com.zcshou.service.ServiceGo;
 import com.zcshou.database.DataBaseHistoryLocation;
 import com.zcshou.database.DataBaseHistorySearch;
@@ -146,10 +145,7 @@ public class MainActivity extends BaseActivity
     private boolean isMockServStart = false;
 
     SharedPreferences sharedPreferences;
-
-    //log debug
-    private static final Logger log = Logger.getLogger(MainActivity.class);
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -158,13 +154,7 @@ public class MainActivity extends BaseActivity
         Toolbar toolbar = findViewById(id.toolbar);
         setSupportActionBar(toolbar);
 
-        try {
-            LogUtil.configLog();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        log.debug("MainActivity: onCreate");
+        XLog.d("xlog test");
 
         //sqlite相关
         initStoreHistory();
@@ -217,21 +207,21 @@ public class MainActivity extends BaseActivity
 
     @Override
     protected void onPause() {
-        log.debug("MainActivity: onPause");
+        XLog.d("MainActivity: onPause");
         mMapView.onPause();
         super.onPause();
     }
 
     @Override
     protected void onResume() {
-        log.debug("MainActivity: onPause");
+        XLog.d("MainActivity: onPause");
         mMapView.onResume();
         super.onResume();
     }
 
     @Override
     protected void onStop() {
-        log.debug("MainActivity: onStop");
+        XLog.d("MainActivity: onStop");
         //取消注册传感器监听
         mSensorManager.unregisterListener(this);
         super.onStop();
@@ -359,16 +349,16 @@ public class MainActivity extends BaseActivity
                     contentValues.put(DataBaseHistorySearch.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
 
                     if (!saveSelectedSearchItem(mSearchHistoryDB, contentValues)) {
-                        log.error("DATABASE: saveSelectedSearchItem[SearchHistory] error");
+                        XLog.e("DATABASE: saveSelectedSearchItem[SearchHistory] error");
                     } else {
-                        log.debug("DATABASE: saveSelectedSearchItem[SearchHistory] success");
+                        XLog.d("DATABASE: saveSelectedSearchItem[SearchHistory] success");
                     }
 
                     mBaiduMap.clear();
                     mSearchLayout.setVisibility(View.INVISIBLE);
                 } catch (Exception e) {
                     DisplayToast("搜索失败，请检查网络连接");
-                    log.debug("HTTP: 搜索失败，请检查网络连接");
+                    XLog.d("HTTP: 搜索失败，请检查网络连接");
                     e.printStackTrace();
                 }
 
@@ -396,7 +386,7 @@ public class MainActivity extends BaseActivity
                         //         .pageNum(0));
                     } catch (Exception e) {
                         DisplayToast("搜索失败，请检查网络连接");
-                        log.debug("HTTP: 搜索失败，请检查网络连接");
+                        XLog.d("HTTP: 搜索失败，请检查网络连接");
                         e.printStackTrace();
                     }
 
@@ -544,13 +534,13 @@ public class MainActivity extends BaseActivity
                     builder.target(mCurLatLngMap).zoom(18.0f);
                     mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
 
-                    log.debug("First Baidu LatLng: " + mCurLatLngMap);
+                    XLog.d("First Baidu LatLng: " + mCurLatLngMap);
 
                     // 这里将百度地图位置转换为 GPS 坐标。实际使用GPS 返回的坐标会更好点
                     double[] latLng = MapUtils.bd2wgs(mCurLatLngMap.longitude, mCurLatLngMap.latitude);
                     mCurLng = latLng[0];
                     mCurLat = latLng[1];
-                    log.debug("First LatLng: " + mCurLng + "   " + mCurLat);
+                    XLog.d("First LatLng: " + mCurLng + "   " + mCurLat);
                 }
             }
         });
@@ -642,7 +632,7 @@ public class MainActivity extends BaseActivity
             }
         } catch (Exception e) {
             ret = false;
-            log.error("UNKNOWN: showHistoryLocation error");
+            XLog.e("UNKNOWN: showHistoryLocation error");
             e.printStackTrace();
         }
 
@@ -651,7 +641,7 @@ public class MainActivity extends BaseActivity
 
     //标定选择的位置
     private void markSelectedPosition() {
-        log.debug("markSelectedPosition");
+        XLog.d("markSelectedPosition");
 
         if (mCurLatLngMap != null) {
             MarkerOptions ooA = new MarkerOptions().position(mCurLatLngMap).icon(mMapIndicator);
@@ -683,22 +673,22 @@ public class MainActivity extends BaseActivity
         //判断bd09坐标是否在国内
         String mapApiUrl = "https://api.map.baidu.com/geoconv/v1/?coords=" + longitude + "," + latitude +
                 "&from=5&to=3&ak=" + ak + "&mcode=" + mcode;
-        log.debug("transformCoordinate: " + mapApiUrl);
+        XLog.d("transformCoordinate: " + mapApiUrl);
         //bd09坐标转gcj02
         StringRequest stringRequest = new StringRequest(mapApiUrl, response -> {
             try {
                 JSONObject getRetJson = new JSONObject(response);
-                log.debug("transformCoordinate:" + getRetJson.toString());
+                XLog.d("transformCoordinate:" + getRetJson.toString());
 
                 //如果api接口转换成功
                 if (Integer.parseInt(getRetJson.getString("status")) == 0) {
-                    log.debug("HTTP: call api[bd09_to_gcj02] success");
+                    XLog.d("HTTP: call api[bd09_to_gcj02] success");
                     JSONArray coordinateArr = getRetJson.getJSONArray("result");
                     JSONObject coordinate = coordinateArr.getJSONObject(0);
                     String gcj02Longitude = coordinate.getString("x");
                     String gcj02Latitude = coordinate.getString("y");
-                    log.debug("bd09Longitude is " + longitude + ", " + "bd09Latitude is " + latitude);
-                    log.debug("gcj02Longitude is " + gcj02Longitude + ", " + "gcj02Latitude is " + gcj02Latitude);
+                    XLog.d("bd09Longitude is " + longitude + ", " + "bd09Latitude is " + latitude);
+                    XLog.d("gcj02Longitude is " + gcj02Longitude + ", " + "gcj02Latitude is " + gcj02Latitude);
                     BigDecimal bigDecimalGcj02Longitude = BigDecimal.valueOf(Double.parseDouble(gcj02Longitude));
                     BigDecimal bigDecimalGcj02Latitude = BigDecimal.valueOf(Double.parseDouble(gcj02Latitude));
                     BigDecimal bigDecimalBd09Longitude = BigDecimal.valueOf(Double.parseDouble(longitude));
@@ -707,15 +697,15 @@ public class MainActivity extends BaseActivity
                     double gcj02LatitudeDouble = bigDecimalGcj02Latitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
                     double bd09LongitudeDouble = bigDecimalBd09Longitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
                     double bd09LatitudeDouble = bigDecimalBd09Latitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
-                    log.debug("gcj02LongitudeDouble is " + gcj02LongitudeDouble + ", " + "gcj02LatitudeDouble is " + gcj02LatitudeDouble);
-                    log.debug("bd09LongitudeDouble is " + bd09LongitudeDouble + ", " + "bd09LatitudeDouble is " + bd09LatitudeDouble);
+                    XLog.d("gcj02LongitudeDouble is " + gcj02LongitudeDouble + ", " + "gcj02LatitudeDouble is " + gcj02LatitudeDouble);
+                    XLog.d("bd09LongitudeDouble is " + bd09LongitudeDouble + ", " + "bd09LatitudeDouble is " + bd09LatitudeDouble);
 
                     //如果bd09转gcj02 结果误差很小  认为该坐标在国外
                     if ((Math.abs(gcj02LongitudeDouble - bd09LongitudeDouble)) <= error && (Math.abs(gcj02LatitudeDouble - bd09LatitudeDouble)) <= error) {
                         //不进行坐标转换
                         mCurLat = Double.parseDouble(latitude);
                         mCurLng = Double.parseDouble(longitude);
-                        log.debug("OUT OF CHN, NO NEED TO TRANSFORM COORDINATE");
+                        XLog.d("OUT OF CHN, NO NEED TO TRANSFORM COORDINATE");
                         // DisplayToast("OUT OF CHN, NO NEED TO TRANSFORM COORDINATE");
                     } else {
                         //离线转换坐标系
@@ -723,7 +713,7 @@ public class MainActivity extends BaseActivity
                         double[] latLng = MapUtils.gcj02towgs84(Double.parseDouble(gcj02Longitude), Double.parseDouble(gcj02Latitude));
                         mCurLng = latLng[0];
                         mCurLat = latLng[1];
-                        log.debug("IN CHN, NEED TO TRANSFORM COORDINATE");
+                        XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
                         // DisplayToast("IN CHN, NEED TO TRANSFORM COORDINATE");
                     }
                 }
@@ -733,27 +723,27 @@ public class MainActivity extends BaseActivity
                     double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
                     mCurLng = latLng[0];
                     mCurLat = latLng[1];
-                    log.debug("IN CHN, NEED TO TRANSFORM COORDINATE");
+                    XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
                     // DisplayToast("BD Map Api Return not Zero, ASSUME IN CHN, NEED TO TRANSFORM COORDINATE");
                 }
             } catch (JSONException e) {
-                log.error("JSON: resolve json error");
+                XLog.e("JSON: resolve json error");
                 e.printStackTrace();
                 //离线转换坐标系
                 double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
                 mCurLng = latLng[0];
                 mCurLat = latLng[1];
-                log.debug("IN CHN, NEED TO TRANSFORM COORDINATE");
+                XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
                 // DisplayToast("Resolve JSON Error, ASSUME IN CHN, NEED TO TRANSFORM COORDINATE");
             }
         }, error1 -> {
             //http 请求失败
-            log.error("HTTP: HTTP GET FAILED");
+            XLog.e("HTTP: HTTP GET FAILED");
             //离线转换坐标系
             double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
             mCurLng = latLng[0];
             mCurLat = latLng[1];
-            log.debug("IN CHN, NEED TO TRANSFORM COORDINATE");
+            XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
             // DisplayToast("HTTP Get Failed, ASSUME IN CHN, NEED TO TRANSFORM COORDINATE");
         });
         // 给请求设置tag
@@ -952,9 +942,9 @@ public class MainActivity extends BaseActivity
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
 
             if (saveSelectedSearchItem(mSearchHistoryDB, contentValues)) {
-                log.debug("DATABASE: saveSelectedSearchItem[SearchHistory] success");
+                XLog.d("DATABASE: saveSelectedSearchItem[SearchHistory] success");
             } else {
-                log.error("DATABASE: saveSelectedSearchItem[SearchHistory] error");
+                XLog.e("DATABASE: saveSelectedSearchItem[SearchHistory] error");
             }
 
             mSearchLayout.setVisibility(View.INVISIBLE);
@@ -998,9 +988,9 @@ public class MainActivity extends BaseActivity
                 contentValues.put(DataBaseHistorySearch.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
 
                 if (saveSelectedSearchItem(mSearchHistoryDB, contentValues)) {
-                    log.debug("DATABASE: saveSelectedSearchItem[SearchHistory] success");
+                    XLog.d("DATABASE: saveSelectedSearchItem[SearchHistory] success");
                 } else {
-                    log.error("DATABASE: saveSelectedSearchItem[SearchHistory] error");
+                    XLog.e("DATABASE: saveSelectedSearchItem[SearchHistory] error");
                 }
             } else if (searchIsLoc.equals("0")) { //如果仅仅是搜索
                 try {
@@ -1022,17 +1012,17 @@ public class MainActivity extends BaseActivity
                     contentValues.put(DataBaseHistorySearch.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
 
                     if (saveSelectedSearchItem(mSearchHistoryDB, contentValues)) {
-                        log.debug("DATABASE: saveSelectedSearchItem[SearchHistory] success");
+                        XLog.d("DATABASE: saveSelectedSearchItem[SearchHistory] success");
                     } else {
-                        log.error("DATABASE: saveSelectedSearchItem[SearchHistory] error");
+                        XLog.e("DATABASE: saveSelectedSearchItem[SearchHistory] error");
                     }
                 } catch (Exception e) {
                     DisplayToast("搜索失败，请检查网络连接");
-                    log.debug("搜索失败，请检查网络连接");
+                    XLog.d("搜索失败，请检查网络连接");
                     e.printStackTrace();
                 }
             } else {    //其他情况
-                log.debug("搜索失败，参数非法");
+                XLog.d("搜索失败，参数非法");
             }
         });
         mSearchHistoryList.setOnItemLongClickListener((parent, view, position, id) -> {
@@ -1059,7 +1049,7 @@ public class MainActivity extends BaseActivity
                                 mHistoryLayout.setVisibility(View.VISIBLE);
                             }
                         } catch (Exception e) {
-                            log.error("DATABASE: delete error");
+                            XLog.e("DATABASE: delete error");
                             DisplayToast("DELETE ERROR[UNKNOWN]");
                             e.printStackTrace();
                         }
@@ -1259,7 +1249,7 @@ public class MainActivity extends BaseActivity
             DataBaseHistorySearch dbHistory = new DataBaseHistorySearch(getApplicationContext());
             mSearchHistoryDB = dbHistory.getWritableDatabase();
         } catch (Exception e) {
-            log.error("DATABASE: sqlite init error");
+            XLog.e("DATABASE: sqlite init error");
             e.printStackTrace();
         }
     }
@@ -1273,7 +1263,7 @@ public class MainActivity extends BaseActivity
             sqLiteDatabase.delete(DataBaseHistoryLocation.TABLE_NAME, DataBaseHistoryLocation.DB_COLUMN_LOCATION + " = ?", new String[] {location});
             sqLiteDatabase.insert(DataBaseHistoryLocation.TABLE_NAME, null, contentValues);
         } catch (Exception e) {
-            log.error("DATABASE: insert error");
+            XLog.e("DATABASE: insert error");
             insertRet = false;
             e.printStackTrace();
         }
@@ -1291,7 +1281,7 @@ public class MainActivity extends BaseActivity
             sqLiteDatabase.delete(DataBaseHistorySearch.TABLE_NAME, DataBaseHistorySearch.DB_COLUMN_KEY + " = ?", new String[] {searchKey});
             sqLiteDatabase.insert(DataBaseHistorySearch.TABLE_NAME, null, contentValues);
         } catch (Exception e) {
-            log.error("DATABASE: insert error");
+            XLog.e("DATABASE: insert error");
             insertRet = false;
             e.printStackTrace();
         }
@@ -1322,7 +1312,7 @@ public class MainActivity extends BaseActivity
             // 关闭光标
             cursor.close();
         } catch (Exception e) {
-            log.error("DATABASE: query error");
+            XLog.e("DATABASE: query error");
             e.printStackTrace();
         }
 
@@ -1337,17 +1327,17 @@ public class MainActivity extends BaseActivity
         final String mapType = "bd09ll";
         //bd09坐标的位置信息
         String mapApiUrl = "https://api.map.baidu.com/reverse_geocoding/v3/?ak=" + ak + "&output=json&coordtype=" + mapType + "&location=" + mCurLatLngMap.latitude + "," + mCurLatLngMap.longitude + "&mcode=" + mcode;
-        log.debug("recordGetPositionInfo:" + mapApiUrl);
+        XLog.d("recordGetPositionInfo:" + mapApiUrl);
         StringRequest stringRequest = new StringRequest(mapApiUrl, response -> {
             try {
                 JSONObject getRetJson = new JSONObject(response);
-                log.debug("recordGetPositionInfo:" + getRetJson.toString());
+                XLog.d("recordGetPositionInfo:" + getRetJson.toString());
 
                 //位置获取成功
                 if (Integer.parseInt(getRetJson.getString("status")) == 0) {
                     JSONObject posInfoJson = getRetJson.getJSONObject("result");
                     String formatted_address = posInfoJson.getString("formatted_address");
-                    log.debug(formatted_address);
+                    XLog.d(formatted_address);
                     //插表参数
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, formatted_address);
@@ -1358,9 +1348,9 @@ public class MainActivity extends BaseActivity
                     contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(mCurLatLngMap.latitude));
 
                     if (saveSelectedLocation(mLocationHistoryDB, contentValues)) {
-                        log.debug("DATABASE: saveSelectedLocation[HistoryLocation] success");
+                        XLog.d("DATABASE: saveSelectedLocation[HistoryLocation] success");
                     } else {
-                        log.error("DATABASE: saveSelectedLocation[HistoryLocation] error");
+                        XLog.e("DATABASE: saveSelectedLocation[HistoryLocation] error");
                     }
                 } else { //位置获取失败
                     //插表参数
@@ -1373,13 +1363,13 @@ public class MainActivity extends BaseActivity
                     contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(mCurLatLngMap.latitude));
 
                     if (saveSelectedLocation(mLocationHistoryDB, contentValues)) {
-                        log.debug("DATABASE: saveSelectedLocation[HistoryLocation] success");
+                        XLog.d("DATABASE: saveSelectedLocation[HistoryLocation] success");
                     } else {
-                        log.error("DATABASE: saveSelectedLocation[HistoryLocation] error");
+                        XLog.e("DATABASE: saveSelectedLocation[HistoryLocation] error");
                     }
                 }
             } catch (JSONException e) {
-                log.error("JSON: resolve json error");
+                XLog.e("JSON: resolve json error");
                 //插表参数
                 ContentValues contentValues = new ContentValues();
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
@@ -1390,16 +1380,16 @@ public class MainActivity extends BaseActivity
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(mCurLatLngMap.latitude));
 
                 if (saveSelectedLocation(mLocationHistoryDB, contentValues)) {
-                    log.debug("DATABASE: saveSelectedLocation[HistoryLocation] success");
+                    XLog.d("DATABASE: saveSelectedLocation[HistoryLocation] success");
                 } else {
-                    log.error("DATABASE: saveSelectedLocation[HistoryLocation] error");
+                    XLog.e("DATABASE: saveSelectedLocation[HistoryLocation] error");
                 }
 
                 e.printStackTrace();
             }
         }, error -> {
             //http 请求失败
-            log.error("HTTP: HTTP GET FAILED");
+            XLog.e("HTTP: HTTP GET FAILED");
             //插表参数
             ContentValues contentValues = new ContentValues();
             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
@@ -1410,9 +1400,9 @@ public class MainActivity extends BaseActivity
             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(mCurLatLngMap.latitude));
 
             if (saveSelectedLocation(mLocationHistoryDB, contentValues)) {
-                log.debug("DATABASE: saveSelectedLocation[HistoryLocation] success");
+                XLog.d("DATABASE: saveSelectedLocation[HistoryLocation] success");
             } else {
-                log.error("DATABASE: saveSelectedLocation[HistoryLocation] error");
+                XLog.e("DATABASE: saveSelectedLocation[HistoryLocation] error");
             }
         });
         // 给请求设置tag
@@ -1423,7 +1413,7 @@ public class MainActivity extends BaseActivity
 
     private void doGoLocation() {
         if (!isMockServStart) {
-            log.debug("Current Baidu LatLng: " + mCurLatLngMap.longitude + "  " + mCurLatLngMap.latitude);
+            XLog.d("Current Baidu LatLng: " + mCurLatLngMap.longitude + "  " + mCurLatLngMap.latitude);
 
             markSelectedPosition();
 
@@ -1437,7 +1427,7 @@ public class MainActivity extends BaseActivity
 
             //insert end
             startForegroundService(serviceGoIntent);
-            log.debug("startForegroundService: ServiceGo");
+            XLog.d("startForegroundService: ServiceGo");
 
             isMockServStart = true;
 //                            Snackbar.make(view, "位置模拟已开启", Snackbar.LENGTH_LONG)
