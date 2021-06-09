@@ -1,13 +1,21 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file('C:\\Users\\ZCShou\\ZCShouKeyGoGo.jks')
+            storePassword 'zcs220807'
+            keyAlias 'GoGoKey'
+            keyPassword 'zcs220807'
+        }
+    }
     compileSdkVersion 29
     defaultConfig {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 27
         targetSdkVersion 29
-        versionCode 160
-        versionName '1.6.0'
+        versionCode 161
+        versionName '1.6.1' // 语义化版本 https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     ndkVersion '22.1.7171670'
