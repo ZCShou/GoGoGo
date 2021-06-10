@@ -60,6 +60,7 @@ import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
+import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.elvishew.xlog.XLog;
@@ -1100,53 +1101,55 @@ public class MainActivity extends BaseActivity
     //检索建议
     private void setSearchSuggestListener() {
         mSuggestionSearch = SuggestionSearch.newInstance();
-        OnGetSuggestionResultListener listener = res -> {
-            if (res == null || res.getAllSuggestions() == null) {
-                DisplayToast("没有找到检索结果");
-            } else { //获取在线建议检索结果
-                if (isSubmit) {
-                    // mBaiduMap.clear();
-                    //normal
-                    //PoiGoOverlay poiOverlay = new PoiGoOverlay(mBaiduMap);
-                    //poiOverlay.setSugData(res);// 设置POI数据
-                    //mBaiduMap.setOnMarkerClickListener(poiOverlay);
-                    //poiOverlay.addToMap();// 将所有的overlay添加到地图上
-                    //poiOverlay.zoomToSpan();
-                    mSearchLayout.setVisibility(View.INVISIBLE);
-                    //标注搜索点 关闭搜索列表
-                    // searchView.clearFocus();  //可以收起键盘
-                    searchItem.collapseActionView(); //关闭搜索视图
-                    isSubmit = false;
-                } else {
-                    List<Map<String, Object>> data = new ArrayList<>();
-                    int retCnt = res.getAllSuggestions().size();
+        mSuggestionSearch.setOnGetSuggestionResultListener(new OnGetSuggestionResultListener() {
+            @Override
+            public void onGetSuggestionResult(SuggestionResult suggestionResult) {
+                if (suggestionResult == null || suggestionResult.getAllSuggestions() == null) {
+                    DisplayToast("没有找到检索结果");
+                } else { //获取在线建议检索结果
+                    if (isSubmit) {
+                        // mBaiduMap.clear();
+                        //normal
+                        //PoiGoOverlay poiOverlay = new PoiGoOverlay(mBaiduMap);
+                        //poiOverlay.setSugData(res);// 设置POI数据
+                        //mBaiduMap.setOnMarkerClickListener(poiOverlay);
+                        //poiOverlay.addToMap();// 将所有的overlay添加到地图上
+                        //poiOverlay.zoomToSpan();
+                        mSearchLayout.setVisibility(View.INVISIBLE);
+                        //标注搜索点 关闭搜索列表
+                        // searchView.clearFocus();  //可以收起键盘
+                        searchItem.collapseActionView(); //关闭搜索视图
+                        isSubmit = false;
+                    } else {
+                        List<Map<String, Object>> data = new ArrayList<>();
+                        int retCnt = suggestionResult.getAllSuggestions().size();
 
-                    for (int i = 0; i < retCnt; i++) {
-                        if (res.getAllSuggestions().get(i).pt == null) {
-                            continue;
+                        for (int i = 0; i < retCnt; i++) {
+                            if (suggestionResult.getAllSuggestions().get(i).pt == null) {
+                                continue;
+                            }
+
+                            Map<String, Object> poiItem = new HashMap<>();
+                            poiItem.put("key_name", suggestionResult.getAllSuggestions().get(i).key);
+                            poiItem.put("key_addr", suggestionResult.getAllSuggestions().get(i).city + " " + suggestionResult.getAllSuggestions().get(i).district);
+                            poiItem.put("key_lng", "" + suggestionResult.getAllSuggestions().get(i).pt.longitude);
+                            poiItem.put("key_lat", "" + suggestionResult.getAllSuggestions().get(i).pt.latitude);
+                            data.add(poiItem);
                         }
 
-                        Map<String, Object> poiItem = new HashMap<>();
-                        poiItem.put("key_name", res.getAllSuggestions().get(i).key);
-                        poiItem.put("key_addr", res.getAllSuggestions().get(i).city + " " + res.getAllSuggestions().get(i).district);
-                        poiItem.put("key_lng", "" + res.getAllSuggestions().get(i).pt.longitude);
-                        poiItem.put("key_lat", "" + res.getAllSuggestions().get(i).pt.latitude);
-                        data.add(poiItem);
+                        SimpleAdapter simAdapt = new SimpleAdapter(
+                                MainActivity.this,
+                                data,
+                                layout.poi_search_item,
+                                new String[] {"key_name", "key_addr", "key_lng", "key_lat"}, // 与下面数组元素要一一对应
+                                new int[] {id.poi_name, id.poi_addr, id.poi_longitude, id.poi_latitude});
+                        mSearchList.setAdapter(simAdapt);
+                        // mSearchList.setVisibility(View.VISIBLE);
+                        mSearchLayout.setVisibility(View.VISIBLE);
                     }
-
-                    SimpleAdapter simAdapt = new SimpleAdapter(
-                            MainActivity.this,
-                            data,
-                            layout.poi_search_item,
-                            new String[] {"key_name", "key_addr", "key_lng", "key_lat"}, // 与下面数组元素要一一对应
-                            new int[] {id.poi_name, id.poi_addr, id.poi_longitude, id.poi_latitude});
-                    mSearchList.setAdapter(simAdapt);
-                    // mSearchList.setVisibility(View.VISIBLE);
-                    mSearchLayout.setVisibility(View.VISIBLE);
                 }
             }
-        };
-        mSuggestionSearch.setOnGetSuggestionResultListener(listener);
+        });
     }
 
 
