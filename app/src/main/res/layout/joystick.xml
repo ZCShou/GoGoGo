@@ -64,7 +64,7 @@
             android:background="@drawable/circle_shape"
             android:orientation="horizontal">
             <ImageButton
-                android:id="@+id/joystick_input"
+                android:id="@+id/joystick_position"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
