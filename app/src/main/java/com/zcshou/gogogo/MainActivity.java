@@ -431,6 +431,7 @@ public class MainActivity extends BaseActivity
         mBaiduMap.setOnMapTouchListener(event -> {
 
         });
+
         mBaiduMap.setOnMapClickListener(new BaiduMap.OnMapClickListener() {
             /**
              * 单击地图

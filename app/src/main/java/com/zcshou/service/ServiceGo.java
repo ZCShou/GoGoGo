@@ -76,13 +76,15 @@ public class ServiceGo extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         mCurLng = intent.getDoubleExtra(MainActivity.LNG_MSG_ID, DEFAULT_LNG);
         mCurLat = intent.getDoubleExtra(MainActivity.LAT_MSG_ID, DEFAULT_LAT);
-        
+
+        mJoyStick.setCurrentPosition(mCurLng, mCurLat);
+
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
-        mJoyStick.hide();
+        mJoyStick.destroy();
 
         mLocHandlerThread.quit();
         mLocHandler.removeMessages(HANDLER_MSG_ID);
@@ -134,13 +136,22 @@ public class ServiceGo extends Service {
 
     private void initJoyStick() {
         mJoyStick = new JoyStick(this);
-        mJoyStick.setListener((disLng, disLat) -> {
-            // 根据当前的经纬度和距离，计算下一个经纬度
-            // Latitude: 1 deg = 110.574 km // 纬度的每度的距离大约为 110.574km
-            // Longitude: 1 deg = 111.320*cos(latitude) km  // 经度的每度的距离从0km到111km不等
-            // 具体见：http://wp.mlab.tw/?p=2200
-            mCurLng += disLng / (111.320 * Math.cos(Math.abs(mCurLat) * Math.PI / 180));
-            mCurLat += disLat / 110.574;
+        mJoyStick.setListener(new JoyStick.JoyStickClickListener() {
+            @Override
+            public void onMoveInfo(double disLng, double disLat) {
+                // 根据当前的经纬度和距离，计算下一个经纬度
+                // Latitude: 1 deg = 110.574 km // 纬度的每度的距离大约为 110.574km
+                // Longitude: 1 deg = 111.320*cos(latitude) km  // 经度的每度的距离从0km到111km不等
+                // 具体见：http://wp.mlab.tw/?p=2200
+                mCurLng += disLng / (111.320 * Math.cos(Math.abs(mCurLat) * Math.PI / 180));
+                mCurLat += disLat / 110.574;
+            }
+
+            @Override
+            public void onPositionInfo(double lng, double lat) {
+                mCurLng = lng;
+                mCurLat = lat;
+            }
         });
         mJoyStick.show();
     }

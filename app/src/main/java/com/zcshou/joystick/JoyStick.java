@@ -11,19 +11,29 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import androidx.preference.PreferenceManager;
 
+import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.MapPoi;
+import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
+import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.MarkerOptions;
+import com.baidu.mapapi.model.LatLng;
 import com.zcshou.gogogo.R;
+import com.zcshou.utils.MapUtils;
 
 public class JoyStick extends View {
     private static final int DivGo = 1000;    /* 移动的时间间隔，单位 ms */
     final private Context mContext;
 
-    private WindowManager.LayoutParams mWindowParams;
+    private WindowManager.LayoutParams mWindowParamJoyStick;
+    private WindowManager.LayoutParams mWindowParamMap;
     private WindowManager mWindowManager;
     private final LayoutInflater inflater;
     private View mJoystickView;
@@ -46,6 +56,13 @@ public class JoyStick extends View {
     private double disLat = 0;
     private final SharedPreferences sharedPreferences;
 
+    private final BitmapDescriptor mMapIndicator = BitmapDescriptorFactory.fromResource(R.drawable.icon_position);
+    MapView mMapView;
+    private BaiduMap mBaiduMap;
+    private double mLng;
+    private double mLat;
+    private LatLng mCurMapLngLat;
+
     public JoyStick(Context context) {
         super(context);
         this.mContext = context;
@@ -59,7 +76,7 @@ public class JoyStick extends View {
         if (inflater != null) {
             initJoyStickView();
 
-            initJoyStickLatLngView();
+            initJoyStickMapView();
         }
     }
 
@@ -76,7 +93,7 @@ public class JoyStick extends View {
         if (inflater != null) {
             initJoyStickView();
 
-            initJoyStickLatLngView();
+            initJoyStickMapView();
         }
     }
 
@@ -93,21 +110,62 @@ public class JoyStick extends View {
         if (inflater != null) {
             initJoyStickView();
 
-            initJoyStickLatLngView();
+            initJoyStickMapView();
         }
+    }
+
+    public void setCurrentPosition(double lng, double lat) {
+        mLng = lng;
+        mLat = lat;
+    }
+
+    public void show() {
+        if (mLatLngView.getParent() != null) {
+            mWindowManager.removeView(mLatLngView);
+        }
+
+        if (mJoystickView.getParent() == null) {
+            mWindowManager.addView(mJoystickView, mWindowParamJoyStick);
+        }
+    }
+
+    public void hide() {
+        if (mLatLngView.getParent() != null) {
+            mWindowManager.removeView(mLatLngView);
+        }
+
+        if (mJoystickView.getParent() != null) {
+            mWindowManager.removeView(mJoystickView);
+        }
+    }
+
+    public void destroy() {
+        if (mLatLngView.getParent() != null) {
+            mWindowManager.removeView(mLatLngView);
+        }
+
+        if (mJoystickView.getParent() != null) {
+            mWindowManager.removeView(mJoystickView);
+        }
+        mBaiduMap.setMyLocationEnabled(false);
+        mMapView.onDestroy();
+    }
+
+    public void setListener(JoyStickClickListener mListener) {
+        this.mListener = mListener;
     }
 
     private void initWindowManager() {
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mWindowParams = new WindowManager.LayoutParams();
-        mWindowParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        mWindowParams.format = PixelFormat.RGBA_8888;
-        mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        mWindowParams.gravity = Gravity.START | Gravity.TOP;
-        mWindowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        mWindowParams.x = 300;
-        mWindowParams.y = 300;
+        mWindowParamJoyStick = new WindowManager.LayoutParams();
+        mWindowParamJoyStick.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        mWindowParamJoyStick.format = PixelFormat.RGBA_8888;
+        mWindowParamJoyStick.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        mWindowParamJoyStick.gravity = Gravity.START | Gravity.TOP;
+        mWindowParamJoyStick.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        mWindowParamJoyStick.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        mWindowParamJoyStick.x = 300;
+        mWindowParamJoyStick.y = 300;
     }
 
     @SuppressLint("InflateParams")
@@ -120,23 +178,23 @@ public class JoyStick extends View {
         mJoystickView = inflater.inflate(R.layout.joystick, null);
         /* 整个摇杆拖动事件处理 */
         mJoystickView.setOnTouchListener(new JoyStickOnTouchListener());
+
         /* 输入按钮点击事件处理 */
-        // 控制按键相关
         ImageButton btnInput = mJoystickView.findViewById(R.id.joystick_input);
         btnInput.setOnClickListener(v -> {
-            if (mJoystickView != null) {
-                mWindowManager.removeView(mJoystickView);
-            }
-
             if (mLatLngView.getParent() == null) {
-                mWindowParams.format = PixelFormat.RGBA_8888;
-                mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                mWindowParams.gravity = Gravity.START | Gravity.TOP;
-                mWindowParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-                mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                mWindowParams.x = 300;
-                mWindowParams.y = 300;
-                mWindowManager.addView(mLatLngView, mWindowParams);
+//                WindowManager.LayoutParams mMapParams;
+//                mMapParams = mWindowParamJoyStick;
+//                mMapParams.x = 0;
+//                mMapParams.y = 0;
+//                mMapParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+//                mMapParams.height = WindowManager.LayoutParams.MATCH_PARENT;
+
+                mWindowManager.addView(mLatLngView, mWindowParamJoyStick);
+
+//                MapStatus.Builder builder = new MapStatus.Builder();
+//                builder.target(mCurMapLngLat).zoom(18.0f);
+//                mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
             }
         });
         /* 步行按键的点击处理 */
@@ -189,7 +247,7 @@ public class JoyStick extends View {
         ButtonView btnView = mJoystickView.findViewById(R.id.joystick_button);
         btnView.setListener(this::processDirection);
 
-        /* 这里用来绝对摇杆类型 */
+        /* 这里用来决定摇杆类型 */
         if (sharedPreferences.getString("joystick_type", "0").equals("0")) {
             rckView.setVisibility(VISIBLE);
             btnView.setVisibility(GONE);
@@ -200,44 +258,88 @@ public class JoyStick extends View {
     }
 
     @SuppressLint({"InflateParams", "ClickableViewAccessibility"})
-    private void initJoyStickLatLngView() {
-        mLatLngView = (LinearLayout)inflater.inflate(R.layout.joystick_latlng, null);
+    private void initJoyStickMapView() {
+        mLatLngView = (LinearLayout)inflater.inflate(R.layout.joystick_map, null);
         mLatLngView.setOnTouchListener(new JoyStickOnTouchListener());
 
-        Button btnOk = mLatLngView.findViewById(R.id.joystick_latlng_ok);
+        ImageButton btnOk = mLatLngView.findViewById(R.id.btnGo);
         btnOk.setOnClickListener(v -> {
-            if (mLatLngView.getParent() != null) {
-                mWindowManager.removeView(mLatLngView);
+            mWindowManager.removeView(mLatLngView);
+            mListener.onPositionInfo(mLng, mLat);
+        });
+        ImageButton btnCancel = mLatLngView.findViewById(R.id.map_close);
+        btnCancel.setOnClickListener(v -> {
+            mWindowManager.removeView(mLatLngView);
+        });
+
+        mMapView = mLatLngView.findViewById(R.id.map_joystick);
+        mMapView.showZoomControls(false);
+        mBaiduMap = mMapView.getMap();
+        mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
+        mBaiduMap.setMyLocationEnabled(true);
+
+        mBaiduMap.setOnMapTouchListener(event -> {
+
+        });
+        mBaiduMap.setOnMapClickListener(new BaiduMap.OnMapClickListener() {
+            /**
+             * 单击地图
+             */
+            public void onMapClick(LatLng point) {
+                mCurMapLngLat = point;
+                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(mMapIndicator);
+                mBaiduMap.clear();
+                mBaiduMap.addOverlay(ooA);
+                /*  */
+                double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
+                mLng = lngLat[0];
+                mLat = lngLat[1];
             }
 
-            if (mJoystickView.getParent() == null) {
-                mWindowParams.format = PixelFormat.RGBA_8888;
-                mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                mWindowParams.gravity = Gravity.START | Gravity.TOP;
-                mWindowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-                mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                mWindowParams.x = 300;
-                mWindowParams.y = 300;
-
-                mWindowManager.addView(mJoystickView, mWindowParams);
+            /**
+             * 单击地图中的POI点
+             */
+            public void onMapPoiClick(MapPoi poi) {
+                mCurMapLngLat = poi.getPosition();
+                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(mMapIndicator);
+                mBaiduMap.clear();
+                mBaiduMap.addOverlay(ooA);
+                /*  */
+                double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
+                mLng = lngLat[0];
+                mLat = lngLat[1];
             }
         });
-        Button btnCancel = mLatLngView.findViewById(R.id.joystick_latlng_cancel);
-        btnCancel.setOnClickListener(v -> {
-            if (mLatLngView.getParent() != null) {
-                mWindowManager.removeView(mLatLngView);
+
+        mBaiduMap.setOnMapLongClickListener(new BaiduMap.OnMapLongClickListener() {
+            /**
+             * 长按地图
+             */
+            public void onMapLongClick(LatLng point) {
+                mCurMapLngLat = point;
+                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(mMapIndicator);
+                mBaiduMap.clear();
+                mBaiduMap.addOverlay(ooA);
+                /*  */
+                double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
+                mLng = lngLat[0];
+                mLat = lngLat[1];
             }
+        });
 
-            if (mJoystickView.getParent() == null) {
-                mWindowParams.format = PixelFormat.RGBA_8888;
-                mWindowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                mWindowParams.gravity = Gravity.START | Gravity.TOP;
-                mWindowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-                mWindowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                mWindowParams.x = 300;
-                mWindowParams.y = 300;
-
-                mWindowManager.addView(mJoystickView, mWindowParams);
+        mBaiduMap.setOnMapDoubleClickListener(new BaiduMap.OnMapDoubleClickListener() {
+            /**
+             * 双击地图
+             */
+            public void onMapDoubleClick(LatLng point) {
+                mCurMapLngLat = point;
+                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(mMapIndicator);
+                mBaiduMap.clear();
+                mBaiduMap.addOverlay(ooA);
+                /*  */
+                double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
+                mLng = lngLat[0];
+                mLat = lngLat[1];
             }
         });
     }
@@ -260,33 +362,9 @@ public class JoyStick extends View {
                 // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）且转换为 km
                 disLng = mSpeed * (double)(DivGo / 1000) * mR * Math.cos(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
                 disLat = mSpeed * (double)(DivGo / 1000) * mR * Math.sin(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
-                mListener.moveInfo(disLng, disLat);
+                mListener.onMoveInfo(disLng, disLat);
             }
         }
-    }
-
-    public void show() {
-        if (mLatLngView.getParent() != null) {
-            mWindowManager.removeView(mLatLngView);
-        }
-
-        if (mJoystickView.getParent() == null) {
-            mWindowManager.addView(mJoystickView, mWindowParams);
-        }
-    }
-    
-    public void hide() {
-        if (mLatLngView.getParent() != null) {
-            mWindowManager.removeView(mLatLngView);
-        }
-
-        if (mJoystickView.getParent() != null) {
-            mWindowManager.removeView(mJoystickView);
-        }
-    }
-
-    public void setListener(JoyStickClickListener mListener) {
-        this.mListener = mListener;
     }
 
     private class JoyStickOnTouchListener implements OnTouchListener {
@@ -307,9 +385,9 @@ public class JoyStick extends View {
                     int movedY = nowY - y;
                     x = nowX;
                     y = nowY;
-                    mWindowParams.x = mWindowParams.x + movedX;
-                    mWindowParams.y = mWindowParams.y + movedY;
-                    mWindowManager.updateViewLayout(view, mWindowParams);
+                    mWindowParamJoyStick.x = mWindowParamJoyStick.x + movedX;
+                    mWindowParamJoyStick.y = mWindowParamJoyStick.y + movedY;
+                    mWindowManager.updateViewLayout(view, mWindowParamJoyStick);
                     break;
                 case MotionEvent.ACTION_UP:
                     view.performClick();
@@ -322,7 +400,9 @@ public class JoyStick extends View {
     }
 
     public interface JoyStickClickListener {
-        void moveInfo(double disLng, double disLat);
+        void onMoveInfo(double disLng, double disLat);
+
+        void onPositionInfo(double lng, double lat);
     }
 
     class TimeCount extends CountDownTimer {
@@ -335,7 +415,7 @@ public class JoyStick extends View {
             // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）且转换为 km
             disLng = mSpeed * (double)(DivGo / 1000) * mR * Math.cos(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
             disLat = mSpeed * (double)(DivGo / 1000) * mR * Math.sin(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
-            mListener.moveInfo(disLng, disLat);
+            mListener.onMoveInfo(disLng, disLat);
             time.start();
         }
 

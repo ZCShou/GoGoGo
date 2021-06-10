@@ -29,28 +29,6 @@
                 android:theme="@style/RippleWhite" />
         </LinearLayout>
 
-<!--        <Space-->
-<!--            android:layout_width="2dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="1" />-->
-
-<!--        <LinearLayout-->
-<!--            android:layout_width="@dimen/joystick_ctrl_btn_width"-->
-<!--            android:layout_height="@dimen/joystick_ctrl_btn_height"-->
-<!--            android:layout_gravity="center_vertical"-->
-<!--            android:gravity="center_vertical"-->
-<!--            android:background="@drawable/circle_shape"-->
-<!--            android:orientation="horizontal">-->
-<!--            <ImageButton-->
-<!--                android:id="@+id/joystick_ew"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:background="?android:attr/selectableItemBackgroundBorderless"-->
-<!--                android:contentDescription="@string/map_home"-->
-<!--                android:src="@drawable/ic_route"-->
-<!--                android:theme="@style/RippleWhite"/>-->
-<!--        </LinearLayout>-->
-
         <Space
             android:layout_width="2dp"
             android:layout_height="wrap_content"
@@ -171,28 +149,6 @@
                 android:src="@drawable/ic_bike"
                 android:theme="@style/RippleWhite"/>
         </LinearLayout>
-
-<!--        <Space-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="1" />-->
-
-<!--        <LinearLayout-->
-<!--            android:layout_width="@dimen/joystick_ctrl_btn_width"-->
-<!--            android:layout_height="@dimen/joystick_ctrl_btn_height"-->
-<!--            android:layout_gravity="center_vertical"-->
-<!--            android:gravity="center_vertical"-->
-<!--            android:background="@drawable/circle_shape"-->
-<!--            android:orientation="horizontal">-->
-<!--            <ImageButton-->
-<!--                android:id="@+id/joystick_bb"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:background="?android:attr/selectableItemBackgroundBorderless"-->
-<!--                android:contentDescription="@string/map_home"-->
-<!--                android:src="@drawable/ic_bike"-->
-<!--                android:theme="@style/RippleWhite"/>-->
-<!--        </LinearLayout>-->
 
     </LinearLayout>
 
