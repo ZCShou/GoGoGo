@@ -1,10 +1,8 @@
 package com.zcshou.gogogo;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.SpannableStringBuilder;
@@ -15,22 +13,16 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import com.zcshou.utils.GoUtils;
 
-import java.util.ArrayList;
 import java.util.Locale;
 
 public class WelcomeActivity extends BaseActivity {
     private Button startBtn;
     private TimeCount time;
     private boolean isNetwork = false;
-
-    private boolean isPermission;
-    private static final int SDK_PERMISSION_REQUEST = 127;
-    private final ArrayList<String> ReqPermissions = new ArrayList<>();
 
     private static final String KEY_IS_FIRST_USAGE = "KEY_IS_FIRST_USAGE";
     private SharedPreferences preferences;
@@ -54,8 +46,6 @@ public class WelcomeActivity extends BaseActivity {
         // 生成默认参数的值（一定要尽可能早的调用，因为后续有些界面可能需要使用参数）
         PreferenceManager.setDefaultValues(this, R.xml.preferences_main, false);
 
-        isPermission = false;
-
         int cnt = Integer.parseInt(getResources().getString(R.string.welcome_btn_cnt));
         time = new TimeCount(cnt, 1000);
         startBtn = findViewById(R.id.startButton);
@@ -63,8 +53,8 @@ public class WelcomeActivity extends BaseActivity {
         startBtn.setClickable(false);        // 放在 setOnClickListener 之后才能生效
 
         if (!GoUtils.isNetworkAvailable(this)) {
-            startBtn.setClickable(true);
             startBtn.setText(getResources().getString(R.string.welcome_network_error));
+            startBtn.setClickable(true);
         } else {
             isNetwork = true;
             preferences = getSharedPreferences(KEY_IS_FIRST_USAGE, MODE_PRIVATE);
@@ -72,7 +62,11 @@ public class WelcomeActivity extends BaseActivity {
             if (preferences.getBoolean(KEY_IS_FIRST_USAGE, true)) {
                 showProtocolDialog();
             } else {
-                requestNeedPermissions();
+                if (haveDefaultPermissions()) {
+                    time.start();
+                } else {
+                    requestDefaultPermissions();
+                }
             }
         }
     }
@@ -100,78 +94,27 @@ public class WelcomeActivity extends BaseActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == SDK_PERMISSION_REQUEST) {
-            int i;
-            for (i = 0; i < ReqPermissions.size(); i++) {
-                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                    break;// Permission Denied 权限被拒绝
-                }
-            }
-
-            if (i >= ReqPermissions.size()) {
-                isPermission = true;
-                time.start();
-            } else {
-                isPermission = false;
-                startBtn.setText(getResources().getString(R.string.welcome_permission_error));
-                startBtn.setClickable(true);
-            }
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    private void requestNeedPermissions() {
-        // 定位精确位置
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ReqPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
-
-        if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ReqPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-        }
-
-        //悬浮窗
-        // if (checkSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
-        //     permissions.add(Manifest.permission.SYSTEM_ALERT_WINDOW);
-        // }
-
-        /*
-         * 读写权限和电话状态权限非必要权限(建议授予)只会申请一次，用户同意或者禁止，只会弹一次
-         */
-        // 读写权限
-        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ReqPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-        }
-
-        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ReqPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-
-        // 读取电话状态权限
-        if (checkSelfPermission( Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            ReqPermissions.add(Manifest.permission.READ_PHONE_STATE);
-        }
-
-        if (ReqPermissions.size() > 0) {
-            requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
-        } else {
-            isPermission = true;
+    public void onPermissionsIsOK(boolean isOK) {       /* 重写父类的方法，实现与父类通信 */
+        if (isOK) {
             time.start();
+        } else {
+            startBtn.setText(getResources().getString(R.string.welcome_permission_error));
+            startBtn.setClickable(true);
         }
+        super.onPermissionsIsOK(isOK);
     }
 
     private void startMainActivity() {
         if (isNetwork) {
-            if (isPermission) {
+            if (haveDefaultPermissions()) {
                 Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
                 startActivity(intent);
+                WelcomeActivity.this.finish();
             } else {
-                requestNeedPermissions();
+                requestDefaultPermissions();
             }
         }
         time.cancel();
-        WelcomeActivity.this.finish();
     }
 
     private void showProtocolDialog() {
@@ -208,7 +151,11 @@ public class WelcomeActivity extends BaseActivity {
                     editor.apply();
                 }
 
-                requestNeedPermissions();
+                if (haveDefaultPermissions()) {
+                    time.start();
+                } else {
+                    requestDefaultPermissions();
+                }
 
                 alertDialog.cancel();
             });
