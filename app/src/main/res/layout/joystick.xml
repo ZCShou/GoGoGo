@@ -22,11 +22,10 @@
                 android:id="@+id/joystick_move"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:clickable="false"
                 android:contentDescription="@string/map_home"
-                android:src="@drawable/ic_move"
-                android:theme="@style/RippleWhite" />
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_move"/>
         </LinearLayout>
 
         <Space
@@ -45,10 +44,9 @@
                 android:id="@+id/joystick_history"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/map_home"
-                android:src="@drawable/ic_history"
-                android:theme="@style/RippleWhite"/>
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_history"/>
         </LinearLayout>
 
         <Space
@@ -67,10 +65,9 @@
                 android:id="@+id/joystick_position"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/map_home"
-                android:src="@drawable/ic_position"
-                android:theme="@style/RippleWhite"/>
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_position"/>
         </LinearLayout>
 
     </LinearLayout>
@@ -100,10 +97,9 @@
                 android:id="@+id/joystick_walk"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/map_home"
-                android:src="@drawable/ic_walk_pressed"
-                android:theme="@style/RippleWhite"/>
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_walk_pressed"/>
         </LinearLayout>
 
         <Space
@@ -124,8 +120,7 @@
                 android:layout_height="match_parent"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/map_home"
-                android:src="@drawable/ic_run"
-                android:theme="@style/RippleWhite"/>
+                android:src="@drawable/ic_run"/>
         </LinearLayout>
 
         <Space
@@ -146,8 +141,7 @@
                 android:layout_height="match_parent"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/map_home"
-                android:src="@drawable/ic_bike"
-                android:theme="@style/RippleWhite"/>
+                android:src="@drawable/ic_bike"/>
         </LinearLayout>
 
     </LinearLayout>
