@@ -116,7 +116,7 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:theme="@style/AppTheme"
             app:srcCompat="@drawable/ic_home_position"
-            android:contentDescription="@string/map_home"
+            android:contentDescription="@null"
             app:tint="@color/colorAccent"/>
 
         <ImageButton
@@ -130,7 +130,7 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:theme="@style/AppTheme"
             app:srcCompat="@drawable/ic_zoom_in"
-            android:contentDescription="@string/map_home"
+            android:contentDescription="@null"
             app:tint="@color/colorAccent"/>
 
         <ImageButton
@@ -144,7 +144,7 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:theme="@style/AppTheme"
             app:srcCompat="@drawable/ic_zoom_out"
-            android:contentDescription="@string/map_home"
+            android:contentDescription="@null"
             app:tint="@color/colorAccent" />
 
         <TextView

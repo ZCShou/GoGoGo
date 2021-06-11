@@ -32,7 +32,7 @@
             android:layout_marginTop="10dp"
             app:srcCompat="@drawable/ic_close"
             app:tint="@color/colorAccent"
-            android:contentDescription="@string/map_home"/>
+            android:contentDescription="@null"/>
 
         <ImageButton
             android:id="@+id/btnGo"
@@ -42,7 +42,7 @@
             android:layout_marginBottom="80dp"
             app:srcCompat="@drawable/ic_position"
             app:tint="@color/colorAccent"
-            android:contentDescription="@string/map_home"/>
+            android:contentDescription="@null"/>
 
     </FrameLayout>
 </LinearLayout>
