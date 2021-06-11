@@ -41,21 +41,7 @@
             app:elevation="6dp"
             app:pressedTranslationZ="12dp"
             app:rippleColor="#a9a9a9"
-            app:srcCompat="@android:drawable/ic_menu_myplaces" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/faBtnStop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|start"
-            android:layout_marginStart="30dp"
-            android:layout_marginBottom="80dp"
-            android:visibility="invisible"
-            app:elevation="6dp"
-            app:pressedTranslationZ="12dp"
-            app:rippleColor="#a9a9a9"
-            app:srcCompat="@android:drawable/ic_menu_delete"
-            android:contentDescription="@string/fabtn_stop" />
+            app:srcCompat="@drawable/ic_position" />
 
         <LinearLayout
             android:id="@+id/search_linear"

@@ -9,6 +9,7 @@ import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -34,7 +35,7 @@ public class WelcomeActivity extends BaseActivity {
 //        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 //                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
+//
         // 从登录界面进入主页，按home键回桌面再进入app，重新弹出登录界面的问题
         if (!isTaskRoot()) {
             finish();
