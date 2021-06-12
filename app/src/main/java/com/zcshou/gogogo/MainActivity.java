@@ -16,14 +16,12 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioGroup;
@@ -54,11 +52,8 @@ import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
-import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
-import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
-import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -240,26 +235,6 @@ public class MainActivity extends BaseActivity
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        if (id == R.id.main_menu_action_setting) {
-            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-            startActivity(intent);
-        } else if (id == R.id.main_menu_action_latlng) {
-            showInputLatLngDialog();
-        } else if (id == R.id.main_menu_action_history) {
-            Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
-            startActivity(intent);
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -341,25 +316,16 @@ public class MainActivity extends BaseActivity
                 mHistoryLayout.setVisibility(View.INVISIBLE);
 
                 if (!newText.equals("")) {
-                    //do search
-                    //WATCH ME
                     try {
                         mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
                                 .keyword(newText)
                                 .city(mCurrentCity)
                         );
-                        // poiSearch.searchInCity((new PoiCitySearchOption())
-                        //         .city(mCurrentCity)
-                        //         .keyword(newText)
-                        //         .pageCapacity(30)
-                        //         .pageNum(0));
                     } catch (Exception e) {
                         DisplayToast("搜索失败，请检查网络连接");
                         XLog.d("HTTP: 搜索失败，请检查网络连接");
                         e.printStackTrace();
                     }
-
-                    //
                 }
 
                 return true;
@@ -572,16 +538,6 @@ public class MainActivity extends BaseActivity
                 mBaiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
             }
         });
-    }
-
-    //设置是否显示交通图
-    public void setMapTraffic(View view) {
-        mBaiduMap.setTrafficEnabled(((CheckBox) view).isChecked());
-    }
-
-    //设置是否显示百度热力图
-    public void setBaiduHeatMap(View view) {
-        mBaiduMap.setBaiduHeatMapEnabled(((CheckBox) view).isChecked());
     }
 
     public void goCurrentPosition(View view) {
@@ -1020,52 +976,49 @@ public class MainActivity extends BaseActivity
     //检索建议
     private void setSearchSuggestListener() {
         mSuggestionSearch = SuggestionSearch.newInstance();
-        mSuggestionSearch.setOnGetSuggestionResultListener(new OnGetSuggestionResultListener() {
-            @Override
-            public void onGetSuggestionResult(SuggestionResult suggestionResult) {
-                if (suggestionResult == null || suggestionResult.getAllSuggestions() == null) {
-                    DisplayToast("没有找到检索结果");
-                } else { //获取在线建议检索结果
-                    if (isSubmit) {
-                        // mBaiduMap.clear();
-                        //normal
-                        //PoiGoOverlay poiOverlay = new PoiGoOverlay(mBaiduMap);
-                        //poiOverlay.setSugData(res);// 设置POI数据
-                        //mBaiduMap.setOnMarkerClickListener(poiOverlay);
-                        //poiOverlay.addToMap();// 将所有的overlay添加到地图上
-                        //poiOverlay.zoomToSpan();
-                        mSearchLayout.setVisibility(View.INVISIBLE);
-                        //标注搜索点 关闭搜索列表
-                        // searchView.clearFocus();  //可以收起键盘
-                        searchItem.collapseActionView(); //关闭搜索视图
-                        isSubmit = false;
-                    } else {
-                        List<Map<String, Object>> data = new ArrayList<>();
-                        int retCnt = suggestionResult.getAllSuggestions().size();
+        mSuggestionSearch.setOnGetSuggestionResultListener(suggestionResult -> {
+            if (suggestionResult == null || suggestionResult.getAllSuggestions() == null) {
+                DisplayToast("没有找到检索结果");
+            } else { //获取在线建议检索结果
+                if (isSubmit) {
+                    // mBaiduMap.clear();
+                    //normal
+                    //PoiGoOverlay poiOverlay = new PoiGoOverlay(mBaiduMap);
+                    //poiOverlay.setSugData(res);// 设置POI数据
+                    //mBaiduMap.setOnMarkerClickListener(poiOverlay);
+                    //poiOverlay.addToMap();// 将所有的overlay添加到地图上
+                    //poiOverlay.zoomToSpan();
+                    mSearchLayout.setVisibility(View.INVISIBLE);
+                    //标注搜索点 关闭搜索列表
+                    // searchView.clearFocus();  //可以收起键盘
+                    searchItem.collapseActionView(); //关闭搜索视图
+                    isSubmit = false;
+                } else {
+                    List<Map<String, Object>> data = new ArrayList<>();
+                    int retCnt = suggestionResult.getAllSuggestions().size();
 
-                        for (int i = 0; i < retCnt; i++) {
-                            if (suggestionResult.getAllSuggestions().get(i).pt == null) {
-                                continue;
-                            }
-
-                            Map<String, Object> poiItem = new HashMap<>();
-                            poiItem.put("key_name", suggestionResult.getAllSuggestions().get(i).key);
-                            poiItem.put("key_addr", suggestionResult.getAllSuggestions().get(i).city + " " + suggestionResult.getAllSuggestions().get(i).district);
-                            poiItem.put("key_lng", "" + suggestionResult.getAllSuggestions().get(i).pt.longitude);
-                            poiItem.put("key_lat", "" + suggestionResult.getAllSuggestions().get(i).pt.latitude);
-                            data.add(poiItem);
+                    for (int i = 0; i < retCnt; i++) {
+                        if (suggestionResult.getAllSuggestions().get(i).pt == null) {
+                            continue;
                         }
 
-                        SimpleAdapter simAdapt = new SimpleAdapter(
-                                MainActivity.this,
-                                data,
-                                R.layout.poi_search_item,
-                                new String[] {"key_name", "key_addr", "key_lng", "key_lat"}, // 与下面数组元素要一一对应
-                                new int[] {R.id.poi_name, R.id.poi_addr, R.id.poi_longitude, R.id.poi_latitude});
-                        mSearchList.setAdapter(simAdapt);
-                        // mSearchList.setVisibility(View.VISIBLE);
-                        mSearchLayout.setVisibility(View.VISIBLE);
+                        Map<String, Object> poiItem = new HashMap<>();
+                        poiItem.put("key_name", suggestionResult.getAllSuggestions().get(i).key);
+                        poiItem.put("key_addr", suggestionResult.getAllSuggestions().get(i).city + " " + suggestionResult.getAllSuggestions().get(i).district);
+                        poiItem.put("key_lng", "" + suggestionResult.getAllSuggestions().get(i).pt.longitude);
+                        poiItem.put("key_lat", "" + suggestionResult.getAllSuggestions().get(i).pt.latitude);
+                        data.add(poiItem);
                     }
+
+                    SimpleAdapter simAdapt = new SimpleAdapter(
+                            MainActivity.this,
+                            data,
+                            R.layout.poi_search_item,
+                            new String[] {"key_name", "key_addr", "key_lng", "key_lat"}, // 与下面数组元素要一一对应
+                            new int[] {R.id.poi_name, R.id.poi_addr, R.id.poi_longitude, R.id.poi_latitude});
+                    mSearchList.setAdapter(simAdapt);
+                    // mSearchList.setVisibility(View.VISIBLE);
+                    mSearchLayout.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -1125,46 +1078,6 @@ public class MainActivity extends BaseActivity
                 .show();
     }
 
-    //显示输入经纬度的对话框
-    public void showInputLatLngDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle("输入经度和纬度(BD09坐标系)");
-        //    通过LayoutInflater来加载一个xml的布局文件作为一个View对象
-        View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.latlng_dialog, null);
-        //    设置我们自己定义的布局文件作为弹出框的Content
-        builder.setView(view);
-        final EditText dialog_lng = view.findViewById(R.id.dialog_longitude);
-        final EditText dialog_lat = view.findViewById(R.id.dialog_latitude);
-        builder.setPositiveButton("确定", (dialog, which) -> {
-            String dialog_lng_str, dialog_lat_str;
-
-            try {
-                dialog_lng_str = dialog_lng.getText().toString().trim();
-                dialog_lat_str = dialog_lat.getText().toString().trim();
-                double dialog_lng_double = Double.parseDouble(dialog_lng_str);
-                double dialog_lat_double = Double.parseDouble(dialog_lat_str);
-
-                // DisplayToast("经度: " + dialog_lng_str + ", 纬度: " + dialog_lat_str);
-                if (dialog_lng_double > 180.0 || dialog_lng_double < -180.0 || dialog_lat_double > 90.0 || dialog_lat_double < -90.0) {
-                    DisplayToast("经纬度超出限制!\n-180.0<经度<180.0\n-90.0<纬度<90.0");
-                } else {
-                    mCurLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
-                    MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mCurLatLngMap);
-                    //对地图的中心点进行更新
-                    mBaiduMap.setMapStatus(mapstatusupdate);
-                    markSelectedPosition();
-                    transformCoordinate(dialog_lng_str, dialog_lat_str);
-                }
-            } catch (Exception e) {
-                DisplayToast("获取经纬度出错,请检查输入是否正确");
-                e.printStackTrace();
-            }
-        });
-        builder.setNegativeButton("取消", (dialog, which) -> {
-        });
-        builder.show();
-    }
-
     private void initStoreHistory() {
         try {
             //定位历史
@@ -1214,7 +1127,6 @@ public class MainActivity extends BaseActivity
                     null, null, DataBaseHistorySearch.DB_COLUMN_TIMESTAMP + " DESC", null);
 
             while (cursor.moveToNext()) {
-                // int ID = cursor.getInt(0);
                 Map<String, Object> searchHistoryItem = new HashMap<>();
                 searchHistoryItem.put("search_key", cursor.getString(1));
                 searchHistoryItem.put("search_description", cursor.getString(2));
@@ -1224,7 +1136,6 @@ public class MainActivity extends BaseActivity
                 searchHistoryItem.put("search_latitude", "" + cursor.getString(8));
                 data.add(searchHistoryItem);
             }
-            // 关闭光标
             cursor.close();
         } catch (Exception e) {
             XLog.e("DATABASE: query error");
@@ -1261,7 +1172,7 @@ public class MainActivity extends BaseActivity
                     contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
                     contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
                     contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(latitude));
+                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
                     contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
 
                     saveSelectedLocation(mLocationHistoryDB, contentValues);
@@ -1385,7 +1296,7 @@ public class MainActivity extends BaseActivity
 
     private void setGoBtnListener() {
         mButtonStart = findViewById(R.id.faBtnStart);
-        mButtonStart.setOnClickListener(view -> startGoLocation(view));
+        mButtonStart.setOnClickListener(this::startGoLocation);
     }
 
     private class TimeTask implements Runnable {
