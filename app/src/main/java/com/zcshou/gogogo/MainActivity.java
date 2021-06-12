@@ -204,7 +204,7 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onDestroy() {
         XLog.i("MainActivity: onDestroy");
-        
+
         if (isMockServStart) {
             Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
             stopService(serviceGoIntent);
@@ -557,7 +557,7 @@ public class MainActivity extends BaseActivity
         //LocationMode. Device_Sensors：仅使用设备；
         option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy); //高精度模式
         //可选，设置是否当GPS有效时按照1S/1次频率输出GPS结果，默认false
-//    option.setLocationNotify(true);
+        // option.setLocationNotify(true);
         mLocClient.setLocOption(option);
         mLocClient.start();
     }
