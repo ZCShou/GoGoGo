@@ -21,46 +21,13 @@
         </com.baidu.mapapi.map.MapView>
 
         <RadioGroup
-            android:id="@+id/RadioGroupMapTrack"
-            android:layout_width="90dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginEnd="5dp"
-            android:layout_marginTop="4dip"
-            android:orientation="vertical">
-
-            <RadioButton
-                android:id="@+id/normalloc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:checked="true"
-                android:text="@string/map_normal" />
-
-            <RadioButton
-                android:id="@+id/trackloc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/map_track" />
-
-            <RadioButton
-                android:id="@+id/compassloc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/map_compass" />
-        </RadioGroup>
-
-        <RadioGroup
             android:id="@+id/RadioGroupMapType"
             android:layout_width="90dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
             android:layout_marginEnd="5dp"
-            android:layout_marginTop="100dip"
+            android:layout_marginTop="4dip"
             android:orientation="vertical">
 
             <RadioButton

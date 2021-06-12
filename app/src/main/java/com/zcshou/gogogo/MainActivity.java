@@ -251,8 +251,6 @@ public class MainActivity extends BaseActivity
             startActivity(intent);
         } else if (id == R.id.main_menu_action_latlng) {
             showInputLatLngDialog();
-        }  else if (id == R.id.action_faq) {
-            showFaqDialog();
         } else if (id == R.id.main_menu_action_history) {
             Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
             startActivity(intent);
@@ -564,30 +562,6 @@ public class MainActivity extends BaseActivity
 
     //地图上各按键的监听
     private void initListenerMapBtn() {
-        RadioGroup mGroupMapTrack = this.findViewById(R.id.RadioGroupMapTrack);
-        mGroupMapTrack.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.normalloc) {
-                mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
-                        MyLocationConfiguration.LocationMode.NORMAL, true, null));
-                MapStatus.Builder builder1 = new MapStatus.Builder();
-                builder1.overlook(0);
-                mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder1.build()));
-            }
-
-            if (checkedId == R.id.trackloc) {
-                mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
-                        MyLocationConfiguration.LocationMode.FOLLOWING, true, null));
-                MapStatus.Builder builder = new MapStatus.Builder();
-                builder.overlook(0);
-                mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
-            }
-
-            if (checkedId == R.id.compassloc) {
-                mBaiduMap.setMyLocationConfiguration(new MyLocationConfiguration(
-                        MyLocationConfiguration.LocationMode.COMPASS, true, null));
-            }
-        });
-
         RadioGroup mGroupMapType = this.findViewById(R.id.RadioGroupMapType);
         mGroupMapType.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.normal) {
@@ -1190,38 +1164,6 @@ public class MainActivity extends BaseActivity
         });
         builder.show();
     }
-
-    private void showFaqDialog() {
-        final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(this).create();
-        alertDialog.show();
-        // alertDialog.setCancelable(false);
-        Window window = alertDialog.getWindow();
-        if (window != null) {
-            window.setContentView(R.layout.faq);
-            window.setGravity(Gravity.CENTER);
-            window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
-
-            TextView tvContent = window.findViewById(R.id.faq_content);
-            String str = "Q：Android 虚拟定位的实现原理是什么？\n"
-                    + "A：具有 ROOT 权限的，一般直接拦截和位置相关的接口更改位置数据。没有 ROOT 权限的，一种是使用 Android 提供的模拟位置 API，一种基于 VirtualApp。\n"
-                    + "\nQ：为何定位总是闪回真实位置？\n"
-                    + "A：这和虚拟定位的实现方式有关系。Android 提供的模拟位置 API 只能模拟 GPS。而安卓的定位数据会同时使用 GPS、网络/WIFI等来实现更精确的定位\n"
-                    + "\nQ：如何防止虚拟定位闪回真实位置？\n"
-                    + "A：对于多数手机，是可以设置定位数据来源的。可以直接关闭从网络/WIFI定位，只允许 GPS 定位；同时关闭 WIFI，仅使用数据流量来上网可有效防止闪回\n"
-                    + "\nQ：为啥在某些软件上没有效果？\n"
-                    + "A：目前仅适用于百度地图和高德地图的SDK定位. 腾讯系列无法使用\n"
-                    + "\nQ：使用位置的 APP 如何检测有没有虚拟定位？\n"
-                    + "A：对于使用 ROOT 权限的虚拟定位，是无法被检测的（但是会检测到 ROOT 权限）；使用 Android 提供的模拟位置 API，在 Android 6.0 之后，系统也没有挺检测方式。基于 VirtualApp 的检测方式要多一些。但是通常，如果位置变化较大、较快，APP 会认为定位异常\n";
-
-            SpannableStringBuilder ssb = new SpannableStringBuilder();
-            ssb.append(str);
-
-            tvContent.setMovementMethod(LinkMovementMethod.getInstance());
-            tvContent.setText(ssb, TextView.BufferType.SPANNABLE);
-
-        }
-    }
-
 
     private void initStoreHistory() {
         try {
