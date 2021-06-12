@@ -30,7 +30,7 @@ import com.zcshou.utils.MapUtils;
 
 public class JoyStick extends View {
     private static final int DivGo = 1000;    /* 移动的时间间隔，单位 ms */
-    final private Context mContext;
+    private final Context mContext;
 
     private WindowManager.LayoutParams mWindowParamJoyStick;
     private WindowManager.LayoutParams mWindowParamMap;
@@ -59,7 +59,7 @@ public class JoyStick extends View {
     private final SharedPreferences sharedPreferences;
 
     private final BitmapDescriptor mMapIndicator = BitmapDescriptorFactory.fromResource(R.drawable.icon_position);
-    MapView mMapView;
+    private MapView mMapView;
     private BaiduMap mBaiduMap;
     private double mLng;
     private double mLat;

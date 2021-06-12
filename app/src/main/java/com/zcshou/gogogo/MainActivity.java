@@ -204,6 +204,7 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onDestroy() {
         XLog.i("MainActivity: onDestroy");
+        
         if (isMockServStart) {
             Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
             stopService(serviceGoIntent);
