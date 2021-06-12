@@ -153,6 +153,8 @@ public class MainActivity extends BaseActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        XLog.i("MainActivity: onCreate");
+
         //sqlite相关
         initStoreHistory();
 
@@ -165,16 +167,6 @@ public class MainActivity extends BaseActivity
 
         // 地图上按键的监听
         initListenerMapBtn();
-
-        //网络是否可用
-        if (!GoUtils.isNetworkAvailable(this)) {
-            DisplayToast("网络连接不可用,请检查网络连接设置");
-        }
-
-        //gps是否开启
-        if (!GoUtils.isGpsOpened(this)) {
-            DisplayToast("GPS定位未开启，请先打开GPS定位服务");
-        }
 
         initNavigationView();
 
@@ -189,21 +181,21 @@ public class MainActivity extends BaseActivity
 
     @Override
     protected void onPause() {
-        XLog.d("MainActivity: onPause");
+        XLog.i("MainActivity: onPause");
         mMapView.onPause();
         super.onPause();
     }
 
     @Override
     protected void onResume() {
-        XLog.d("MainActivity: onPause");
+        XLog.i("MainActivity: onResume");
         mMapView.onResume();
         super.onResume();
     }
 
     @Override
     protected void onStop() {
-        XLog.d("MainActivity: onStop");
+        XLog.i("MainActivity: onStop");
         //取消注册传感器监听
         mSensorManager.unregisterListener(this);
         super.onStop();
@@ -211,6 +203,7 @@ public class MainActivity extends BaseActivity
 
     @Override
     protected void onDestroy() {
+        XLog.i("MainActivity: onDestroy");
         if (isMockServStart) {
             Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
             stopService(serviceGoIntent);

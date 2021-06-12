@@ -124,7 +124,6 @@ public class ServiceGo extends Service {
                 .setChannelId(SERVICE_GO_NOTE_CHANNEL_ID)
                 .setContentTitle(getResources().getString(R.string.app_name))
                 .setContentText(getResources().getString(R.string.app_service))
-//                .setStyle(new NotificationCompat.BigTextStyle().bigText(getResources().getString(R.string.app_service)))
                 .setContentIntent(clickPI)
                 .addAction(new NotificationCompat.Action(null, getResources().getString(R.string.note_show), showPendingPI))
                 .addAction(new NotificationCompat.Action(null, getResources().getString(R.string.note_hide), hidePendingPI))

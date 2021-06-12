@@ -56,11 +56,6 @@
         android:theme="@style/AppTheme"
         tools:targetApi="q">
 
-        <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-2117389248426871~1441816909"/>
-
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
@@ -105,10 +100,6 @@
             android:name=".HistoryActivity"
             android:label="@string/app_history"
             android:screenOrientation="portrait"/>
-
-        <receiver
-            android:name=".MainActivity$ServiceGoReceiver"
-            tools:ignore="Instantiatable" />
 
     </application>
 

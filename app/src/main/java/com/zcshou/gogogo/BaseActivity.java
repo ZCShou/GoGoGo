@@ -18,8 +18,8 @@ public class BaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /* 防止旋转 */
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        /* 防止旋转(这里效果不不好，在这换界面的瞬间还是会出现屏幕旋转) */
+        // setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         checkDefaultPermissions();
     }
