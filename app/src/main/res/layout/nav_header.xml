@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:contentDescription="@string/nav_header_desc"
+        android:contentDescription="@null"
         app:srcCompat="@mipmap/ic_launcher_round" />
 
     <TextView

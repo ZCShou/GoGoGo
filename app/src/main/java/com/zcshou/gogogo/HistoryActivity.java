@@ -49,7 +49,7 @@ public class HistoryActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.history_list);
+        setContentView(R.layout.activity_history);
 
         ActionBar actionBar = getSupportActionBar();
         if(actionBar != null) {

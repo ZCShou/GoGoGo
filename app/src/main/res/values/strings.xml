@@ -31,10 +31,8 @@
     </string>
     <!-- 主界面 -->
     <string name="fabtn_start">启动定位</string>
-    <string name="fabtn_stop">停止定位</string>
     <string name="label_longitude">经度</string>
     <string name="label_latitude">纬度</string>
-    <string name="label_faq">FAQ</string>
     <!-- 主菜单 -->
     <string name="main_menu_action_latlng">经纬度定位</string>
     <string name="main_menu_action_history">历史记录</string>

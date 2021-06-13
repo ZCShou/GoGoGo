@@ -242,7 +242,7 @@ public class MainActivity extends BaseActivity
         searchItem = menu.findItem(R.id.action_search);
         searchView = (SearchView) searchItem.getActionView();
         //searchView.setIconified(false);// 设置searchView处于展开状态
-        searchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
+//        searchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
         // searchView.setIconifiedByDefault(true);//默认为true在框内，设置false则在框外
         //searchView.setSubmitButtonEnabled(false);//显示提交按钮
         searchItem.setOnActionExpandListener(new  MenuItem.OnActionExpandListener() {
