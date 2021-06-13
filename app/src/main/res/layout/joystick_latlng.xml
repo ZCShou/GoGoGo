@@ -34,23 +34,21 @@
             android:layout_weight="1" />
 
         <Button
-            android:id="@+id/joystick_latlng_ok"
+            android:id="@+id/joystick_latlng_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/btn_bottom_confirm_bg"
-            android:text="@string/joystick_input_ok"/>
+            android:theme="@style/AppTheme.Button"
+            android:text="@string/joystick_input_cancel"/>
 
         <Space
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
-
         <Button
-            android:id="@+id/joystick_latlng_cancel"
+            android:id="@+id/joystick_latlng_ok"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/btn_bottom_confirm_bg"
-            android:text="@string/joystick_input_cancel"/>
+            android:text="@string/joystick_input_ok"/>
 
         <Space
             android:layout_width="0dp"

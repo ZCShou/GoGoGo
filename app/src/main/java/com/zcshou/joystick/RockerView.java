@@ -40,10 +40,10 @@ public class RockerView extends View {
     private boolean isClick = false;
 
     private RockerViewClickListener mListener;
-    Context mContext;
+    private final Context mContext;
 
-    Rect srcRect = null;
-    Rect dstRect = null;
+    private Rect srcRect = null;
+    private Rect dstRect = null;
 
     public RockerView(Context context) {
         super(context);

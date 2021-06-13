@@ -39,7 +39,7 @@ public class HistoryActivity extends BaseActivity {
     private static final String KEY_LOCATION = "KEY_LOCATION";
     private static final String KEY_TIME = "KEY_TIME";
     private static final String KEY_LNG_LAT_WGS = "KEY_LNG_LAT_WGS";
-    private static final String KEY_LNG_LAT_BD = "KEY_LNG_LAT_BD";
+    private static final String KEY_LNG_LAT_CUSTOM = "KEY_LNG_LAT_CUSTOM";
 
     private ListView mRecordListView;
     private SearchView mSearchView;
@@ -49,7 +49,7 @@ public class HistoryActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.history_list);
+        setContentView(R.layout.activity_history);
 
         ActionBar actionBar = getSupportActionBar();
         if(actionBar != null) {
@@ -141,7 +141,7 @@ public class HistoryActivity extends BaseActivity {
                             HistoryActivity.this.getBaseContext(),
                             mAllRecord,
                             R.layout.history_item,
-                            new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_BD}, // 与下面数组元素要一一对应
+                            new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_CUSTOM}, // 与下面数组元素要一一对应
                             new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
                     mRecordListView.setAdapter(simAdapt);
                 } else {
@@ -156,7 +156,7 @@ public class HistoryActivity extends BaseActivity {
                                 HistoryActivity.this.getBaseContext(),
                                 searchRet,
                                 R.layout.history_item,
-                                new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_BD}, // 与下面数组元素要一一对应
+                                new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_CUSTOM}, // 与下面数组元素要一一对应
                                 new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
                         mRecordListView.setAdapter(simAdapt);
                     } else {
@@ -165,7 +165,7 @@ public class HistoryActivity extends BaseActivity {
                                 HistoryActivity.this.getBaseContext(),
                                 mAllRecord,
                                 R.layout.history_item,
-                                new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_BD}, // 与下面数组元素要一一对应
+                                new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_CUSTOM}, // 与下面数组元素要一一对应
                                 new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
                         mRecordListView.setAdapter(simAdapt);
                     }
@@ -196,7 +196,7 @@ public class HistoryActivity extends BaseActivity {
                         this,
                         mAllRecord,
                         R.layout.history_item,
-                        new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_BD}, // 与下面数组元素要一一对应
+                        new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_CUSTOM}, // 与下面数组元素要一一对应
                         new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
                 mRecordListView.setAdapter(simAdapt);
             } catch (Exception e) {
@@ -284,7 +284,7 @@ public class HistoryActivity extends BaseActivity {
                 item.put(KEY_LOCATION, Location);
                 item.put(KEY_TIME, timeStamp2Date(Long.toString(TimeStamp), null));
                 item.put(KEY_LNG_LAT_WGS, "[经度:" + doubleLongitude + " 纬度:" + doubleLatitude + "]");
-                item.put(KEY_LNG_LAT_BD, "[经度:" + doubleBDLongitude + " 纬度:" + doubleBDLatitude + "]");
+                item.put(KEY_LNG_LAT_CUSTOM, "[经度:" + doubleBDLongitude + " 纬度:" + doubleBDLatitude + "]");
                 data.add(item);
             }
             cursor.close();

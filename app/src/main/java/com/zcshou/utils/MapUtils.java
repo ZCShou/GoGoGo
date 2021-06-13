@@ -49,9 +49,7 @@ public class MapUtils {
         double gg_lat = z * Math.sin(theta);
         return new double[] { gg_lng, gg_lat };
     }
-    
-    
-    
+
     public static double[] gcj02towgs84(double lng, double lat) {
         //		if (out_of_china(lng, lat)) {
         //			return new double[] { lng, lat };

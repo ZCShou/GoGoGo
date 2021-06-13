@@ -5,17 +5,21 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
+import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
 import com.zcshou.utils.GoUtils;
@@ -23,25 +27,28 @@ import com.zcshou.utils.GoUtils;
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class WelcomeActivity extends BaseActivity {
+public class WelcomeActivity extends AppCompatActivity {
     private Button startBtn;
     private TimeCount time;
     private boolean isNetwork = false;
 
-    private boolean isPermission;
-    private static final int SDK_PERMISSION_REQUEST = 127;
-    private final ArrayList<String> ReqPermissions = new ArrayList<>();
-
     private static final String KEY_IS_FIRST_USAGE = "KEY_IS_FIRST_USAGE";
     private SharedPreferences preferences;
+
+    private static boolean isPermission = false;
+    private static final int SDK_PERMISSION_REQUEST = 127;
+    private static final ArrayList<String> ReqPermissions = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        /* 全屏，必须尽早调用 */
-//        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        Window window = getWindow();
+        window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.TRANSPARENT);
 
         // 从登录界面进入主页，按home键回桌面再进入app，重新弹出登录界面的问题
         if (!isTaskRoot()) {
@@ -54,8 +61,6 @@ public class WelcomeActivity extends BaseActivity {
         // 生成默认参数的值（一定要尽可能早的调用，因为后续有些界面可能需要使用参数）
         PreferenceManager.setDefaultValues(this, R.xml.preferences_main, false);
 
-        isPermission = false;
-
         int cnt = Integer.parseInt(getResources().getString(R.string.welcome_btn_cnt));
         time = new TimeCount(cnt, 1000);
         startBtn = findViewById(R.id.startButton);
@@ -63,8 +68,8 @@ public class WelcomeActivity extends BaseActivity {
         startBtn.setClickable(false);        // 放在 setOnClickListener 之后才能生效
 
         if (!GoUtils.isNetworkAvailable(this)) {
-            startBtn.setClickable(true);
             startBtn.setText(getResources().getString(R.string.welcome_network_error));
+            startBtn.setClickable(true);
         } else {
             isNetwork = true;
             preferences = getSharedPreferences(KEY_IS_FIRST_USAGE, MODE_PRIVATE);
@@ -72,7 +77,7 @@ public class WelcomeActivity extends BaseActivity {
             if (preferences.getBoolean(KEY_IS_FIRST_USAGE, true)) {
                 showProtocolDialog();
             } else {
-                requestNeedPermissions();
+                checkDefaultPermissions();
             }
         }
     }
@@ -113,7 +118,6 @@ public class WelcomeActivity extends BaseActivity {
                 isPermission = true;
                 time.start();
             } else {
-                isPermission = false;
                 startBtn.setText(getResources().getString(R.string.welcome_permission_error));
                 startBtn.setClickable(true);
             }
@@ -121,7 +125,7 @@ public class WelcomeActivity extends BaseActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    private void requestNeedPermissions() {
+    private void checkDefaultPermissions() {
         // 定位精确位置
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ReqPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
@@ -149,15 +153,15 @@ public class WelcomeActivity extends BaseActivity {
         }
 
         // 读取电话状态权限
-        if (checkSelfPermission( Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             ReqPermissions.add(Manifest.permission.READ_PHONE_STATE);
         }
 
-        if (ReqPermissions.size() > 0) {
-            requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
-        } else {
+        if (ReqPermissions.size() <= 0) {
             isPermission = true;
             time.start();
+        } else {
+            requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
         }
     }
 
@@ -166,12 +170,12 @@ public class WelcomeActivity extends BaseActivity {
             if (isPermission) {
                 Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
                 startActivity(intent);
+                WelcomeActivity.this.finish();
             } else {
-                requestNeedPermissions();
+                checkDefaultPermissions();
             }
         }
         time.cancel();
-        WelcomeActivity.this.finish();
     }
 
     private void showProtocolDialog() {
@@ -208,7 +212,11 @@ public class WelcomeActivity extends BaseActivity {
                     editor.apply();
                 }
 
-                requestNeedPermissions();
+                if (isPermission) {
+                    time.start();
+                } else {
+                    checkDefaultPermissions();
+                }
 
                 alertDialog.cancel();
             });

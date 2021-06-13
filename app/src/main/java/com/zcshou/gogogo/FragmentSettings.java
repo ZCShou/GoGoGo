@@ -9,11 +9,13 @@ import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.Preference.OnPreferenceChangeListener;
+import androidx.preference.SwitchPreferenceCompat;
 
+import com.elvishew.xlog.XLog;
 import com.zcshou.utils.AppUtils;
 
 /* */
-public class FragmentSettings extends PreferenceFragmentCompat implements OnPreferenceChangeListener {
+public class FragmentSettings extends PreferenceFragmentCompat {
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -76,11 +78,27 @@ public class FragmentSettings extends PreferenceFragmentCompat implements OnPref
             });
             pfBike.setOnBindEditTextListener(editText -> editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER));
         }
-    }
-    
-    @Override
-    public boolean onPreferenceChange(Preference preference, Object newValue) {
-        return true;
-    }
 
+        SwitchPreferenceCompat pLog = findPreference("setting_log_off");
+        if (pLog != null) {
+            pLog.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+
+                    if(((SwitchPreferenceCompat) preference).isChecked() != (Boolean) newValue) {
+                        XLog.d(preference.getKey() + newValue);
+
+                        if (Boolean.parseBoolean(newValue.toString())) {
+                            XLog.d("on");
+                        } else {
+                            XLog.d("off");
+                        }
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            });
+        }
+    }
 }

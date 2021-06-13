@@ -16,7 +16,7 @@
             android:layout_width="@dimen/joystick_btn_width"
             android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/map_home"
+            android:contentDescription="@null"
             android:src="@drawable/ic_left_up"
             android:theme="@style/RippleWhite" />
 
@@ -25,7 +25,7 @@
             android:layout_width="@dimen/joystick_btn_width"
             android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/map_home"
+            android:contentDescription="@null"
             android:src="@drawable/ic_up"
             android:theme="@style/RippleWhite" />
 
@@ -34,7 +34,7 @@
             android:layout_width="@dimen/joystick_btn_width"
             android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/map_home"
+            android:contentDescription="@null"
             android:src="@drawable/ic_right_up"
             android:theme="@style/RippleWhite" />
 
@@ -50,7 +50,7 @@
             android:layout_width="@dimen/joystick_btn_width"
             android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/map_home"
+            android:contentDescription="@null"
             android:src="@drawable/ic_left"
             android:theme="@style/RippleWhite" />
 
@@ -59,7 +59,7 @@
             android:layout_width="@dimen/joystick_btn_width"
             android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/map_home"
+            android:contentDescription="@null"
             android:src="@drawable/ic_lock_close"
             android:theme="@style/RippleWhite" />
 
@@ -68,7 +68,7 @@
             android:layout_width="@dimen/joystick_btn_width"
             android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/map_home"
+            android:contentDescription="@null"
             android:src="@drawable/ic_right"
             android:theme="@style/RippleWhite" />
 
@@ -85,7 +85,7 @@
             android:layout_width="@dimen/joystick_btn_width"
             android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/map_home"
+            android:contentDescription="@null"
             android:src="@drawable/ic_left_down"
             android:theme="@style/RippleWhite" />
 
@@ -94,7 +94,7 @@
             android:layout_width="@dimen/joystick_btn_width"
             android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/map_home"
+            android:contentDescription="@null"
             android:src="@drawable/ic_down"
             android:theme="@style/RippleWhite" />
 
@@ -103,7 +103,7 @@
             android:layout_width="@dimen/joystick_btn_width"
             android:layout_height="@dimen/joystick_btn_height"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/map_home"
+            android:contentDescription="@null"
             android:src="@drawable/ic_right_down"
             android:theme="@style/RippleWhite" />
 
