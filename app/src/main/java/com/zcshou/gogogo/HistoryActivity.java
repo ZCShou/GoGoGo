@@ -31,9 +31,6 @@ import java.util.Map;
 
 import com.zcshou.database.DataBaseHistoryLocation;
 
-import static com.zcshou.gogogo.MainActivity.showHistoryLocation;
-
-
 public class HistoryActivity extends BaseActivity {
     private static final String KEY_ID = "KEY_ID";
     private static final String KEY_LOCATION = "KEY_LOCATION";
@@ -42,8 +39,7 @@ public class HistoryActivity extends BaseActivity {
     private static final String KEY_LNG_LAT_CUSTOM = "KEY_LNG_LAT_CUSTOM";
 
     private ListView mRecordListView;
-    private SearchView mSearchView;
-    private SQLiteDatabase mSqliteDB;
+    private SQLiteDatabase mHistoryLocationDB;
     private List<Map<String, Object>> mAllRecord;
     
     @Override
@@ -57,15 +53,7 @@ public class HistoryActivity extends BaseActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        try {
-            DataBaseHistoryLocation hisLocDBHelper = new DataBaseHistoryLocation(getApplicationContext());
-            mSqliteDB = hisLocDBHelper.getWritableDatabase();
-        } catch (Exception e) {
-            Log.e("HistoryActivity", "SQLiteDatabase init error");
-            e.printStackTrace();
-        }
-
-        recordArchive();
+        initDataBaseHistoryLocation();
 
         initSearchView();
 
@@ -74,7 +62,7 @@ public class HistoryActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
-        mSqliteDB.close();
+        mHistoryLocationDB.close();
         super.onDestroy();
     }
 
@@ -115,22 +103,119 @@ public class HistoryActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void initDataBaseHistoryLocation() {
+        try {
+            DataBaseHistoryLocation hisLocDBHelper = new DataBaseHistoryLocation(getApplicationContext());
+            mHistoryLocationDB = hisLocDBHelper.getWritableDatabase();
+        } catch (Exception e) {
+            Log.e("HistoryActivity", "SQLiteDatabase init error");
+            e.printStackTrace();
+        }
+
+        recordArchive();
+
+        mAllRecord = fetchAllRecord();
+    }
+
+    //sqlite 操作 查询所有记录
+    private List<Map<String, Object>> fetchAllRecord() {
+        List<Map<String, Object>> data = new ArrayList<>();
+
+        try {
+            Cursor cursor = mHistoryLocationDB.query(DataBaseHistoryLocation.TABLE_NAME, null,
+                    DataBaseHistoryLocation.DB_COLUMN_ID + " > ?", new String[] {"0"},
+                    null, null, DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " DESC", null);
+
+            while (cursor.moveToNext()) {
+                Map<String, Object> item = new HashMap<>();
+                int ID = cursor.getInt(0);
+                String Location = cursor.getString(1);
+                String Longitude = cursor.getString(2);
+                String Latitude = cursor.getString(3);
+                long TimeStamp = cursor.getInt(4);
+                String BD09Longitude = cursor.getString(5);
+                String BD09Latitude = cursor.getString(6);
+                Log.d("TB", ID + "\t" + Location + "\t" + Longitude + "\t" + Latitude + "\t" + TimeStamp + "\t" + BD09Longitude + "\t" + BD09Latitude);
+                BigDecimal bigDecimalLongitude = BigDecimal.valueOf(Double.parseDouble(Longitude));
+                BigDecimal bigDecimalLatitude = BigDecimal.valueOf(Double.parseDouble(Latitude));
+                BigDecimal bigDecimalBDLongitude = BigDecimal.valueOf(Double.parseDouble(BD09Longitude));
+                BigDecimal bigDecimalBDLatitude = BigDecimal.valueOf(Double.parseDouble(BD09Latitude));
+                double doubleLongitude = bigDecimalLongitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
+                double doubleLatitude = bigDecimalLatitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
+                double doubleBDLongitude = bigDecimalBDLongitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
+                double doubleBDLatitude = bigDecimalBDLatitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
+                item.put(KEY_ID, Integer.toString(ID));
+                item.put(KEY_LOCATION, Location);
+                item.put(KEY_TIME, timeStamp2Date(Long.toString(TimeStamp)));
+                item.put(KEY_LNG_LAT_WGS, "[经度:" + doubleLongitude + " 纬度:" + doubleLatitude + "]");
+                item.put(KEY_LNG_LAT_CUSTOM, "[经度:" + doubleBDLongitude + " 纬度:" + doubleBDLatitude + "]");
+                data.add(item);
+            }
+            cursor.close();
+        } catch (Exception e) {
+            data.clear();
+            e.printStackTrace();
+        }
+
+        return data;
+    }
+
+    private String timeStamp2Date(String seconds) {
+        if (seconds == null || seconds.isEmpty() || seconds.equals("null")) {
+            return "";
+        }
+
+        // if (format == null || format.isEmpty()){
+        //     format = "yyyy-MM-dd HH:mm:ss";
+        // }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+
+        return sdf.format(new Date(Long.parseLong(seconds + "000")));
+    }
+
+    // 删除旧数据
+    private void recordArchive() {
+        final long weekSecond = 7 * 24 * 60 * 60;
+
+        try {
+            mHistoryLocationDB.delete(DataBaseHistoryLocation.TABLE_NAME,
+                    DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " < ?", new String[] {Long.toString(System.currentTimeMillis() / 1000 - weekSecond)});
+        } catch (Exception e) {
+            Log.e("SQLITE", "archive error");
+            e.printStackTrace();
+        }
+    }
+
+    private boolean deleteRecord(int ID) {
+        boolean deleteRet = true;
+
+        try {
+            if (ID <= -1) {
+                mHistoryLocationDB.delete(DataBaseHistoryLocation.TABLE_NAME,null, null);
+            } else {
+                mHistoryLocationDB.delete(DataBaseHistoryLocation.TABLE_NAME,
+                        DataBaseHistoryLocation.DB_COLUMN_ID + " = ?", new String[] {Integer.toString(ID)});
+            }
+        } catch (Exception e) {
+            Log.e("SQLITE", "delete error");
+            deleteRet = false;
+            e.printStackTrace();
+        }
+
+        return deleteRet;
+    }
+
     private void initSearchView() {
-        mSearchView = findViewById(R.id.searchView);
+        SearchView mSearchView = findViewById(R.id.searchView);
         mSearchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
         mSearchView.setSubmitButtonEnabled(false);//显示提交按钮
         mSearchView.setFocusable(false);
         mSearchView.requestFocusFromTouch();
         mSearchView.clearFocus();
-
-        setSearchViewListener();
-    }
-
-    private void setSearchViewListener() {
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {// 当点击搜索按钮时触发该方法
-                // DisplayToast("click submit");
                 return false;
             }
 
@@ -180,7 +265,6 @@ public class HistoryActivity extends BaseActivity {
         TextView noRecordText = findViewById(R.id.record_no_textview);
         LinearLayout mSearchLayout = findViewById(R.id.search_linear);
         mRecordListView = findViewById(R.id.record_list_view);
-        mAllRecord = fetchAllRecord();
 
         if (mAllRecord.size() == 0) {
             mRecordListView.setVisibility(View.GONE);
@@ -225,7 +309,7 @@ public class HistoryActivity extends BaseActivity {
             wgs84Longitude = latLngStr2[0].substring(latLngStr2[0].indexOf(":") + 1);
             wgs84Latitude = latLngStr2[1].substring(latLngStr2[1].indexOf(":") + 1);
 
-            if (!showHistoryLocation(bd09Longitude, bd09Latitude, wgs84Longitude, wgs84Latitude)) {
+            if (!MainActivity.showHistoryLocation(bd09Longitude, bd09Latitude, wgs84Longitude, wgs84Latitude)) {
                 DisplayToast("定位失败,请手动选取定位点");
             }
             this.finish();
@@ -253,97 +337,6 @@ public class HistoryActivity extends BaseActivity {
         });
     }
 
-    //sqlite 操作 查询所有记录
-    private List<Map<String, Object>> fetchAllRecord() {
-        List<Map<String, Object>> data = new ArrayList<>();
-        
-        try {
-            Cursor cursor = mSqliteDB.query(DataBaseHistoryLocation.TABLE_NAME, null,
-                    DataBaseHistoryLocation.DB_COLUMN_ID + " > ?", new String[] {"0"},
-                                                 null, null, DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " DESC", null);
-                                                 
-            while (cursor.moveToNext()) {
-                Map<String, Object> item = new HashMap<>();
-                int ID = cursor.getInt(0);
-                String Location = cursor.getString(1);
-                String Longitude = cursor.getString(2);
-                String Latitude = cursor.getString(3);
-                long TimeStamp = cursor.getInt(4);
-                String BD09Longitude = cursor.getString(5);
-                String BD09Latitude = cursor.getString(6);
-                Log.d("TB", ID + "\t" + Location + "\t" + Longitude + "\t" + Latitude + "\t" + TimeStamp + "\t" + BD09Longitude + "\t" + BD09Latitude);
-                BigDecimal bigDecimalLongitude = BigDecimal.valueOf(Double.parseDouble(Longitude));
-                BigDecimal bigDecimalLatitude = BigDecimal.valueOf(Double.parseDouble(Latitude));
-                BigDecimal bigDecimalBDLongitude = BigDecimal.valueOf(Double.parseDouble(BD09Longitude));
-                BigDecimal bigDecimalBDLatitude = BigDecimal.valueOf(Double.parseDouble(BD09Latitude));
-                double doubleLongitude = bigDecimalLongitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
-                double doubleLatitude = bigDecimalLatitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
-                double doubleBDLongitude = bigDecimalBDLongitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
-                double doubleBDLatitude = bigDecimalBDLatitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
-                item.put(KEY_ID, Integer.toString(ID));
-                item.put(KEY_LOCATION, Location);
-                item.put(KEY_TIME, timeStamp2Date(Long.toString(TimeStamp), null));
-                item.put(KEY_LNG_LAT_WGS, "[经度:" + doubleLongitude + " 纬度:" + doubleLatitude + "]");
-                item.put(KEY_LNG_LAT_CUSTOM, "[经度:" + doubleBDLongitude + " 纬度:" + doubleBDLatitude + "]");
-                data.add(item);
-            }
-            cursor.close();
-        } catch (Exception e) {
-            data.clear();
-            e.printStackTrace();
-        }
-        
-        return data;
-    }
-    
-    public static String timeStamp2Date(String seconds, String format) {
-        if (seconds == null || seconds.isEmpty() || seconds.equals("null")) {
-            return "";
-        }
-        
-        if (format == null || format.isEmpty()){
-            format = "yyyy-MM-dd HH:mm:ss";
-        }
-
-        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
-
-        return sdf.format(new Date(Long.parseLong(seconds + "000")));
-    }
-    
-    //sqlite 操作 保留七天的数据
-    private void recordArchive() {
-        final long weekSecond = 7 * 24 * 60 * 60;
-        
-        try {
-            mSqliteDB.delete(DataBaseHistoryLocation.TABLE_NAME,
-                    DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " < ?", new String[] {Long.toString(System.currentTimeMillis() / 1000 - weekSecond)});
-        } catch (Exception e) {
-            Log.e("SQLITE", "archive error");
-            e.printStackTrace();
-        }
-        
-        Log.d("SQLITE", "archive success");
-    }
-    
-    //sqlite 操作 删除记录
-    private boolean deleteRecord(int ID) {
-        boolean deleteRet = true;
-        
-        try {
-            if (ID <= -1) {
-                mSqliteDB.delete(DataBaseHistoryLocation.TABLE_NAME,null, null);
-            } else {
-                mSqliteDB.delete(DataBaseHistoryLocation.TABLE_NAME,
-                        DataBaseHistoryLocation.DB_COLUMN_ID + " = ?", new String[] {Integer.toString(ID)});
-            }
-        } catch (Exception e) {
-            Log.e("SQLITE", "delete error");
-            deleteRet = false;
-            e.printStackTrace();
-        }
-        
-        return deleteRet;
-    }
 
     public void DisplayToast(String str) {
         Toast toast = Toast.makeText(this, str, Toast.LENGTH_LONG);
