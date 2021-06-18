@@ -241,27 +241,19 @@ public class MainActivity extends BaseActivity
         //找到searchView
         searchItem = menu.findItem(R.id.action_search);
         searchView = (SearchView) searchItem.getActionView();
-        //searchView.setIconified(false);// 设置searchView处于展开状态
-//        searchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
-        // searchView.setIconifiedByDefault(true);//默认为true在框内，设置false则在框外
-        //searchView.setSubmitButtonEnabled(false);//显示提交按钮
+        searchView.setIconified(false);// 设置searchView处于展开状态
+        searchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
+        searchView.setIconifiedByDefault(true);//默认为true在框内，设置false则在框外
+        searchView.setSubmitButtonEnabled(false);//显示提交按钮
         searchItem.setOnActionExpandListener(new  MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                // Do something when collapsed
-                menu.setGroupVisible(0, true);
-                menu.setGroupVisible(1, true);
-                // searchView.setIconified(false);// 设置searchView处于展开状态
-                // mSearchList.setVisibility(View.GONE);
                 mSearchLayout.setVisibility(View.INVISIBLE);
                 mHistoryLayout.setVisibility(View.INVISIBLE);
                 return true;  // Return true to collapse action view
             }
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
-                // Do something when expanded
-                menu.setGroupVisible(0, false);
-                menu.setGroupVisible(1, false);
                 mSearchLayout.setVisibility(View.INVISIBLE);
                 //展示搜索历史
                 List<Map<String, Object>> data = getSearchHistory();
@@ -823,7 +815,6 @@ public class MainActivity extends BaseActivity
 
 
     private void initSearchView() {
-        // 搜索相关
         searchView = findViewById(R.id.action_search);
         mSearchList = findViewById(R.id.search_list_view);
         mSearchLayout = findViewById(R.id.search_linear);

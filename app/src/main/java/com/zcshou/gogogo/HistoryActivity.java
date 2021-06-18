@@ -39,7 +39,7 @@ public class HistoryActivity extends BaseActivity {
     private static final String KEY_LNG_LAT_CUSTOM = "KEY_LNG_LAT_CUSTOM";
 
     private ListView mRecordListView;
-    private SQLiteDatabase mSqliteDB;
+    private SQLiteDatabase mHistoryLocationDB;
     private List<Map<String, Object>> mAllRecord;
     
     @Override
@@ -62,7 +62,7 @@ public class HistoryActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
-        mSqliteDB.close();
+        mHistoryLocationDB.close();
         super.onDestroy();
     }
 
@@ -106,7 +106,7 @@ public class HistoryActivity extends BaseActivity {
     private void initDataBaseHistoryLocation() {
         try {
             DataBaseHistoryLocation hisLocDBHelper = new DataBaseHistoryLocation(getApplicationContext());
-            mSqliteDB = hisLocDBHelper.getWritableDatabase();
+            mHistoryLocationDB = hisLocDBHelper.getWritableDatabase();
         } catch (Exception e) {
             Log.e("HistoryActivity", "SQLiteDatabase init error");
             e.printStackTrace();
@@ -115,7 +115,6 @@ public class HistoryActivity extends BaseActivity {
         recordArchive();
 
         mAllRecord = fetchAllRecord();
-
     }
 
     //sqlite 操作 查询所有记录
@@ -123,7 +122,7 @@ public class HistoryActivity extends BaseActivity {
         List<Map<String, Object>> data = new ArrayList<>();
 
         try {
-            Cursor cursor = mSqliteDB.query(DataBaseHistoryLocation.TABLE_NAME, null,
+            Cursor cursor = mHistoryLocationDB.query(DataBaseHistoryLocation.TABLE_NAME, null,
                     DataBaseHistoryLocation.DB_COLUMN_ID + " > ?", new String[] {"0"},
                     null, null, DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " DESC", null);
 
@@ -180,7 +179,7 @@ public class HistoryActivity extends BaseActivity {
         final long weekSecond = 7 * 24 * 60 * 60;
 
         try {
-            mSqliteDB.delete(DataBaseHistoryLocation.TABLE_NAME,
+            mHistoryLocationDB.delete(DataBaseHistoryLocation.TABLE_NAME,
                     DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " < ?", new String[] {Long.toString(System.currentTimeMillis() / 1000 - weekSecond)});
         } catch (Exception e) {
             Log.e("SQLITE", "archive error");
@@ -193,9 +192,9 @@ public class HistoryActivity extends BaseActivity {
 
         try {
             if (ID <= -1) {
-                mSqliteDB.delete(DataBaseHistoryLocation.TABLE_NAME,null, null);
+                mHistoryLocationDB.delete(DataBaseHistoryLocation.TABLE_NAME,null, null);
             } else {
-                mSqliteDB.delete(DataBaseHistoryLocation.TABLE_NAME,
+                mHistoryLocationDB.delete(DataBaseHistoryLocation.TABLE_NAME,
                         DataBaseHistoryLocation.DB_COLUMN_ID + " = ?", new String[] {Integer.toString(ID)});
             }
         } catch (Exception e) {
