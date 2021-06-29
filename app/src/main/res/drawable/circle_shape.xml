@@ -11,5 +11,5 @@
     <!--边框的宽度及颜色-->
     <stroke
         android:width="3px"
-        android:color="#38768E" />
+        android:color="@color/colorAccent" />
 </shape>
