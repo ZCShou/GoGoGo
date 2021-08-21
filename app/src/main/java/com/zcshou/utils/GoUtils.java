@@ -114,9 +114,4 @@ public class GoUtils {
 
         return canMockPosition;
     }
-
-    //向量求模
-    public double magnitude(float x, float y, float z) {
-        return Math.sqrt(x * x + y * y + z * z);
-    }
 }

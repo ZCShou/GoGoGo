@@ -1,7 +1,9 @@
 package com.zcshou.gogogo;
 
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Sensor;
@@ -10,6 +12,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
@@ -108,6 +111,7 @@ public class MainActivity extends BaseActivity
     private static double mCurLat = ServiceGo.DEFAULT_LAT;  /* WGS84 坐标系的纬度 */
     private static double mCurLng = ServiceGo.DEFAULT_LNG;  /* WGS84 坐标系的经度 */
     private SensorManager mSensorManager;
+    private Sensor mSensor;
     private float mLastDirection = 0.0f;
     // http
     private RequestQueue mRequestQueue;
@@ -133,6 +137,9 @@ public class MainActivity extends BaseActivity
     private boolean isLimit = true;
     private static final long mTS = 1636588801;
     private boolean isMockServStart = false;
+    private boolean isMove = false;
+    private ServiceGo.ServiceGoBinder mServiceBinder;
+    private ServiceConnection mConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,7 +165,7 @@ public class MainActivity extends BaseActivity
 
         initBaiduMap();
 
-        initLocateBaiduMap();
+        initBaiduLocation();
 
         // 地图上按键的监听
         initListenerMapBtn();
@@ -172,6 +179,18 @@ public class MainActivity extends BaseActivity
         TimeTask timeTask = new TimeTask();
         ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
         threadExecutor.submit(timeTask);
+
+        mConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                mServiceBinder = (ServiceGo.ServiceGoBinder)service;
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+
+            }
+        };
     }
 
     @Override
@@ -179,6 +198,8 @@ public class MainActivity extends BaseActivity
         XLog.i("MainActivity: onPause");
         mMapView.onPause();
         super.onPause();
+        mSensorManager.unregisterListener(this);
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
@@ -201,6 +222,7 @@ public class MainActivity extends BaseActivity
         XLog.i("MainActivity: onDestroy");
 
         if (isMockServStart) {
+            unbindService(mConnection); // 解绑服务，服务要记得解绑，不要造成内存泄漏
             Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
             stopService(serviceGoIntent);
         }
@@ -332,13 +354,13 @@ public class MainActivity extends BaseActivity
 
         if (Math.abs(x - mLastDirection) > 1.0) {
             mCurrentDirection = x;
-            MyLocationData locData = new MyLocationData.Builder()
-                    .accuracy(mCurrentAccuracy)
-                    .direction(mCurrentDirection)   // 此处设置开发者获取到的方向信息，顺时针0-360
-                    .latitude(mCurrentLat)
-                    .longitude(mCurrentLon)
-                    .build();
-            mBaiduMap.setMyLocationData(locData);
+//            MyLocationData locData = new MyLocationData.Builder()
+//                    .accuracy(mCurrentAccuracy)
+//                    .direction(mCurrentDirection)   // 此处设置开发者获取到的方向信息，顺时针0-360
+//                    .latitude(mCurrentLat)
+//                    .longitude(mCurrentLon)
+//                    .build();
+//            mBaiduMap.setMyLocationData(locData);
         }
 
         mLastDirection = x;
@@ -424,15 +446,15 @@ public class MainActivity extends BaseActivity
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);// 获取传感器管理服务
         if (mSensorManager != null) {
-            Sensor mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             if (mSensor != null) {
-                mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_UI);
             }
         }
     }
 
     //开启地图的定位图层
-    private void initLocateBaiduMap() {
+    private void initBaiduLocation() {
         // 定位初始化
         mLocClient = new LocationClient(this);
         mLocClient.registerLocationListener(new BDAbstractLocationListener() {
@@ -452,6 +474,12 @@ public class MainActivity extends BaseActivity
                         .latitude(bdLocation.getLatitude())
                         .longitude(bdLocation.getLongitude()).build();
                 mBaiduMap.setMyLocationData(locData);
+
+                if (isMove) {
+                    isMove = false;
+                    mBaiduMap.clear();
+                    mCurLatLngMap = null;
+                }
 
                 /* 如果出现错误，则需要重新请求位置 */
                 int err = bdLocation.getLocType();
@@ -1030,9 +1058,9 @@ public class MainActivity extends BaseActivity
                         DisplayToast("无法跳转到开发者选项,请先确保您的设备已处于开发者模式");
                         e.printStackTrace();
                     }
-                })//setPositiveButton里面的onClick执行的是左边按钮
+                })
                 .setNegativeButton("取消",(dialog, which) -> {
-                })//setNegativeButton里面的onClick执行的是右边的按钮的操作
+                })
                 .show();
     }
 
@@ -1049,9 +1077,9 @@ public class MainActivity extends BaseActivity
                         DisplayToast("无法跳转到设置界面，请在权限管理中开启该应用的悬浮窗");
                         e.printStackTrace();
                     }
-                })//setPositiveButton里面的onClick执行的是左边按钮
+                })
                 .setNegativeButton("取消", (dialog, which) -> {
-                })//setNegativeButton里面的onClick执行的是右边的按钮的操作
+                })
                 .show();
     }
 
@@ -1059,10 +1087,15 @@ public class MainActivity extends BaseActivity
     private void showEnableGpsDialog() {
         new AlertDialog.Builder(MainActivity.this)
                 .setTitle("Tips")//这里是表头的内容
-                .setMessage("是否开启GPS定位服务?")//这里是中间显示的具体信息
+                .setMessage("是否开启 GPS 定位服务?")//这里是中间显示的具体信息
                 .setPositiveButton("确定",(dialog, which) -> {
-                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    startActivityForResult(intent, 0);
+                    try {
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        DisplayToast("无法跳转到设置界面，请在权限管理中开启该应用的悬浮窗");
+                        e.printStackTrace();
+                    }
                 })
                 .setNegativeButton("取消",(dialog, which) -> {
                 })
@@ -1219,8 +1252,11 @@ public class MainActivity extends BaseActivity
 
             //start mock location service
             Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
+            bindService(serviceGoIntent, mConnection, BIND_AUTO_CREATE);    // 绑定服务和活动，之后活动就可以去调服务的方法了
             serviceGoIntent.putExtra(LNG_MSG_ID, mCurLng);
             serviceGoIntent.putExtra(LAT_MSG_ID, mCurLat);
+
+            isMove = true;
 
             //save record
             recordGetPositionInfo();
@@ -1242,23 +1278,25 @@ public class MainActivity extends BaseActivity
                     showEnableGpsDialog();
                     XLog.e("无悬浮窗权限!");
                 } else {
-                    if (!GoUtils.isAllowMockLocation(this)) {
-                        showEnableMockLocationDialog();
-                        XLog.e("无模拟位置权限!");
-                    } else {
+                    if (isMockServStart) {
                         if (mCurLatLngMap == null) {
-                            if (isMockServStart) {
-                                stopGoLocation();
-                                Snackbar.make(v, "模拟位置已终止", Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
-                                mButtonStart.setImageResource(R.drawable.ic_position);
-                            } else {
-                                Snackbar.make(v, "请先点击地图位置或者搜索位置", Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
-                            }
+                            stopGoLocation();
+                            Snackbar.make(v, "模拟位置已终止", Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                            mButtonStart.setImageResource(R.drawable.ic_position);
                         } else {
-                            if (isMockServStart) {
-                                Snackbar.make(v, "暂不支持传送", Snackbar.LENGTH_LONG)
+                            mServiceBinder.setPosition(mCurLng, mCurLat);
+                            isMove = true;
+                            Snackbar.make(v, "已传送到新位置", Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+                    } else {
+                        if (!GoUtils.isAllowMockLocation(this)) {
+                            showEnableMockLocationDialog();
+                            XLog.e("无模拟位置权限!");
+                        } else {
+                            if (mCurLatLngMap == null) {
+                                Snackbar.make(v, "请先点击地图位置或者搜索位置", Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
                             } else {
                                 doGoLocation();
@@ -1266,8 +1304,6 @@ public class MainActivity extends BaseActivity
                                 Snackbar.make(v, "模拟位置已启动", Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
                             }
-                            mBaiduMap.clear();
-                            mCurLatLngMap = null;
                         }
                     }
                 }
@@ -1279,6 +1315,7 @@ public class MainActivity extends BaseActivity
 
     private void stopGoLocation() {
         if (isMockServStart) {
+            unbindService(mConnection); // 解绑服务，服务要记得解绑，不要造成内存泄漏
             Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
             stopService(serviceGoIntent);
             isMockServStart = false;

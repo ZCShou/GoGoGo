@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -33,6 +34,7 @@ public class ServiceGo extends Service {
     public static final double DEFAULT_LNG = 117.027707;
     private double mCurLat = DEFAULT_LAT;
     private double mCurLng = DEFAULT_LNG;
+    private double mSpeed = 1.2;        /* 默认的速度，单位 m/s */
     private static final int HANDLER_MSG_ID = 0;
     private static final String SERVICE_GO_HANDLER_NAME = "ServiceGoLocation";
     private LocationManager mLocManager;
@@ -47,10 +49,12 @@ public class ServiceGo extends Service {
     private NoteActionReceiver mActReceiver;
     // 摇杆相关
     private JoyStick mJoyStick;
-    
+
+    private final ServiceGoBinder mBinder = new ServiceGoBinder();
+
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
     }
 
     @Override
@@ -114,11 +118,11 @@ public class ServiceGo extends Service {
 
         //准备intent
         Intent clickIntent = new Intent(this, MainActivity.class);
-        PendingIntent clickPI = PendingIntent.getActivity(this, 1, clickIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent clickPI = PendingIntent.getActivity(this, 1, clickIntent, PendingIntent.FLAG_IMMUTABLE);
         Intent showIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW);
-        PendingIntent showPendingPI = PendingIntent.getBroadcast(this, 0, showIntent, PendingIntent.FLAG_CANCEL_CURRENT );
+        PendingIntent showPendingPI = PendingIntent.getBroadcast(this, 0, showIntent, PendingIntent.FLAG_IMMUTABLE);
         Intent hideIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE);
-        PendingIntent hidePendingPI = PendingIntent.getBroadcast(this, 0, hideIntent, PendingIntent.FLAG_CANCEL_CURRENT );
+        PendingIntent hidePendingPI = PendingIntent.getBroadcast(this, 0, hideIntent, PendingIntent.FLAG_IMMUTABLE);
 
         Notification notification = new NotificationCompat.Builder(this, SERVICE_GO_NOTE_CHANNEL_ID)
                 .setChannelId(SERVICE_GO_NOTE_CHANNEL_ID)
@@ -137,7 +141,8 @@ public class ServiceGo extends Service {
         mJoyStick = new JoyStick(this);
         mJoyStick.setListener(new JoyStick.JoyStickClickListener() {
             @Override
-            public void onMoveInfo(double disLng, double disLat) {
+            public void onMoveInfo(double speed, double disLng, double disLat) {
+                mSpeed = speed;
                 // 根据当前的经纬度和距离，计算下一个经纬度
                 // Latitude: 1 deg = 110.574 km // 纬度的每度的距离大约为 110.574km
                 // Longitude: 1 deg = 111.320*cos(latitude) km  // 经度的每度的距离从0km到111km不等
@@ -181,7 +186,7 @@ public class ServiceGo extends Service {
         mLocHandler.sendEmptyMessage(HANDLER_MSG_ID);
     }
 
-    public Location makeLocation() {
+    private Location makeLocation() {
         Location loc = new Location(LocationManager.GPS_PROVIDER);  // 这里只能填写 GPS，否则导致位置不生效
         loc.setAccuracy(Criteria.ACCURACY_FINE);                    // 设定此位置的估计水平精度，以米为单位。
         loc.setAltitude(55.0D);                 // 设置高度，在 WGS 84 参考坐标系中的米
@@ -189,6 +194,7 @@ public class ServiceGo extends Service {
         loc.setLatitude(mCurLat);                // 纬度（度）
         loc.setLongitude(mCurLng);               // 经度（度）
         loc.setTime(System.currentTimeMillis());    // 本地时间
+        loc.setSpeed((float) mSpeed);
         loc.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
         Bundle bundle = new Bundle();
         bundle.putInt("satellites", 7);
@@ -271,6 +277,15 @@ public class ServiceGo extends Service {
                     mJoyStick.hide();
                 }
             }
+        }
+    }
+
+    public class ServiceGoBinder extends Binder {
+        public void setPosition(double lng, double lat) {
+            mLocHandler.removeMessages(HANDLER_MSG_ID);
+            mCurLng = lng;
+            mCurLat = lat;
+            mLocHandler.sendEmptyMessage(HANDLER_MSG_ID);
         }
     }
 }

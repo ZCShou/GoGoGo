@@ -1,7 +1,5 @@
 package com.zcshou.utils;
 
-import android.location.Location;
-
 public class MapUtils {
     public final static String CoorType_GCJ02 = "gcj02";
     public final static String CoorType_BD09LL = "bd09ll";
