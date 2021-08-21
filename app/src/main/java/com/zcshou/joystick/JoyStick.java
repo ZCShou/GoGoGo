@@ -11,8 +11,9 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
+import android.widget.SearchView;
 
 import androidx.preference.PreferenceManager;
 
@@ -34,12 +35,12 @@ public class JoyStick extends View {
 
     private WindowManager.LayoutParams mWindowParamJoyStick;
     private WindowManager.LayoutParams mWindowParamMap;
-    private WindowManager.LayoutParams mWindowParamHistory;
+//    private WindowManager.LayoutParams mWindowParamHistory;
     private WindowManager mWindowManager;
     private final LayoutInflater inflater;
     private View mJoystickLayout;
-    private LinearLayout mMapLayout;
-    private LinearLayout mHistoryLayout;
+    private FrameLayout mMapLayout;
+//    private LinearLayout mHistoryLayout;
     private JoyStickClickListener mListener;
     private boolean isWalk;
     private ImageButton btnWalk;
@@ -81,7 +82,7 @@ public class JoyStick extends View {
 
             initJoyStickMapView();
 
-            initHistoryView();
+//            initHistoryView();
         }
     }
 
@@ -100,7 +101,7 @@ public class JoyStick extends View {
 
             initJoyStickMapView();
 
-            initHistoryView();
+//            initHistoryView();
         }
     }
 
@@ -119,7 +120,7 @@ public class JoyStick extends View {
 
             initJoyStickMapView();
 
-            initHistoryView();
+//            initHistoryView();
         }
     }
 
@@ -134,31 +135,31 @@ public class JoyStick extends View {
                 if (mJoystickLayout.getParent() != null) {
                     mWindowManager.removeView(mJoystickLayout);
                 }
-                if (mHistoryLayout.getParent() != null) {
-                    mWindowManager.removeView(mHistoryLayout);
-                }
+//                if (mHistoryLayout.getParent() != null) {
+//                    mWindowManager.removeView(mHistoryLayout);
+//                }
                 if (mMapLayout.getParent() == null) {
                     mWindowManager.addView(mMapLayout, mWindowParamMap);
                 }
                 break;
-            case HISTORY:
-                if (mMapLayout.getParent() != null) {
-                    mWindowManager.removeView(mMapLayout);
-                }
-                if (mJoystickLayout.getParent() != null) {
-                    mWindowManager.removeView(mJoystickLayout);
-                }
-                if (mHistoryLayout.getParent() == null) {
-                    mWindowManager.addView(mHistoryLayout, mWindowParamHistory);
-                }
-                break;
+//            case HISTORY:
+//                if (mMapLayout.getParent() != null) {
+//                    mWindowManager.removeView(mMapLayout);
+//                }
+//                if (mJoystickLayout.getParent() != null) {
+//                    mWindowManager.removeView(mJoystickLayout);
+//                }
+//                if (mHistoryLayout.getParent() == null) {
+//                    mWindowManager.addView(mHistoryLayout, mWindowParamHistory);
+//                }
+//                break;
             case JOYSTICK:
                 if (mMapLayout.getParent() != null) {
                     mWindowManager.removeView(mMapLayout);
                 }
-                if (mHistoryLayout.getParent() != null) {
-                    mWindowManager.removeView(mHistoryLayout);
-                }
+//                if (mHistoryLayout.getParent() != null) {
+//                    mWindowManager.removeView(mHistoryLayout);
+//                }
                 if (mJoystickLayout.getParent() == null) {
                     mWindowManager.addView(mJoystickLayout, mWindowParamJoyStick);
                 }
@@ -171,9 +172,9 @@ public class JoyStick extends View {
             mWindowManager.removeView(mMapLayout);
         }
 
-        if (mHistoryLayout.getParent() != null) {
-            mWindowManager.removeView(mHistoryLayout);
-        }
+//        if (mHistoryLayout.getParent() != null) {
+//            mWindowManager.removeView(mHistoryLayout);
+//        }
 
         if (mJoystickLayout.getParent() != null) {
             mWindowManager.removeView(mJoystickLayout);
@@ -189,9 +190,10 @@ public class JoyStick extends View {
             mWindowManager.removeView(mJoystickLayout);
         }
 
-        if (mHistoryLayout.getParent() != null) {
-            mWindowManager.removeView(mHistoryLayout);
-        }
+//        if (mHistoryLayout.getParent() != null) {
+//            mWindowManager.removeView(mHistoryLayout);
+//        }
+
         mBaiduMap.setMyLocationEnabled(false);
         mMapView.onDestroy();
     }
@@ -205,14 +207,14 @@ public class JoyStick extends View {
         mWindowParamJoyStick = new WindowManager.LayoutParams();
         mWindowParamJoyStick.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         mWindowParamJoyStick.format = PixelFormat.RGBA_8888;
-        mWindowParamJoyStick.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        mWindowParamJoyStick.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         mWindowParamJoyStick.gravity = Gravity.START | Gravity.TOP;
         mWindowParamJoyStick.width = WindowManager.LayoutParams.WRAP_CONTENT;
         mWindowParamJoyStick.height = WindowManager.LayoutParams.WRAP_CONTENT;
         mWindowParamJoyStick.x = 300;
         mWindowParamJoyStick.y = 300;
         mWindowParamMap = mWindowParamJoyStick;
-        mWindowParamHistory = mWindowParamJoyStick;
+//        mWindowParamHistory = mWindowParamJoyStick;
     }
 
     @SuppressLint("InflateParams")
@@ -239,14 +241,15 @@ public class JoyStick extends View {
             }
         });
 
-        /* 历史按钮点击事件处理 */
-        ImageButton btnHistory = mJoystickLayout.findViewById(R.id.joystick_history);
-        btnHistory.setOnClickListener(v -> {
-            if (mHistoryLayout.getParent() == null) {
-                mCurWin = WINDOW_TYPE.HISTORY;
-                show();
-            }
-        });
+//        /* 历史按钮点击事件处理 */
+//        ImageButton btnHistory = mJoystickLayout.findViewById(R.id.joystick_history);
+//        btnHistory.setOnClickListener(v -> {
+//            if (mHistoryLayout.getParent() == null) {
+//                mCurWin = WINDOW_TYPE.HISTORY;
+//                show();
+//            }
+//        });
+
         /* 步行按键的点击处理 */
         isWalk = true;
         btnWalk = mJoystickLayout.findViewById(R.id.joystick_walk);
@@ -309,7 +312,7 @@ public class JoyStick extends View {
 
     @SuppressLint({"InflateParams", "ClickableViewAccessibility"})
     private void initJoyStickMapView() {
-        mMapLayout = (LinearLayout)inflater.inflate(R.layout.joystick_map, null);
+        mMapLayout = (FrameLayout)inflater.inflate(R.layout.joystick_map, null);
         mMapLayout.setOnTouchListener(new JoyStickOnTouchListener());
 
         ImageButton btnOk = mMapLayout.findViewById(R.id.btnGo);
@@ -394,13 +397,33 @@ public class JoyStick extends View {
                 mLat = lngLat[1];
             }
         });
+
+
+        SearchView mSearchView = mMapLayout.findViewById(R.id.searchView);
+        mSearchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
+        mSearchView.setSubmitButtonEnabled(false);//显示提交按钮
+        mSearchView.setFocusable(false);
+        mSearchView.requestFocusFromTouch();
+        mSearchView.clearFocus();
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {// 当点击搜索按钮时触发该方法
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {// 当搜索内容改变时触发该方法
+                return false;
+            }
+        });
+
     }
 
-    @SuppressLint({"ClickableViewAccessibility", "InflateParams"})
-    private void initHistoryView() {
-        mHistoryLayout = (LinearLayout)inflater.inflate(R.layout.joystick_latlng, null);
-        mHistoryLayout.setOnTouchListener(new JoyStickOnTouchListener());
-    }
+//    @SuppressLint({"ClickableViewAccessibility", "InflateParams"})
+//    private void initHistoryView() {
+//        mHistoryLayout = (LinearLayout)inflater.inflate(R.layout.joystick_latlng, null);
+//        mHistoryLayout.setOnTouchListener(new JoyStickOnTouchListener());
+//    }
 
     private void processDirection(boolean auto, double angle, double r) {
         if (r <= 0) {
@@ -449,11 +472,11 @@ public class JoyStick extends View {
                             mWindowParamMap.y = mWindowParamMap.y + movedY;
                             mWindowManager.updateViewLayout(view, mWindowParamMap);
                             break;
-                        case HISTORY:
-                            mWindowParamHistory.x = mWindowParamHistory.x + movedX;
-                            mWindowParamHistory.y = mWindowParamHistory.y + movedY;
-                            mWindowManager.updateViewLayout(view, mWindowParamHistory);
-                            break;
+//                        case HISTORY:
+//                            mWindowParamHistory.x = mWindowParamHistory.x + movedX;
+//                            mWindowParamHistory.y = mWindowParamHistory.y + movedY;
+//                            mWindowManager.updateViewLayout(view, mWindowParamHistory);
+//                            break;
                         case JOYSTICK:
                             mWindowParamJoyStick.x = mWindowParamJoyStick.x + movedX;
                             mWindowParamJoyStick.y = mWindowParamJoyStick.y + movedY;
@@ -500,6 +523,6 @@ public class JoyStick extends View {
     public enum WINDOW_TYPE {
         JOYSTICK,
         MAP,
-        HISTORY
+//        HISTORY
     }
 }
