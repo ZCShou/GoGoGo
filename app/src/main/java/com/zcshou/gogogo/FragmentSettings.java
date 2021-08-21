@@ -1,9 +1,15 @@
 package com.zcshou.gogogo;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings;
 import android.text.InputType;
 import android.text.TextUtils;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -84,18 +90,36 @@ public class FragmentSettings extends PreferenceFragmentCompat {
             pLog.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-
-                    if(((SwitchPreferenceCompat) preference).isChecked() != (Boolean) newValue) {
-                        XLog.d(preference.getKey() + newValue);
-
-                        if (Boolean.parseBoolean(newValue.toString())) {
-                            XLog.d("on");
-                        } else {
-                            XLog.d("off");
-                        }
-                        return true;
-                    } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+                        new AlertDialog.Builder(preference.getContext())
+                                .setTitle("启用外部存储权限")//这里是表头的内容
+                                .setMessage("Android 11 及之后系统需要开启外部存储权限")//这里是中间显示的具体信息
+                                .setPositiveButton("开启",(dialog, which) -> {
+                                    try {
+                                        Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                                        intent.setData(Uri.parse("package:" + preference.getContext().getPackageName()));
+                                        startActivity(intent);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                })
+                                .setNegativeButton("取消", (dialog, which) -> {
+                                })
+                                .show();
                         return false;
+                    } else {
+                        if(((SwitchPreferenceCompat) preference).isChecked() != (Boolean) newValue) {
+                            XLog.d(preference.getKey() + newValue);
+
+                            if (Boolean.parseBoolean(newValue.toString())) {
+                                XLog.d("on");
+                            } else {
+                                XLog.d("off");
+                            }
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
                 }
             });
