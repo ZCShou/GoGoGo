@@ -354,13 +354,13 @@ public class MainActivity extends BaseActivity
 
         if (Math.abs(x - mLastDirection) > 1.0) {
             mCurrentDirection = x;
-//            MyLocationData locData = new MyLocationData.Builder()
-//                    .accuracy(mCurrentAccuracy)
-//                    .direction(mCurrentDirection)   // 此处设置开发者获取到的方向信息，顺时针0-360
-//                    .latitude(mCurrentLat)
-//                    .longitude(mCurrentLon)
-//                    .build();
-//            mBaiduMap.setMyLocationData(locData);
+            MyLocationData locData = new MyLocationData.Builder()
+                    .accuracy(mCurrentAccuracy)
+                    .direction(mCurrentDirection)   // 此处设置开发者获取到的方向信息，顺时针0-360
+                    .latitude(mCurrentLat)
+                    .longitude(mCurrentLon)
+                    .build();
+            mBaiduMap.setMyLocationData(locData);
         }
 
         mLastDirection = x;
@@ -532,7 +532,7 @@ public class MainActivity extends BaseActivity
         //可选，设置发起定位请求的间隔，int类型，单位ms
         //如果设置为0，则代表单次定位，即仅定位一次，默认为0
         //如果设置非0，需设置1000ms以上才有效
-        option.setScanSpan(1200);
+        option.setScanSpan(1001);
         //可选，设置是否收集Crash信息，默认收集，即参数为false
         option.SetIgnoreCacheException(true);
         //可选，设置定位模式，默认高精度
