@@ -9,11 +9,11 @@ android {
             keyPassword 'zcs220807'
         }
     }
-    compileSdkVersion 30
+    compileSdkVersion 29
     defaultConfig {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 27
-        targetSdkVersion 30
+        targetSdkVersion 29
         versionCode 170
         versionName '1.7.0' // 语义化版本 https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
