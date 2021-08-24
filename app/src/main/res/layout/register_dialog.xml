@@ -2,7 +2,6 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -12,29 +11,38 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         android:text="@string/register_title"
         android:textColor="#282828"
-        android:textSize="20sp"
+        android:textSize="24sp"
         android:textStyle="bold" />
 
     <EditText
         android:id="@+id/reg_user_name"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="32dp"
         android:autofillHints="username"
         android:hint="@string/register_user_name"
         android:inputType="text"
+        android:layout_marginTop="3dp"
+        android:layout_marginEnd="3dp"
+        android:layout_marginStart="3dp"
+        android:textCursorDrawable="@null"
         android:drawablePadding="10dip"
-        app:drawableStartCompat="@drawable/ic_user"/>
+        app:drawableStartCompat="@drawable/ic_user"
+        android:background="@drawable/border_gray"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="3dp"
+        android:layout_marginStart="3dp"
         android:gravity="center"
-        android:layout_marginStart="2dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@drawable/border_gray">
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -64,11 +72,15 @@
     <TextView
         android:id="@+id/reg_request"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:layout_marginTop="10dp"
-        android:text="请求码：3333333333333333333333333333333333333333333333333333333"
+        android:layout_height="40dp"
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="3dp"
+        android:layout_marginTop="8dp"
+        android:singleLine="true"
+        android:textIsSelectable="true"
+        android:gravity="center"
+        android:text="3333333333333333333333333333333333333333333333333333333"
+        android:scrollbars="horizontal"
         android:drawablePadding="10dip"
         app:drawableStartCompat="@drawable/ic_pwd"
         android:background="@drawable/border_gray"/>
@@ -76,8 +88,8 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="3dp"
         android:layout_marginTop="8dp"
         android:textStyle="bold"
         android:text="@string/register_tips"/>
@@ -86,9 +98,8 @@
         android:id="@+id/reg_response"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:autofillHints="longitude"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="3dp"
         android:hint="@string/register_response"
         android:inputType="textMultiLine"
         android:minLines="4"

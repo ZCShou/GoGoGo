@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioGroup;
@@ -750,6 +751,15 @@ public class MainActivity extends BaseActivity
         View navHeaderView = mNavigationView.getHeaderView(0);
         TextView mUserLimitInfo = navHeaderView.findViewById(R.id.user_limit);
         TextView mUserName = navHeaderView.findViewById(R.id.user_name);
+        ImageView mUserIcon = navHeaderView.findViewById(R.id.user_icon);
+        mUserIcon.setOnClickListener(v -> {
+            DrawerLayout drawer = findViewById(R.id.drawer_layout);
+
+            if (drawer.isDrawerOpen(GravityCompat.START)) {
+                drawer.closeDrawer(GravityCompat.START);
+            }
+            showRegisterDialog();
+        });
 
         mUserName.setOnClickListener(v -> {
             DrawerLayout drawer = findViewById(R.id.drawer_layout);

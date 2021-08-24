@@ -14,7 +14,7 @@
         android:id="@+id/user_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="40dp"
         android:contentDescription="@null"
         app:srcCompat="@mipmap/ic_launcher_round" />
 
@@ -30,7 +30,7 @@
         android:id="@+id/user_limit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:layout_gravity="center_vertical"
         android:gravity="center_vertical"
         android:text="@string/user_limit_info"
