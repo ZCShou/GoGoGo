@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#ff008577</color>
     <color name="colorPrimaryDark">#ff008577</color>
-    <color name="colorAccent">#ff008577</color>
+    <color name="colorAccent">#ff00897B</color>
 
     <color name="white">#ffffff</color> <!-- 白色 -->
     <color name="ivory">#fffff0</color> <!-- 象牙色 -->
