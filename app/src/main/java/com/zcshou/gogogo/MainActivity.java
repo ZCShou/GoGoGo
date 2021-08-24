@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Sensor;
@@ -15,8 +16,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
 import android.view.Menu;
@@ -25,6 +28,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -39,6 +43,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.preference.PreferenceManager;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -141,6 +146,9 @@ public class MainActivity extends BaseActivity
     private boolean isMove = false;
     private ServiceGo.ServiceGoBinder mServiceBinder;
     private ServiceConnection mConnection;
+    private SharedPreferences sharedPreferences;
+    private final JSONObject mReg = new JSONObject();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,6 +163,8 @@ public class MainActivity extends BaseActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         XLog.i("MainActivity: onCreate");
 
@@ -743,36 +753,42 @@ public class MainActivity extends BaseActivity
 
             return true;
         });
-        setUserLimitInfo();
+        initUserInfo();
     }
 
-    private void setUserLimitInfo() {
-        // 从上到下逐级获取
+    private void initUserInfo() {
         View navHeaderView = mNavigationView.getHeaderView(0);
-        TextView mUserLimitInfo = navHeaderView.findViewById(R.id.user_limit);
+
         TextView mUserName = navHeaderView.findViewById(R.id.user_name);
+        TextView mUserLimitInfo = navHeaderView.findViewById(R.id.user_limit);
         ImageView mUserIcon = navHeaderView.findViewById(R.id.user_icon);
-        mUserIcon.setOnClickListener(v -> {
-            DrawerLayout drawer = findViewById(R.id.drawer_layout);
 
-            if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START);
-            }
-            showRegisterDialog();
-        });
+        if (sharedPreferences.getString("setting_reg_code", null) != null) {
 
-        mUserName.setOnClickListener(v -> {
-            DrawerLayout drawer = findViewById(R.id.drawer_layout);
+            mUserName.setText("ZCShou");
 
-            if (drawer.isDrawerOpen(GravityCompat.START)) {
-                drawer.closeDrawer(GravityCompat.START);
-            }
-            showRegisterDialog();
-        });
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+            mUserLimitInfo.setText(String.format(Locale.getDefault(), "有效期: %s", simpleDateFormat.format(new Date(mTS*1000))));
+        } else {
+            mUserIcon.setOnClickListener(v -> {
+                DrawerLayout drawer = findViewById(R.id.drawer_layout);
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        mUserLimitInfo.setText(String.format(Locale.getDefault(), "有效期: %s", simpleDateFormat.format(new Date(mTS*1000))));
+                if (drawer.isDrawerOpen(GravityCompat.START)) {
+                    drawer.closeDrawer(GravityCompat.START);
+                }
+                showRegisterDialog();
+            });
+
+            mUserName.setOnClickListener(v -> {
+                DrawerLayout drawer = findViewById(R.id.drawer_layout);
+
+                if (drawer.isDrawerOpen(GravityCompat.START)) {
+                    drawer.closeDrawer(GravityCompat.START);
+                }
+                showRegisterDialog();
+            });
+        }
     }
 
     public void showRegisterDialog() {
@@ -787,32 +803,77 @@ public class MainActivity extends BaseActivity
             window.setGravity(Gravity.CENTER);
             window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
 
-            TextView regCancel = window.findViewById(R.id.reg_cancel);
-            TextView regAgree = window.findViewById(R.id.reg_agree);
-            mPtlCheckBox = window.findViewById(R.id.reg_check);
+            final TextView mRegReq = window.findViewById(R.id.reg_request);
             final TextView regResp = window.findViewById(R.id.reg_response);
-            final TextView regUserName = window.findViewById(R.id.reg_user_name);
 
+            final TextView regUserName = window.findViewById(R.id.reg_user_name);
+            regUserName.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    if (s.length() >= 3) {
+                        try {
+                            mReg.put("UserName", s.toString());
+                            mRegReq.setText(mReg.toString());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
+
+            DatePicker mDatePicker = window.findViewById(R.id.date_picker);
+            mDatePicker.setOnDateChangedListener(new DatePicker.OnDateChangedListener() {
+                @Override
+                public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                    try {
+                        mReg.put("DateTime", 1111);
+                        mRegReq.setText(mReg.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            mPtlCheckBox = window.findViewById(R.id.reg_check);
             mPtlCheckBox.setOnClickListener(v -> {
                 if (mPtlCheckBox.isChecked()) {
                     showProtocolDialog();
                 }
             });
 
+            TextView regCancel = window.findViewById(R.id.reg_cancel);
             regCancel.setOnClickListener(v -> alertDialog.cancel());
 
+            TextView regAgree = window.findViewById(R.id.reg_agree);
             regAgree.setOnClickListener(v -> {
                 if (!mPtlCheckBox.isChecked()) {
                     DisplayToast("您必须先阅读并同意免责声明");
+                    return;
+                }
+                if (TextUtils.isEmpty(regUserName.getText())) {
+                    DisplayToast("用户名不能为空");
                     return;
                 }
                 if (TextUtils.isEmpty(regResp.getText())) {
                     DisplayToast("注册码不能为空");
                     return;
                 }
-                if (TextUtils.isEmpty(regUserName.getText())) {
-                    DisplayToast("用户名不能为空");
-                    return;
+                try {
+                    mReg.put("RegReq", mReg.toString());
+                    mReg.put("ReqResp", regResp.toString());
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
 
                 alertDialog.cancel();
