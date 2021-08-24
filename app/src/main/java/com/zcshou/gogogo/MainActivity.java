@@ -479,6 +479,10 @@ public class MainActivity extends BaseActivity
                     isMove = false;
                     mBaiduMap.clear();
                     mCurLatLngMap = null;
+
+                    if (GoUtils.isWifiEnabled(MainActivity.this)) {
+                        showDisableWifiDialog();
+                    }
                 }
 
                 /* 如果出现错误，则需要重新请求位置 */
@@ -1079,6 +1083,7 @@ public class MainActivity extends BaseActivity
                     }
                 })
                 .setNegativeButton("取消", (dialog, which) -> {
+                    DisplayToast("悬浮窗权限未开启，无法启动模拟位置");
                 })
                 .show();
     }
@@ -1086,18 +1091,38 @@ public class MainActivity extends BaseActivity
     //显示开启GPS的提示
     private void showEnableGpsDialog() {
         new AlertDialog.Builder(MainActivity.this)
-                .setTitle("Tips")//这里是表头的内容
+                .setTitle("启用定位服务")//这里是表头的内容
                 .setMessage("是否开启 GPS 定位服务?")//这里是中间显示的具体信息
                 .setPositiveButton("确定",(dialog, which) -> {
                     try {
                         Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                         startActivity(intent);
                     } catch (Exception e) {
-                        DisplayToast("无法跳转到设置界面，请在权限管理中开启该应用的悬浮窗");
+                        DisplayToast("无法跳转到设置界面，请在手动前往设置界面开启定位服务");
                         e.printStackTrace();
                     }
                 })
                 .setNegativeButton("取消",(dialog, which) -> {
+                    DisplayToast("定位服务未开启，无法启动模拟位置");
+                })
+                .show();
+    }
+
+    // 提醒开启位置模拟的弹框
+    private void showDisableWifiDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("警告")
+                .setMessage("开启 WIFI 后（即使没有连接热点）将导致定位闪回真实位置。建议关闭 WIFI，使用移动流量进行游戏！")
+                .setPositiveButton("去关闭",(dialog, which) -> {
+                    try {
+                        Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        DisplayToast("无法跳转到 WIFI 设置界面，请手动关闭 WIFI");
+                        e.printStackTrace();
+                    }
+                })
+                .setNegativeButton("忽略",(dialog, which) -> {
                 })
                 .show();
     }
@@ -1273,10 +1298,10 @@ public class MainActivity extends BaseActivity
             //悬浮窗权限判断
             if (!Settings.canDrawOverlays(getApplicationContext())) {
                 showEnableFloatWindowDialog();
+                XLog.e("无悬浮窗权限!");
             } else {
                 if (!GoUtils.isGpsOpened(this)) {
                     showEnableGpsDialog();
-                    XLog.e("无悬浮窗权限!");
                 } else {
                     if (isMockServStart) {
                         if (mCurLatLngMap == null) {

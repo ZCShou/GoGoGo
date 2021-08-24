@@ -6,6 +6,7 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 
 public class GoUtils {
     //WIFI是否可用
@@ -18,6 +19,11 @@ public class GoUtils {
         }
 
         return false;
+    }
+
+    public static boolean isWifiEnabled(Context context) {
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        return wifiManager.isWifiEnabled();
     }
 
     //MOBILE网络是否可用
