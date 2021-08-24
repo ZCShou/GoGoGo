@@ -207,7 +207,7 @@ public class JoyStick extends View {
         mWindowParamJoyStick = new WindowManager.LayoutParams();
         mWindowParamJoyStick.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         mWindowParamJoyStick.format = PixelFormat.RGBA_8888;
-        mWindowParamJoyStick.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        mWindowParamJoyStick.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
         mWindowParamJoyStick.gravity = Gravity.START | Gravity.TOP;
         mWindowParamJoyStick.width = WindowManager.LayoutParams.WRAP_CONTENT;
         mWindowParamJoyStick.height = WindowManager.LayoutParams.WRAP_CONTENT;
