@@ -71,7 +71,7 @@
 
     <TextView
         android:id="@+id/reg_request"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_marginStart="3dp"
         android:layout_marginEnd="3dp"
@@ -79,8 +79,6 @@
         android:singleLine="true"
         android:textIsSelectable="true"
         android:gravity="center"
-        android:text="3333333333333333333333333333333333333333333333333333333"
-        android:scrollbars="horizontal"
         android:drawablePadding="10dip"
         app:drawableStartCompat="@drawable/ic_pwd"
         android:background="@drawable/border_gray"/>
@@ -101,9 +99,10 @@
         android:layout_marginStart="3dp"
         android:layout_marginEnd="3dp"
         android:hint="@string/register_response"
+        android:autofillHints="name"
         android:inputType="textMultiLine"
-        android:minLines="4"
-        android:maxLines="6"
+        android:minLines="3"
+        android:maxLines="5"
         android:layout_marginTop="8dp"
         android:scrollbars="vertical"
         android:drawablePadding="10dip"
