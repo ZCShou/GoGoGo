@@ -14,8 +14,8 @@ android {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 27
         targetSdkVersion 29
-        versionCode 171
-        versionName '1.7.1' // 语义化版本 https://semver.org/lang/zh-CN/
+        versionCode 172
+        versionName '1.7.2' // 语义化版本 https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     ndkVersion '22.1.7171670'

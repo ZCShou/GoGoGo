@@ -23,9 +23,9 @@ public class RockerView extends View {
     private Paint outerCirclePaint;
     private Paint innerCirclePaint;
     /** 内圆中心x坐标 */
-    private double innerCenterX;
+    private float innerCenterX;
     /** 内圆中心y坐标 */
-    private double innerCenterY;
+    private float innerCenterY;
     /** view中心点x坐标 */
     private float viewCenterX;
     /** view中心点y左边 */
@@ -44,6 +44,7 @@ public class RockerView extends View {
 
     private Rect srcRect = null;
     private Rect dstRect = null;
+    private boolean isOK = false;
 
     public RockerView(Context context) {
         super(context);
@@ -81,22 +82,23 @@ public class RockerView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        int size = getMeasuredWidth();
-        setMeasuredDimension(size, size);
+        if (!isOK) {
+            isOK = true;
+            int size = getMeasuredWidth();
+            setMeasuredDimension(size, size);
 
-        innerCenterX = (double)size / 2;
-        innerCenterY = (double)size / 2;
-        viewCenterX = (float)size / 2;
-        viewCenterY = (float)size / 2;
-        outerCircleRadius = size / 2;
-        innerCircleRadius = size / 6;
-
-        if (dstRect == null) {
+            innerCenterX = (float)size / 2;
+            innerCenterY = (float)size / 2;
+            viewCenterX = (float)size / 2;
+            viewCenterY = (float)size / 2;
+            outerCircleRadius = size / 2;
+            innerCircleRadius = size / 6;
             dstRect = new Rect(
                     (int) (innerCenterX - mRockerBitmap.getWidth()),
                     (int) (innerCenterY - mRockerBitmap.getHeight()),
                     (int) (innerCenterX + mRockerBitmap.getWidth()),
                     (int) (innerCenterY + mRockerBitmap.getHeight()));
+
         }
     }
 
@@ -106,7 +108,7 @@ public class RockerView extends View {
 
         canvas.drawCircle(viewCenterX, viewCenterY, outerCircleRadius, outerCirclePaint);
         /* 摇杆的控制部分由两部分组成 */
-        canvas.drawCircle((float) innerCenterX, (float) innerCenterY, innerCircleRadius, innerCirclePaint);
+        canvas.drawCircle(innerCenterX, innerCenterY, innerCircleRadius, innerCirclePaint);
         canvas.drawBitmap(mRockerBitmap, srcRect, dstRect, innerCirclePaint);
     }
 
@@ -154,7 +156,7 @@ public class RockerView extends View {
     }
 
     private void moveToPosition(float x, float y) {
-        double distance = Math.sqrt(Math.pow(x-viewCenterX, 2) + Math.pow(y-viewCenterY, 2)); //触摸点与view中心距离
+        float distance = (float) Math.sqrt(Math.pow(x-viewCenterX, 2) + Math.pow(y-viewCenterY, 2)); //触摸点与view中心距离
 
         if (distance < outerCircleRadius-innerCircleRadius) {
             //在自由域之内，触摸点实时作为内圆圆心
