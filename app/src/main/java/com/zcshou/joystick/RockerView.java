@@ -59,12 +59,12 @@ public class RockerView extends View {
 
     private void init() {
         outerCirclePaint = new Paint();
-        outerCirclePaint.setColor(ContextCompat.getColor(mContext, R.color.lightgrey));
+        outerCirclePaint.setColor(ContextCompat.getColor(mContext, R.color.grey));
         outerCirclePaint.setAlpha(180);
         outerCirclePaint.setAntiAlias(true);
 
         innerCirclePaint = new Paint();
-        innerCirclePaint.setColor(ContextCompat.getColor(mContext, R.color.grey));
+        innerCirclePaint.setColor(ContextCompat.getColor(mContext, R.color.lightgrey));
         innerCirclePaint.setAlpha(180);
         innerCirclePaint.setAntiAlias(true);
 

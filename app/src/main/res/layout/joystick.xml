@@ -67,7 +67,7 @@
                 android:layout_height="match_parent"
                 android:contentDescription="@null"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_position"/>
+                android:src="@drawable/ic_map"/>
         </LinearLayout>
 
     </LinearLayout>
