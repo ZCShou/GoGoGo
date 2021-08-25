@@ -44,7 +44,6 @@ public class RockerView extends View {
 
     private Rect srcRect = null;
     private Rect dstRect = null;
-    private boolean isOK = false;
 
     public RockerView(Context context) {
         super(context);
@@ -82,8 +81,7 @@ public class RockerView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        if (!isOK) {
-            isOK = true;
+        if (dstRect == null) {      // 只需要测量一次即可
             int size = getMeasuredWidth();
             setMeasuredDimension(size, size);
 
@@ -98,7 +96,6 @@ public class RockerView extends View {
                     (int) (innerCenterY - mRockerBitmap.getHeight()),
                     (int) (innerCenterX + mRockerBitmap.getWidth()),
                     (int) (innerCenterY + mRockerBitmap.getHeight()));
-
         }
     }
 
