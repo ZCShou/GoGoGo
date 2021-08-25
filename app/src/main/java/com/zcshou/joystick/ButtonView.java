@@ -11,27 +11,29 @@ import com.zcshou.gogogo.R;
 public class ButtonView extends LinearLayout {
 
 	private ButtonViewClickListener mListener;
-	boolean isCenter = true;
-	ImageButton btnCenter;
-	boolean isNorth;
-	ImageButton btnNorth;
-	boolean isSouth;
-	ImageButton btnSouth;
-	boolean isWest;
-	ImageButton btnWest;
-	boolean isEast;
-	ImageButton btnEast;
-	boolean isEastNorth;
-	ImageButton btnEastNorth;
-	boolean isEastSouth;
-	ImageButton btnEastSouth;
-	boolean isWestNorth;
-	ImageButton btnWestNorth;
-	boolean isWestSouth;
-	ImageButton btnWestSouth;
+	private boolean isCenter = true;
+	private ImageButton btnCenter;
+	private boolean isNorth;
+	private ImageButton btnNorth;
+	private boolean isSouth;
+	private ImageButton btnSouth;
+	private boolean isWest;
+	private ImageButton btnWest;
+	private boolean isEast;
+	private ImageButton btnEast;
+	private boolean isEastNorth;
+	private ImageButton btnEastNorth;
+	private boolean isEastSouth;
+	private ImageButton btnEastSouth;
+	private boolean isWestNorth;
+	private ImageButton btnWestNorth;
+	private boolean isWestSouth;
+	private ImageButton btnWestSouth;
+	private final Context mContext;
 
 	public ButtonView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
+		mContext = context;
 		LayoutInflater.from(context).inflate(R.layout.joystick_button, this);
 
 		initButtonView();
@@ -39,6 +41,7 @@ public class ButtonView extends LinearLayout {
 
 	public ButtonView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		mContext = context;
 
 		LayoutInflater.from(context).inflate(R.layout.joystick_button, this);
 		initButtonView();
@@ -46,6 +49,7 @@ public class ButtonView extends LinearLayout {
 
 	public ButtonView(Context context) {
 		super(context);
+		mContext = context;
 
 		LayoutInflater.from(context).inflate(R.layout.joystick_button, this);
 
@@ -53,53 +57,57 @@ public class ButtonView extends LinearLayout {
 	}
 
 	private void initButtonView() {
-		isCenter = true;
 		btnCenter = findViewById(R.id.btn_center);
 		btnCenter.setOnClickListener(view -> {
 			if (!isCenter) {
 				isCenter = true;
 				btnCenter.setImageResource(R.drawable.ic_lock_close);
+				btnCenter.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 			} else {
 				isCenter = false;
 				btnCenter.setImageResource(R.drawable.ic_lock_open);
+				btnCenter.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 
 				if (isNorth) {
 					isNorth = false;
-					btnNorth.setImageResource(R.drawable.ic_up);
+					btnNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 				}
 				if (isSouth) {
 					isSouth = false;
-					btnSouth.setImageResource(R.drawable.ic_down);
+					btnSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 				}
 				if (isWest) {
 					isWest = false;
-					btnWest.setImageResource(R.drawable.ic_left);
+					btnWest.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 				}
 				if (isEast) {
 					isEast = false;
-					btnEast.setImageResource(R.drawable.ic_right);
+					btnEast.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 				}
 				if (isEastNorth) {
 					isEastNorth = false;
-					btnEastNorth.setImageResource(R.drawable.ic_right_up);
+					btnEastNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 				}
 				if (isEastSouth) {
 					isEastSouth = false;
-					btnEastSouth.setImageResource(R.drawable.ic_right_down);
+					btnEastSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 				}
 				if (isWestNorth) {
 					isWestNorth = false;
-					btnWestNorth.setImageResource(R.drawable.ic_left_up);
+					btnWestNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 				}
 				if (isWestSouth) {
 					isWestSouth = false;
-					btnWestSouth.setImageResource(R.drawable.ic_left_down);
+					btnWestSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 				}
 				if (mListener != null) {
 					mListener.clickAngleInfo(false,0, 0);
 				}
 			}
 		});
+		/* 默认 */
+		isCenter = true;
+		btnCenter.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 
 		isNorth = false;
 		btnNorth = findViewById(R.id.btn_north);
@@ -107,22 +115,22 @@ public class ButtonView extends LinearLayout {
 			if (isCenter) {
 				if (!isNorth) {
 					isNorth = true;
-					btnNorth.setImageResource(R.drawable.ic_up_pressed);
+					btnNorth.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 
 					isSouth = false;
-					btnSouth.setImageResource(R.drawable.ic_down);
+					btnSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWest = false;
-					btnWest.setImageResource(R.drawable.ic_left);
+					btnWest.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEast = false;
-					btnEast.setImageResource(R.drawable.ic_right);
+					btnEast.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastNorth = false;
-					btnEastNorth.setImageResource(R.drawable.ic_right_up);
+					btnEastNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastSouth = false;
-					btnEastSouth.setImageResource(R.drawable.ic_right_down);
+					btnEastSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestNorth = false;
-					btnWestNorth.setImageResource(R.drawable.ic_left_up);
+					btnWestNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestSouth = false;
-					btnWestSouth.setImageResource(R.drawable.ic_left_down);
+					btnWestSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					if (mListener != null) {
 						mListener.clickAngleInfo(true,90, 1);
 					}
@@ -146,21 +154,23 @@ public class ButtonView extends LinearLayout {
 			if (isCenter) {
 				if (!isSouth) {
 					isSouth = true;
-					btnSouth.setImageResource(R.drawable.ic_down_pressed);
+					btnSouth.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
+
 					isNorth = false;
-					btnNorth.setImageResource(R.drawable.ic_up);
+					btnNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWest = false;
-					btnWest.setImageResource(R.drawable.ic_left);
+					btnWest.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEast = false;
-					btnEast.setImageResource(R.drawable.ic_right);
+					btnEast.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastNorth = false;
-					btnEastNorth.setImageResource(R.drawable.ic_right_up);
+					btnEastNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastSouth = false;
-					btnEastSouth.setImageResource(R.drawable.ic_right_down);
+					btnEastSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestNorth = false;
-					btnWestNorth.setImageResource(R.drawable.ic_left_up);
+					btnWestNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestSouth = false;
-					btnWestSouth.setImageResource(R.drawable.ic_left_down);
+					btnWestSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+
 					if (mListener != null) {
 						mListener.clickAngleInfo(true,270, 1);
 					}
@@ -184,21 +194,23 @@ public class ButtonView extends LinearLayout {
 			if (isCenter) {
 				if (!isWest) {
 					isWest = true;
-					btnWest.setImageResource(R.drawable.ic_left_pressed);
-					isNorth = false;
-					btnNorth.setImageResource(R.drawable.ic_up);
+					btnWest.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
+
 					isSouth = false;
-					btnSouth.setImageResource(R.drawable.ic_down);
+					btnSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+					isNorth = false;
+					btnNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEast = false;
-					btnEast.setImageResource(R.drawable.ic_right);
+					btnEast.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastNorth = false;
-					btnEastNorth.setImageResource(R.drawable.ic_right_up);
+					btnEastNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastSouth = false;
-					btnEastSouth.setImageResource(R.drawable.ic_right_down);
+					btnEastSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestNorth = false;
-					btnWestNorth.setImageResource(R.drawable.ic_left_up);
+					btnWestNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestSouth = false;
-					btnWestSouth.setImageResource(R.drawable.ic_left_down);
+					btnWestSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+
 					if (mListener != null) {
 						mListener.clickAngleInfo(true,180, 1);
 					}
@@ -222,21 +234,23 @@ public class ButtonView extends LinearLayout {
 			if (isCenter) {
 				if (!isEast) {
 					isEast = true;
-					btnEast.setImageResource(R.drawable.ic_right_pressed);
-					isNorth = false;
-					btnNorth.setImageResource(R.drawable.ic_up);
+					btnEast.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
+
 					isSouth = false;
-					btnSouth.setImageResource(R.drawable.ic_down);
-					isWest = false;
-					btnWest.setImageResource(R.drawable.ic_left);
+					btnSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+					isNorth = false;
+					btnNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+					isWest = true;
+					btnWest.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastNorth = false;
-					btnEastNorth.setImageResource(R.drawable.ic_right_up);
+					btnEastNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastSouth = false;
-					btnEastSouth.setImageResource(R.drawable.ic_right_down);
+					btnEastSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestNorth = false;
-					btnWestNorth.setImageResource(R.drawable.ic_left_up);
+					btnWestNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestSouth = false;
-					btnWestSouth.setImageResource(R.drawable.ic_left_down);
+					btnWestSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+
 					if (mListener != null) {
 						mListener.clickAngleInfo(true,0, 1);
 					}
@@ -260,22 +274,23 @@ public class ButtonView extends LinearLayout {
 			if (isCenter) {
 				if (!isEastNorth) {
 					isEastNorth = true;
-					btnEastNorth.setImageResource(R.drawable.ic_right_up_pressed);
+					btnEastNorth.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 
-					isNorth = false;
-					btnNorth.setImageResource(R.drawable.ic_up);
 					isSouth = false;
-					btnSouth.setImageResource(R.drawable.ic_down);
-					isWest = false;
-					btnWest.setImageResource(R.drawable.ic_left);
+					btnSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+					isNorth = false;
+					btnNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+					isWest = true;
+					btnWest.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEast = false;
-					btnEast.setImageResource(R.drawable.ic_right);
+					btnEast.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastSouth = false;
-					btnEastSouth.setImageResource(R.drawable.ic_right_down);
+					btnEastSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestNorth = false;
-					btnWestNorth.setImageResource(R.drawable.ic_left_up);
+					btnWestNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestSouth = false;
-					btnWestSouth.setImageResource(R.drawable.ic_left_down);
+					btnWestSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+
 					if (mListener != null) {
 						mListener.clickAngleInfo(true,45, 1);
 					}
@@ -299,22 +314,23 @@ public class ButtonView extends LinearLayout {
 			if (isCenter) {
 				if (!isEastSouth) {
 					isEastSouth = true;
-					btnEastSouth.setImageResource(R.drawable.ic_right_down_pressed);
+					btnEastSouth.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 
-					isNorth = false;
-					btnNorth.setImageResource(R.drawable.ic_up);
 					isSouth = false;
-					btnSouth.setImageResource(R.drawable.ic_down);
-					isWest = false;
-					btnWest.setImageResource(R.drawable.ic_left);
+					btnSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+					isNorth = false;
+					btnNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+					isWest = true;
+					btnWest.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEast = false;
-					btnEast.setImageResource(R.drawable.ic_right);
+					btnEast.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastNorth = false;
-					btnEastNorth.setImageResource(R.drawable.ic_right_up);
+					btnEastNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestNorth = false;
-					btnWestNorth.setImageResource(R.drawable.ic_left_up);
+					btnWestNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestSouth = false;
-					btnWestSouth.setImageResource(R.drawable.ic_left_down);
+					btnWestSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+
 					if (mListener != null) {
 						mListener.clickAngleInfo(true,315, 1);
 					}
@@ -338,22 +354,23 @@ public class ButtonView extends LinearLayout {
 			if (isCenter) {
 				if (!isWestNorth) {
 					isWestNorth = true;
-					btnWestNorth.setImageResource(R.drawable.ic_left_up_pressed);
+					btnWestNorth.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 
-					isNorth = false;
-					btnNorth.setImageResource(R.drawable.ic_up);
 					isSouth = false;
-					btnSouth.setImageResource(R.drawable.ic_down);
-					isWest = false;
-					btnWest.setImageResource(R.drawable.ic_left);
+					btnSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+					isNorth = false;
+					btnNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+					isWest = true;
+					btnWest.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEast = false;
-					btnEast.setImageResource(R.drawable.ic_right);
+					btnEast.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastNorth = false;
-					btnEastNorth.setImageResource(R.drawable.ic_right_up);
+					btnEastNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastSouth = false;
-					btnEastSouth.setImageResource(R.drawable.ic_right_down);
+					btnEastSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestSouth = false;
-					btnWestSouth.setImageResource(R.drawable.ic_left_down);
+					btnWestSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+
 					if (mListener != null) {
 						mListener.clickAngleInfo(true,135, 1);
 					}
@@ -377,22 +394,23 @@ public class ButtonView extends LinearLayout {
 			if (isCenter) {
 				if (!isWestSouth) {
 					isWestSouth = true;
-					btnWestSouth.setImageResource(R.drawable.ic_left_down_pressed);
+					btnWestSouth.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 
-					isNorth = false;
-					btnNorth.setImageResource(R.drawable.ic_up);
 					isSouth = false;
-					btnSouth.setImageResource(R.drawable.ic_down);
-					isWest = false;
-					btnWest.setImageResource(R.drawable.ic_left);
+					btnSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+					isNorth = false;
+					btnNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+					isWest = true;
+					btnWest.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEast = false;
-					btnEast.setImageResource(R.drawable.ic_right);
+					btnEast.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastNorth = false;
-					btnEastNorth.setImageResource(R.drawable.ic_right_up);
+					btnEastNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isEastSouth = false;
-					btnEastSouth.setImageResource(R.drawable.ic_right_down);
+					btnEastSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
 					isWestNorth = false;
-					btnWestNorth.setImageResource(R.drawable.ic_left_up);
+					btnWestNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
+
 					if (mListener != null) {
 						mListener.clickAngleInfo(true,225, 1);
 					}

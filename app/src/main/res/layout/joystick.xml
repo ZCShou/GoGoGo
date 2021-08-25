@@ -99,7 +99,7 @@
                 android:layout_height="match_parent"
                 android:contentDescription="@null"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_walk_pressed"/>
+                android:src="@drawable/ic_walk"/>
         </LinearLayout>
 
         <Space

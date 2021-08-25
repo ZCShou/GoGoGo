@@ -251,29 +251,31 @@ public class JoyStick extends View {
 //        });
 
         /* 步行按键的点击处理 */
-        isWalk = true;
         btnWalk = mJoystickLayout.findViewById(R.id.joystick_walk);
         btnWalk.setOnClickListener(v -> {
             if (!isWalk) {
-                btnWalk.setImageResource(R.drawable.ic_walk_pressed);
+                btnWalk.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
                 isWalk = true;
-                btnRun.setImageResource(R.drawable.ic_run);
+                btnRun.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                 isRun = false;
-                btnBike.setImageResource(R.drawable.ic_bike);
+                btnBike.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                 isBike = false;
                 mSpeed = Double.parseDouble(sharedPreferences.getString("setting_walk", getResources().getString(R.string.setting_walk_default)));
             }
         });
+        /* 默认为步行 */
+        isWalk = true;
+        btnWalk.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
         /* 跑步按键的点击处理 */
         isRun = false;
         btnRun = mJoystickLayout.findViewById(R.id.joystick_run);
         btnRun.setOnClickListener(v -> {
             if (!isRun) {
-                btnRun.setImageResource(R.drawable.ic_run_pressed);
+                btnRun.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
                 isRun = true;
-                btnWalk.setImageResource(R.drawable.ic_walk);
+                btnWalk.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                 isWalk = false;
-                btnBike.setImageResource(R.drawable.ic_bike);
+                btnBike.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                 isBike = false;
                 mSpeed = Double.parseDouble(sharedPreferences.getString("setting_run", getResources().getString(R.string.setting_run_default)));
             }
@@ -283,11 +285,11 @@ public class JoyStick extends View {
         btnBike = mJoystickLayout.findViewById(R.id.joystick_bike);
         btnBike.setOnClickListener(v -> {
             if (!isBike) {
-                btnBike.setImageResource(R.drawable.ic_bike_pressed);
+                btnBike.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
                 isBike = true;
-                btnWalk.setImageResource(R.drawable.ic_walk);
+                btnWalk.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                 isWalk = false;
-                btnRun.setImageResource(R.drawable.ic_run);
+                btnRun.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                 isRun = false;
                 mSpeed = Double.parseDouble(sharedPreferences.getString("setting_bike", getResources().getString(R.string.setting_bike_default)));
             }
