@@ -29,7 +29,7 @@ public class FragmentSettings extends PreferenceFragmentCompat {
             pfVersion.setSummary(verName);
         }
 
-        ListPreference pfJoystick = findPreference("joystick_type");
+        ListPreference pfJoystick = findPreference("setting_joystick_type");
         if (pfJoystick != null) {
             // 使用自定义 SummaryProvider
             pfJoystick.setSummaryProvider((Preference.SummaryProvider<ListPreference>) preference -> {
@@ -94,6 +94,19 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                     return false;
                 }
             });
+        }
+
+        EditTextPreference pfPosHisValid = findPreference("setting_pos_history");
+        if (pfPosHisValid != null) {
+            // 使用自定义 SummaryProvider
+            pfPosHisValid.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> {
+                String text = preference.getText();
+                if (TextUtils.isEmpty(text)) {
+                    return "未设置";
+                }
+                return "当前值: " + text;
+            });
+            pfPosHisValid.setOnBindEditTextListener(editText -> editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER));
         }
     }
 }

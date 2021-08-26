@@ -5,10 +5,10 @@
         app:title="@string/setting_group_move"
         app:iconSpaceReserved="false">
         <ListPreference
-            app:key="joystick_type"
+            app:key="setting_joystick_type"
             app:title="@string/setting_joystick"
-            app:entries="@array/joystick_type"
-            app:entryValues="@array/joystick_type_values"
+            app:entries="@array/array_joystick_type"
+            app:entryValues="@array/array_joystick_type_values"
             app:dialogTitle="@string/setting_joystick_tips"
             app:defaultValue="0"
             app:iconSpaceReserved="false">
@@ -45,6 +45,12 @@
             app:title="@string/setting_log_off"
             app:defaultValue="false"
             app:iconSpaceReserved="false"/>
+        <EditTextPreference
+            app:key="setting_pos_history"
+            app:title="@string/setting_pos_history"
+            app:defaultValue="@string/setting_pos_history_default"
+            app:summary="@string/setting_pos_history_default"
+            app:iconSpaceReserved="false"/>
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -59,8 +65,8 @@
         <Preference
             app:key="setting_author"
             app:title="@string/setting_author"
-            app:defaultValue="@string/author"
-            app:summary="@string/author"
+            app:defaultValue="@string/app_author"
+            app:summary="@string/app_author"
             app:iconSpaceReserved="false"/>
     </PreferenceCategory>
 

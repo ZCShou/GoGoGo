@@ -2,10 +2,10 @@
     <string name="app_name">影梭</string>
     <string name="app_settings">设置</string>
     <string name="app_history">历史记录</string>
-    <string name="author">ZCShou</string>
-    <string name="author_email">Author: zcsexp@gmail.com</string>
+    <string name="app_author">ZCShou</string>
+    <string name="app_email">Author: zcsexp@gmail.com</string>
     <string name="app_statement">仅供学习使用，否则后果自负！</string>
-    <string name="app_service">影梭服务正在运行中</string>
+    <string name="app_service_tips">影梭服务正在运行中</string>
     <!-- 通知栏 -->
     <string name="note_show">显示摇杆</string>
     <string name="note_hide">隐藏摇杆</string>
@@ -33,17 +33,16 @@
     <string name="fabtn_start">启动定位</string>
     <string name="label_longitude">经度</string>
     <string name="label_latitude">纬度</string>
-    <!-- 主菜单 -->
-    <string name="main_menu_action_latlng">经纬度定位</string>
-    <string name="main_menu_action_history">历史记录</string>
-    <string name="main_menu_action_setting">设置</string>
 
     <!-- 历史记录页面 -->
     <string name="history_idle">暂无历史记录</string>
+    <string name="action_delete">删除</string>
+    <string name="action_all">全选</string>
+    <string name="action_cancel">取消</string>
+
     <!-- 导航页 -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_desc">Navigation header</string>
     <string name="user_name">点击头像注册</string>
     <string name="user_limit_info">未注册版本部分功能受限</string>
     <string name="nav_menu_history">历史记录</string>
@@ -65,28 +64,20 @@
     <string name="setting_run_default">3.6</string>
     <string name="setting_bike">驾驶速度(米/秒)</string>
     <string name="setting_bike_default">10.0</string>
-    <string name="setting_group_log">日志</string>
+    <string name="setting_group_log">记录</string>
     <string name="setting_log_off">关闭日志</string>
+    <string name="setting_pos_history">历史记录有效期(天)</string>
+    <string name="setting_pos_history_default">7</string>
     <string name="setting_group_about">关于</string>
     <string name="setting_version">版本号</string>
     <string name="setting_author">开发者</string>
     <string name="setting_group_sys">系统</string>
 
     <!-- 百度地图 -->
-    <string name="map_pic_hot">热力图</string>
-    <string name="map_pic_road">路况图</string>
     <string name="map_pic_sate">卫星图</string>
     <string name="map_pic_normal">普通图</string>
-    <string name="map_compass">罗盘</string>
-    <string name="map_track">跟踪</string>
-    <string name="map_normal">正常</string>
     <string name="safecode">32:2F:E6:05:6C:2F:11:6D:CD:ED:AC:FF:23:02:5A:29:68:FD:45:D2;com.zcshou.gogogo</string>
     <string name="ak">fb7YwlKY3ntx8hBDGMGLqX2FhlPkDMvv</string>
-
-    <!-- 菜单项名称 -->
-    <string name="action_delete">删除</string>
-    <string name="action_all">全选</string>
-    <string name="action_cancel">取消</string>
 
     <!-- 摇杆 -->
     <string name="joystick_input_ok">传送</string>
@@ -100,8 +91,4 @@
     <string name="register_tips">长按复制以上代码发送给开发者，然后在下面填写获取到的注册码</string>
     <string name="register_cancel">取消</string>
     <string name="register_check">我已阅读免责声明，并同意所有条款</string>
-    <!-- ads -->
-    <string name="ad_unit_id_main_banner" translatable="false">ca-app-pub-2117389248426871/1567963500</string>
-    <string name="ad_unit_id_go_start" translatable="false">ca-app-pub-2117389248426871/2828744710</string>
-
 </resources>

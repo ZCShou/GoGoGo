@@ -303,7 +303,7 @@ public class JoyStick extends View {
         btnView.setListener(this::processDirection);
 
         /* 这里用来决定摇杆类型 */
-        if (sharedPreferences.getString("joystick_type", "0").equals("0")) {
+        if (sharedPreferences.getString("setting_joystick_type", "0").equals("0")) {
             rckView.setVisibility(VISIBLE);
             btnView.setVisibility(GONE);
         } else {

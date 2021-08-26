@@ -1,11 +1,13 @@
 package com.zcshou.gogogo;
 
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
+import androidx.preference.PreferenceManager;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -41,7 +43,8 @@ public class HistoryActivity extends BaseActivity {
     private ListView mRecordListView;
     private SQLiteDatabase mHistoryLocationDB;
     private List<Map<String, Object>> mAllRecord;
-    
+    private SharedPreferences sharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +55,8 @@ public class HistoryActivity extends BaseActivity {
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         initDataBaseHistoryLocation();
 
@@ -176,7 +181,8 @@ public class HistoryActivity extends BaseActivity {
 
     // 删除旧数据
     private void recordArchive() {
-        final long weekSecond = 7 * 24 * 60 * 60;
+        final double limits = Double.parseDouble(sharedPreferences.getString("setting_pos_history", getResources().getString(R.string.setting_pos_history_default)));
+        final long weekSecond = (long) (limits * 24 * 60 * 60);
 
         try {
             mHistoryLocationDB.delete(DataBaseHistoryLocation.TABLE_NAME,
