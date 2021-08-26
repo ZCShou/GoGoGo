@@ -423,7 +423,7 @@ public class JoyStick extends View {
 
 //    @SuppressLint({"ClickableViewAccessibility", "InflateParams"})
 //    private void initHistoryView() {
-//        mHistoryLayout = (LinearLayout)inflater.inflate(R.layout.joystick_latlng, null);
+//        mHistoryLayout = (LinearLayout)inflater.inflate(R.layout.input_latlng, null);
 //        mHistoryLayout.setOnTouchListener(new JoyStickOnTouchListener());
 //    }
 

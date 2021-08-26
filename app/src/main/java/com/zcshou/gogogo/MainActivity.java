@@ -22,16 +22,20 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -580,6 +584,59 @@ public class MainActivity extends BaseActivity
     //缩小地图
     public void zoomOutMap(View view) {
         mBaiduMap.animateMapStatus(MapStatusUpdateFactory.zoomOut());
+    }
+
+    public void goInputPosition(View view1) {
+        AlertDialog dialog;
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("请输入经度和纬度");
+        View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.input_latlng, null);
+        builder.setView(view);
+        dialog = builder.show();
+
+        EditText dialog_lng = view.findViewById(R.id.joystick_longitude);
+        EditText dialog_lat = view.findViewById(R.id.joystick_latitude);
+        RadioButton rbBD = view.findViewById(R.id.pos_type_bd);
+
+        Button btnGo = view.findViewById(R.id.joystick_latlng_ok);
+        btnGo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String dialog_lng_str = dialog_lng.getText().toString();
+                String dialog_lat_str = dialog_lat.getText().toString();
+
+                if (TextUtils.isEmpty(dialog_lng_str) || TextUtils.isEmpty(dialog_lat_str)) {
+                    DisplayToast("输入不能为空");
+                } else {
+                    double dialog_lng_double = Double.parseDouble(dialog_lng_str);
+                    double dialog_lat_double = Double.parseDouble(dialog_lat_str);
+
+                    if (dialog_lng_double > 180.0 || dialog_lng_double < -180.0 || dialog_lat_double > 90.0 || dialog_lat_double < -90.0) {
+                        DisplayToast("经纬度超出限制!\n-180.0<经度<180.0\n-90.0<纬度<90.0");
+                    } else {
+                        if (rbBD.isChecked()) {
+                            mCurLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
+                        } else {
+                            double[] latLon = MapUtils.wgs2bd09(dialog_lat_double, dialog_lng_double);
+                            mCurLatLngMap = new LatLng(latLon[0], latLon[0]);
+                        }
+
+                        MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mCurLatLngMap);
+                        mBaiduMap.setMapStatus(mapstatusupdate);
+                        markSelectedPosition();
+                        dialog.dismiss();
+                    }
+                }
+            }
+        });
+
+        Button btnCancel = view.findViewById(R.id.joystick_latlng_cancel);
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
     }
 
     // 在地图上显示历史位置

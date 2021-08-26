@@ -17,8 +17,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:clickable="true"
-            android:focusable="true" >
-        </com.baidu.mapapi.map.MapView>
+            android:focusable="true"/>
 
         <RadioGroup
             android:id="@+id/RadioGroupMapType"
@@ -48,17 +47,17 @@
 
         <ImageButton
             android:id="@+id/pos_btn"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="360dp"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:onClick="goCurrentPosition"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="350dp"
+            android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@null"
+            android:onClick="goCurrentPosition"
             android:theme="@style/AppTheme"
             app:srcCompat="@drawable/ic_home_position"
-            android:contentDescription="@null"
-            app:tint="@color/colorAccent"/>
+            app:tint="@color/colorAccent" />
 
         <ImageButton
             android:id="@+id/zoom_in"
@@ -66,7 +65,7 @@
             android:layout_height="32dp"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="10dp"
-            android:layout_marginTop="393dp"
+            android:layout_marginTop="383dp"
             android:onClick="zoomInMap"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:theme="@style/AppTheme"
@@ -76,17 +75,32 @@
 
         <ImageButton
             android:id="@+id/zoom_out"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="426dp"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:onClick="zoomOutMap"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="416dp"
+            android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@null"
+            android:onClick="zoomOutMap"
             android:theme="@style/AppTheme"
             app:srcCompat="@drawable/ic_zoom_out"
-            android:contentDescription="@null"
             app:tint="@color/colorAccent" />
+
+        <ImageButton
+            android:id="@+id/input"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="240dp"
+            android:layout_marginEnd="10dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@null"
+            android:onClick="goInputPosition"
+            android:theme="@style/AppTheme"
+            app:srcCompat="@drawable/ic_input"
+            app:tint="@color/colorAccent" />
+
 
         <TextView
             android:layout_width="match_parent"

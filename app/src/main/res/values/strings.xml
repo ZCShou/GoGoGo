@@ -13,7 +13,6 @@
     <!-- 欢迎页 -->
     <string name="welcome_btn_txt">进入应用</string>
     <string name="welcome_btn_cnt">3000</string>
-    <string name="welcome_desc">世界这么大，我想去看看</string>
     <string name="welcome_protocol_title">免责声明</string>
     <string name="welcome_protocol_agree">同意并继续</string>
     <string name="welcome_protocol_disagree">不同意</string>
@@ -33,6 +32,10 @@
     <string name="fabtn_start">启动定位</string>
     <string name="label_longitude">经度</string>
     <string name="label_latitude">纬度</string>
+    <string name="input_latlng_ok">传送</string>
+    <string name="input_latlng_cancel">取消</string>
+    <string name="input_latlng_baidu">BD09 坐标系</string>
+    <string name="input_latlng_gps">GPS 坐标系</string>
 
     <!-- 历史记录页面 -->
     <string name="history_idle">暂无历史记录</string>
@@ -80,8 +83,6 @@
     <string name="ak">fb7YwlKY3ntx8hBDGMGLqX2FhlPkDMvv</string>
 
     <!-- 摇杆 -->
-    <string name="joystick_input_ok">传送</string>
-    <string name="joystick_input_cancel">取消</string>
     <string name="joystick_map_tips">搜索或点击地图选择位置</string>
     <!-- 注册 -->
     <string name="register_title">离线注册</string>
