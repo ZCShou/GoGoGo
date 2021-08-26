@@ -257,13 +257,6 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onBackPressed() {
-//        DrawerLayout drawer = findViewById(id.drawer_layout);
-//
-//        if (drawer.isDrawerOpen(GravityCompat.START)) {
-//            drawer.closeDrawer(GravityCompat.START);
-//        } else {
-//            super.onBackPressed();
-//        }
         moveTaskToBack(false);
     }
 
@@ -765,7 +758,7 @@ public class MainActivity extends BaseActivity
 
         if (sharedPreferences.getString("setting_reg_code", null) != null) {
 
-            mUserName.setText("ZCShou");
+            // mUserName.setText("ZCShou");
 
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
             simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -1075,13 +1068,6 @@ public class MainActivity extends BaseActivity
                 DisplayToast("没有找到检索结果");
             } else { //获取在线建议检索结果
                 if (isSubmit) {
-                    // mBaiduMap.clear();
-                    //normal
-                    //PoiGoOverlay poiOverlay = new PoiGoOverlay(mBaiduMap);
-                    //poiOverlay.setSugData(res);// 设置POI数据
-                    //mBaiduMap.setOnMarkerClickListener(poiOverlay);
-                    //poiOverlay.addToMap();// 将所有的overlay添加到地图上
-                    //poiOverlay.zoomToSpan();
                     mSearchLayout.setVisibility(View.INVISIBLE);
                     //标注搜索点 关闭搜索列表
                     // searchView.clearFocus();  //可以收起键盘

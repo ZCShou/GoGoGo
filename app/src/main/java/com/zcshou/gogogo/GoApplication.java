@@ -69,7 +69,6 @@ public class GoApplication extends Application {
                 .fileNameGenerator(new ChangelessFileNameGenerator(LOG_FILE_NAME))         // 指定日志文件名生成器，默认为 ChangelessFileNameGenerator("log")
                 .backupStrategy(new NeverBackupStrategy())              // 指定日志文件备份策略，默认为 FileSizeBackupStrategy(1024 * 1024)
                 .cleanStrategy(new FileLastModifiedCleanStrategy(MAX_TIME))     // 指定日志文件清除策略，默认为 NeverCleanStrategy()
-//                .flattener(new MyFlattener())                          // 指定日志平铺器，默认为 DefaultFlattener
                 .build();
 
         XLog.init(                                                 // 初始化 XLog

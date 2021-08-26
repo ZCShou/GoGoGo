@@ -170,10 +170,6 @@ public class HistoryActivity extends BaseActivity {
             return "";
         }
 
-        // if (format == null || format.isEmpty()){
-        //     format = "yyyy-MM-dd HH:mm:ss";
-        // }
-
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 
         return sdf.format(new Date(Long.parseLong(seconds + "000")));

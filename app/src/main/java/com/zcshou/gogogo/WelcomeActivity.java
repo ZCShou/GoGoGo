@@ -135,11 +135,6 @@ public class WelcomeActivity extends AppCompatActivity {
             ReqPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
         }
 
-        //悬浮窗
-        // if (checkSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
-        //     permissions.add(Manifest.permission.SYSTEM_ALERT_WINDOW);
-        // }
-
         /*
          * 读写权限和电话状态权限非必要权限(建议授予)只会申请一次，用户同意或者禁止，只会弹一次
          */
