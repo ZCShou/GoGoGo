@@ -2,59 +2,61 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="300dp"
+    android:layout_height="500dp"
     android:background="@drawable/border_window"
     android:orientation="vertical">
 
     <TextView
+        android:id="@+id/joystick_map_tips"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:gravity="center_horizontal|center_vertical"
-        android:text="点击地图选择位置"/>
+        android:text="@string/joystick_map_tips"/>
+
+    <SearchView
+        android:id="@+id/joystick_map_searchView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:layout_marginEnd="40dp"
+        android:iconifiedByDefault="true"
+        app:showAsAction="collapseActionView|ifRoom"
+        android:queryHint="请输入搜索内容" />
+
+    <ImageButton
+        android:id="@+id/map_close"
+        android:layout_width="@dimen/joystick_btn_width"
+        android:layout_height="@dimen/joystick_btn_height"
+        android:layout_gravity="top|end"
+        android:layout_marginEnd="3dp"
+        android:layout_marginTop="10dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_close"
+        android:theme="@style/RippleWhite" />
 
     <FrameLayout
+        android:layout_marginTop="50dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <SearchView
-            android:id="@+id/searchView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:layout_marginTop="0dp"
-            android:layout_marginEnd="60dp"
-            android:iconifiedByDefault="true"
-            app:showAsAction="always|collapseActionView"
-            android:queryHint="请输入搜索内容" />
+        android:layout_height="600dp">
 
         <com.baidu.mapapi.map.MapView
-            android:layout_marginTop="50dp"
             android:id="@+id/map_joystick"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
         </com.baidu.mapapi.map.MapView>
 
         <ImageButton
-            android:id="@+id/map_close"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="top|end"
-            android:layout_marginEnd="3dp"
-            android:layout_marginTop="10dp"
-            app:srcCompat="@drawable/ic_close"
-            app:tint="@color/colorAccent"
-            android:contentDescription="@null"/>
-
-        <ImageButton
             android:id="@+id/btnGo"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_gravity="center_horizontal|center_vertical|bottom"
             android:layout_marginBottom="80dp"
-            app:srcCompat="@drawable/ic_position"
-            app:tint="@color/colorAccent"
-            android:contentDescription="@null"/>
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_fly"
+            android:theme="@style/RippleWhite" />
 
     </FrameLayout>
 </FrameLayout>

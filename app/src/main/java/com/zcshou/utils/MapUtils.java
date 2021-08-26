@@ -37,6 +37,34 @@ public class MapUtils {
         double[] bd2Gcj = bd09togcj02(lon, lat);
         return gcj02towgs84(bd2Gcj[0], bd2Gcj[1]);
     }
+
+    /**
+     * WGS84 转换为 BD-09
+     * @param lng
+     * @param lat
+     * @returns {*[]}
+     *
+     */
+    public static double[] wgs2bd09(double lng, double lat){
+        //第一次转换
+        double dlat = transformLat(lng - 105.0, lat - 35.0);
+        double dlng = transformLon(lng - 105.0, lat - 35.0);
+        double radlat = lat / 180.0 * pi;
+        double magic = Math.sin(radlat);
+        magic = 1 - ee * magic * magic;
+        double sqrtmagic = Math.sqrt(magic);
+        dlat = (dlat * 180.0) / ((a * (1 - ee)) / (magic * sqrtmagic) * pi);
+        dlng = (dlng * 180.0) / (a / sqrtmagic * Math.cos(radlat) * pi);
+        double mglat = lat + dlat;
+        double mglng = lng + dlng;
+
+        //第二次转换
+        double z = Math.sqrt(mglng * mglng + mglat * mglat) + 0.00002 * Math.sin(mglat * x_pi);
+        double theta = Math.atan2(mglat, mglng) + 0.000003 * Math.cos(mglng * x_pi);
+        double bd_lng = z * Math.cos(theta) + 0.0065;
+        double bd_lat = z * Math.sin(theta) + 0.006;
+        return new double[] { bd_lng, bd_lat };
+    }
     
     public static double[] bd09togcj02(double bd_lon, double bd_lat) {
         double x = bd_lon - 0.0065;

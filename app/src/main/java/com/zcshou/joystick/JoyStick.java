@@ -13,7 +13,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.SearchView;
+//import android.widget.SearchView;
+//import android.widget.TextView;
 
 import androidx.preference.PreferenceManager;
 
@@ -25,6 +26,7 @@ import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
+import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
 import com.zcshou.gogogo.R;
 import com.zcshou.utils.MapUtils;
@@ -125,8 +127,21 @@ public class JoyStick extends View {
     }
 
     public void setCurrentPosition(double lng, double lat) {
-        mLng = lng;
-        mLat = lat;
+
+        double[] lngLat = MapUtils.wgs2bd09(lng, lat);
+        mLng = lngLat[0];
+        mLat = lngLat[1];
+
+        MyLocationData locData = new MyLocationData.Builder()
+                .latitude(mLat)
+                .longitude(mLng)
+                .build();
+        mBaiduMap.setMyLocationData(locData);
+
+        LatLng pos = new LatLng(mLat, mLng);
+        MapStatus.Builder builder = new MapStatus.Builder();
+        builder.target(pos).zoom(18.0f);
+        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
     }
 
     public void show() {
@@ -317,12 +332,17 @@ public class JoyStick extends View {
         mMapLayout = (FrameLayout)inflater.inflate(R.layout.joystick_map, null);
         mMapLayout.setOnTouchListener(new JoyStickOnTouchListener());
 
+//        TextView tips = mMapLayout.findViewById(R.id.joystick_map_tips);
+//        SearchView mSearchView = mMapLayout.findViewById(R.id.joystick_map_searchView);
+
         ImageButton btnOk = mMapLayout.findViewById(R.id.btnGo);
         btnOk.setOnClickListener(v -> {
             mCurWin = WINDOW_TYPE.JOYSTICK;
             show();
             mListener.onPositionInfo(mLng, mLat);
         });
+        btnOk.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
+
         ImageButton btnCancel = mMapLayout.findViewById(R.id.map_close);
         btnCancel.setOnClickListener(v -> {
             mCurWin = WINDOW_TYPE.JOYSTICK;
@@ -399,26 +419,6 @@ public class JoyStick extends View {
                 mLat = lngLat[1];
             }
         });
-
-
-        SearchView mSearchView = mMapLayout.findViewById(R.id.searchView);
-        mSearchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
-        mSearchView.setSubmitButtonEnabled(false);//显示提交按钮
-        mSearchView.setFocusable(false);
-        mSearchView.requestFocusFromTouch();
-        mSearchView.clearFocus();
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {// 当点击搜索按钮时触发该方法
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {// 当搜索内容改变时触发该方法
-                return false;
-            }
-        });
-
     }
 
 //    @SuppressLint({"ClickableViewAccessibility", "InflateParams"})

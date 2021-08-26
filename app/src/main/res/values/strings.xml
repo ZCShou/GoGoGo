@@ -82,6 +82,7 @@
     <!-- 摇杆 -->
     <string name="joystick_input_ok">传送</string>
     <string name="joystick_input_cancel">取消</string>
+    <string name="joystick_map_tips">搜索或点击地图选择位置</string>
     <!-- 注册 -->
     <string name="register_title">离线注册</string>
     <string name="register_user_name">用户名</string>
