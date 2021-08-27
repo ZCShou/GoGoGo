@@ -13,8 +13,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-//import android.widget.SearchView;
-//import android.widget.TextView;
+import android.widget.TextView;
+import android.widget.SearchView;
 
 import androidx.preference.PreferenceManager;
 
@@ -184,29 +184,29 @@ public class JoyStick extends View {
 
     public void hide() {
         if (mMapLayout.getParent() != null) {
-            mWindowManager.removeView(mMapLayout);
+            mWindowManager.removeViewImmediate(mMapLayout);
+        }
+
+        if (mJoystickLayout.getParent() != null) {
+            mWindowManager.removeViewImmediate(mJoystickLayout);
         }
 
 //        if (mHistoryLayout.getParent() != null) {
-//            mWindowManager.removeView(mHistoryLayout);
+//            mWindowManager.removeViewImmediate(mHistoryLayout);
 //        }
-
-        if (mJoystickLayout.getParent() != null) {
-            mWindowManager.removeView(mJoystickLayout);
-        }
     }
 
     public void destroy() {
         if (mMapLayout.getParent() != null) {
-            mWindowManager.removeView(mMapLayout);
+            mWindowManager.removeViewImmediate(mMapLayout);
         }
 
         if (mJoystickLayout.getParent() != null) {
-            mWindowManager.removeView(mJoystickLayout);
+            mWindowManager.removeViewImmediate(mJoystickLayout);
         }
 
 //        if (mHistoryLayout.getParent() != null) {
-//            mWindowManager.removeView(mHistoryLayout);
+//            mWindowManager.removeViewImmediate(mHistoryLayout);
 //        }
 
         mBaiduMap.setMyLocationEnabled(false);
@@ -222,12 +222,15 @@ public class JoyStick extends View {
         mWindowParamJoyStick = new WindowManager.LayoutParams();
         mWindowParamJoyStick.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         mWindowParamJoyStick.format = PixelFormat.RGBA_8888;
-        mWindowParamJoyStick.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+        mWindowParamJoyStick.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE      // 不添加这个将导致游戏无法启动（MIUI12）,添加之后导致键盘无法显示
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
         mWindowParamJoyStick.gravity = Gravity.START | Gravity.TOP;
         mWindowParamJoyStick.width = WindowManager.LayoutParams.WRAP_CONTENT;
         mWindowParamJoyStick.height = WindowManager.LayoutParams.WRAP_CONTENT;
         mWindowParamJoyStick.x = 300;
         mWindowParamJoyStick.y = 300;
+
         mWindowParamMap = mWindowParamJoyStick;
 //        mWindowParamHistory = mWindowParamJoyStick;
     }
@@ -332,8 +335,21 @@ public class JoyStick extends View {
         mMapLayout = (FrameLayout)inflater.inflate(R.layout.joystick_map, null);
         mMapLayout.setOnTouchListener(new JoyStickOnTouchListener());
 
-//        TextView tips = mMapLayout.findViewById(R.id.joystick_map_tips);
-//        SearchView mSearchView = mMapLayout.findViewById(R.id.joystick_map_searchView);
+        TextView tips = mMapLayout.findViewById(R.id.joystick_map_tips);
+        SearchView mSearchView = mMapLayout.findViewById(R.id.joystick_map_searchView);
+        mSearchView.setOnSearchClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tips.setVisibility(GONE);
+            }
+        });
+        mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                tips.setVisibility(VISIBLE);
+                return false;       /* 这里必须返回false，否则需要自行处理搜索框的折叠 */
+            }
+        });
 
         ImageButton btnOk = mMapLayout.findViewById(R.id.btnGo);
         btnOk.setOnClickListener(v -> {

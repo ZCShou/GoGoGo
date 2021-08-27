@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:gravity="center_horizontal|center_vertical"
+        android:textSize="18sp"
         android:text="@string/joystick_map_tips"/>
 
     <SearchView
@@ -22,6 +23,8 @@
         android:layout_marginEnd="40dp"
         android:iconifiedByDefault="true"
         app:showAsAction="collapseActionView|ifRoom"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:queryHint="请输入搜索内容" />
 
     <ImageButton
