@@ -8,7 +8,7 @@
     <LinearLayout
         android:id="@+id/content_layout"
         android:layout_width="0dp"
-        android:layout_height="80dp"
+        android:layout_height="wrap_content"
         android:layout_weight="3"
         android:gravity="center_vertical"
         android:orientation="vertical"
@@ -42,12 +42,4 @@
             android:layout_height="wrap_content"
             android:visibility="gone" />
     </LinearLayout>
-
-    <CheckBox
-        android:id="@+id/check_one"
-        android:layout_width="wrap_content"
-        android:layout_height="80dp"
-        android:visibility="gone"
-        android:gravity="center_vertical"/>
-
 </LinearLayout>
