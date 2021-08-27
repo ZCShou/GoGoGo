@@ -3,9 +3,12 @@ package com.zcshou.joystick;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.PixelFormat;
 import android.os.CountDownTimer;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -13,6 +16,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.SearchView;
 
@@ -28,8 +33,17 @@ import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.zcshou.database.DataBaseHistoryLocation;
+import com.zcshou.gogogo.HistoryActivity;
 import com.zcshou.gogogo.R;
+import com.zcshou.utils.AppUtils;
 import com.zcshou.utils.MapUtils;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class JoyStick extends View {
     private static final int DivGo = 1000;    /* 移动的时间间隔，单位 ms */
@@ -37,12 +51,12 @@ public class JoyStick extends View {
 
     private WindowManager.LayoutParams mWindowParamJoyStick;
     private WindowManager.LayoutParams mWindowParamMap;
-//    private WindowManager.LayoutParams mWindowParamHistory;
+    private WindowManager.LayoutParams mWindowParamHistory;
     private WindowManager mWindowManager;
     private final LayoutInflater inflater;
     private View mJoystickLayout;
     private FrameLayout mMapLayout;
-//    private LinearLayout mHistoryLayout;
+    private FrameLayout mHistoryLayout;
     private JoyStickClickListener mListener;
     private boolean isWalk;
     private ImageButton btnWalk;
@@ -67,7 +81,9 @@ public class JoyStick extends View {
     private double mLng;
     private double mLat;
     private LatLng mCurMapLngLat;
-    private WINDOW_TYPE mCurWin = WINDOW_TYPE.JOYSTICK;
+
+
+    private WINDOW_TYPE mCurWin = WINDOW_TYPE.WINDOW_TYPE_JOYSTICK;
 
     public JoyStick(Context context) {
         super(context);
@@ -84,7 +100,7 @@ public class JoyStick extends View {
 
             initJoyStickMapView();
 
-//            initHistoryView();
+            initHistoryView();
         }
     }
 
@@ -103,7 +119,7 @@ public class JoyStick extends View {
 
             initJoyStickMapView();
 
-//            initHistoryView();
+            initHistoryView();
         }
     }
 
@@ -122,7 +138,7 @@ public class JoyStick extends View {
 
             initJoyStickMapView();
 
-//            initHistoryView();
+            initHistoryView();
         }
     }
 
@@ -146,35 +162,35 @@ public class JoyStick extends View {
 
     public void show() {
         switch (mCurWin) {
-            case MAP:
+            case WINDOW_TYPE_MAP:
                 if (mJoystickLayout.getParent() != null) {
                     mWindowManager.removeView(mJoystickLayout);
                 }
-//                if (mHistoryLayout.getParent() != null) {
-//                    mWindowManager.removeView(mHistoryLayout);
-//                }
+                if (mHistoryLayout.getParent() != null) {
+                    mWindowManager.removeView(mHistoryLayout);
+                }
                 if (mMapLayout.getParent() == null) {
                     mWindowManager.addView(mMapLayout, mWindowParamMap);
                 }
                 break;
-//            case HISTORY:
-//                if (mMapLayout.getParent() != null) {
-//                    mWindowManager.removeView(mMapLayout);
-//                }
-//                if (mJoystickLayout.getParent() != null) {
-//                    mWindowManager.removeView(mJoystickLayout);
-//                }
-//                if (mHistoryLayout.getParent() == null) {
-//                    mWindowManager.addView(mHistoryLayout, mWindowParamHistory);
-//                }
-//                break;
-            case JOYSTICK:
+            case WINDOW_TYPE_HISTORY:
                 if (mMapLayout.getParent() != null) {
                     mWindowManager.removeView(mMapLayout);
                 }
-//                if (mHistoryLayout.getParent() != null) {
-//                    mWindowManager.removeView(mHistoryLayout);
-//                }
+                if (mJoystickLayout.getParent() != null) {
+                    mWindowManager.removeView(mJoystickLayout);
+                }
+                if (mHistoryLayout.getParent() == null) {
+                    mWindowManager.addView(mHistoryLayout, mWindowParamHistory);
+                }
+                break;
+            case WINDOW_TYPE_JOYSTICK:
+                if (mMapLayout.getParent() != null) {
+                    mWindowManager.removeView(mMapLayout);
+                }
+                if (mHistoryLayout.getParent() != null) {
+                    mWindowManager.removeView(mHistoryLayout);
+                }
                 if (mJoystickLayout.getParent() == null) {
                     mWindowManager.addView(mJoystickLayout, mWindowParamJoyStick);
                 }
@@ -191,9 +207,9 @@ public class JoyStick extends View {
             mWindowManager.removeViewImmediate(mJoystickLayout);
         }
 
-//        if (mHistoryLayout.getParent() != null) {
-//            mWindowManager.removeViewImmediate(mHistoryLayout);
-//        }
+        if (mHistoryLayout.getParent() != null) {
+            mWindowManager.removeViewImmediate(mHistoryLayout);
+        }
     }
 
     public void destroy() {
@@ -205,9 +221,9 @@ public class JoyStick extends View {
             mWindowManager.removeViewImmediate(mJoystickLayout);
         }
 
-//        if (mHistoryLayout.getParent() != null) {
-//            mWindowManager.removeViewImmediate(mHistoryLayout);
-//        }
+        if (mHistoryLayout.getParent() != null) {
+            mWindowManager.removeViewImmediate(mHistoryLayout);
+        }
 
         mBaiduMap.setMyLocationEnabled(false);
         mMapView.onDestroy();
@@ -232,7 +248,7 @@ public class JoyStick extends View {
         mWindowParamJoyStick.y = 300;
 
         mWindowParamMap = mWindowParamJoyStick;
-//        mWindowParamHistory = mWindowParamJoyStick;
+        mWindowParamHistory = mWindowParamJoyStick;
     }
 
     @SuppressLint("InflateParams")
@@ -251,7 +267,7 @@ public class JoyStick extends View {
         ImageButton btnPosition = mJoystickLayout.findViewById(R.id.joystick_position);
         btnPosition.setOnClickListener(v -> {
             if (mMapLayout.getParent() == null) {
-                mCurWin = WINDOW_TYPE.MAP;
+                mCurWin = WINDOW_TYPE.WINDOW_TYPE_MAP;
                 show();
                 MapStatus.Builder builder = new MapStatus.Builder();
                 builder.target(mCurMapLngLat).zoom(18.0f);
@@ -259,14 +275,14 @@ public class JoyStick extends View {
             }
         });
 
-//        /* 历史按钮点击事件处理 */
-//        ImageButton btnHistory = mJoystickLayout.findViewById(R.id.joystick_history);
-//        btnHistory.setOnClickListener(v -> {
-//            if (mHistoryLayout.getParent() == null) {
-//                mCurWin = WINDOW_TYPE.HISTORY;
-//                show();
-//            }
-//        });
+        /* 历史按钮点击事件处理 */
+        ImageButton btnHistory = mJoystickLayout.findViewById(R.id.joystick_history);
+        btnHistory.setOnClickListener(v -> {
+            if (mHistoryLayout.getParent() == null) {
+                mCurWin = WINDOW_TYPE.WINDOW_TYPE_HISTORY;
+                show();
+            }
+        });
 
         /* 步行按键的点击处理 */
         btnWalk = mJoystickLayout.findViewById(R.id.joystick_walk);
@@ -353,7 +369,7 @@ public class JoyStick extends View {
 
         ImageButton btnOk = mMapLayout.findViewById(R.id.btnGo);
         btnOk.setOnClickListener(v -> {
-            mCurWin = WINDOW_TYPE.JOYSTICK;
+            mCurWin = WINDOW_TYPE.WINDOW_TYPE_JOYSTICK;
             show();
             mListener.onPositionInfo(mLng, mLat);
         });
@@ -361,7 +377,7 @@ public class JoyStick extends View {
 
         ImageButton btnCancel = mMapLayout.findViewById(R.id.map_close);
         btnCancel.setOnClickListener(v -> {
-            mCurWin = WINDOW_TYPE.JOYSTICK;
+            mCurWin = WINDOW_TYPE.WINDOW_TYPE_JOYSTICK;
             show();
         });
 
@@ -437,11 +453,115 @@ public class JoyStick extends View {
         });
     }
 
-//    @SuppressLint({"ClickableViewAccessibility", "InflateParams"})
-//    private void initHistoryView() {
-//        mHistoryLayout = (LinearLayout)inflater.inflate(R.layout.input_latlng, null);
-//        mHistoryLayout.setOnTouchListener(new JoyStickOnTouchListener());
-//    }
+    @SuppressLint({"InflateParams", "ClickableViewAccessibility"})
+    private void initHistoryView() {
+        mHistoryLayout = (FrameLayout)inflater.inflate(R.layout.joystick_history, null);
+        mHistoryLayout.setOnTouchListener(new JoyStickOnTouchListener());
+
+        ImageButton btnCancel = mHistoryLayout.findViewById(R.id.joystick_his_close);
+        btnCancel.setOnClickListener(v -> {
+            mCurWin = WINDOW_TYPE.WINDOW_TYPE_JOYSTICK;
+            show();
+        });
+
+        TextView noRecordText = mHistoryLayout.findViewById(R.id.joystick_his_record_no_textview);
+        ListView mRecordListView = mHistoryLayout.findViewById(R.id.joystick_his_record_list_view);
+        TextView tips = mHistoryLayout.findViewById(R.id.joystick_his_tips);
+        SearchView mSearchView = mHistoryLayout.findViewById(R.id.joystick_his_searchView);
+        mSearchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
+        mSearchView.setOnSearchClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tips.setVisibility(GONE);
+            }
+        });
+        mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                tips.setVisibility(VISIBLE);
+                return false;       /* 这里必须返回false，否则需要自行处理搜索框的折叠 */
+            }
+        });
+
+        mRecordListView.setOnItemClickListener((adapterView, view, i, l) -> {
+            String wgs84Longitude;
+            String wgs84Latitude;
+            //wgs84坐标
+            String wgs84LatLng = (String) ((TextView) view.findViewById(R.id.WGSLatLngText)).getText();
+            wgs84LatLng = wgs84LatLng.substring(wgs84LatLng.indexOf("[") + 1, wgs84LatLng.indexOf("]"));
+            String[] latLngStr2 = wgs84LatLng.split(" ");
+            wgs84Longitude = latLngStr2[0].substring(latLngStr2[0].indexOf(":") + 1);
+            wgs84Latitude = latLngStr2[1].substring(latLngStr2[1].indexOf(":") + 1);
+
+            mCurWin = WINDOW_TYPE.WINDOW_TYPE_JOYSTICK;
+            show();
+            mListener.onPositionInfo(Double.parseDouble(wgs84Longitude), Double.parseDouble(wgs84Latitude));
+        });
+
+        SQLiteDatabase mHistoryLocationDB;
+        List<Map<String, Object>> mAllRecord = new ArrayList<> ();
+
+        try {
+            DataBaseHistoryLocation hisLocDBHelper = new DataBaseHistoryLocation(mContext.getApplicationContext());
+            mHistoryLocationDB = hisLocDBHelper.getWritableDatabase();
+
+            Cursor cursor = mHistoryLocationDB.query(DataBaseHistoryLocation.TABLE_NAME, null,
+                    DataBaseHistoryLocation.DB_COLUMN_ID + " > ?", new String[] {"0"},
+                    null, null, DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " DESC", null);
+
+            while (cursor.moveToNext()) {
+                Map<String, Object> item = new HashMap<>();
+                int ID = cursor.getInt(0);
+                String Location = cursor.getString(1);
+                String Longitude = cursor.getString(2);
+                String Latitude = cursor.getString(3);
+                long TimeStamp = cursor.getInt(4);
+                String BD09Longitude = cursor.getString(5);
+                String BD09Latitude = cursor.getString(6);
+                Log.d("TB", ID + "\t" + Location + "\t" + Longitude + "\t" + Latitude + "\t" + TimeStamp + "\t" + BD09Longitude + "\t" + BD09Latitude);
+                BigDecimal bigDecimalLongitude = BigDecimal.valueOf(Double.parseDouble(Longitude));
+                BigDecimal bigDecimalLatitude = BigDecimal.valueOf(Double.parseDouble(Latitude));
+                BigDecimal bigDecimalBDLongitude = BigDecimal.valueOf(Double.parseDouble(BD09Longitude));
+                BigDecimal bigDecimalBDLatitude = BigDecimal.valueOf(Double.parseDouble(BD09Latitude));
+                double doubleLongitude = bigDecimalLongitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
+                double doubleLatitude = bigDecimalLatitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
+                double doubleBDLongitude = bigDecimalBDLongitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
+                double doubleBDLatitude = bigDecimalBDLatitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
+                item.put(HistoryActivity.KEY_ID, Integer.toString(ID));
+                item.put(HistoryActivity.KEY_LOCATION, Location);
+                item.put(HistoryActivity.KEY_TIME, AppUtils.timeStamp2Date(Long.toString(TimeStamp)));
+                item.put(HistoryActivity.KEY_LNG_LAT_WGS, "[经度:" + doubleLongitude + " 纬度:" + doubleLatitude + "]");
+                item.put(HistoryActivity.KEY_LNG_LAT_CUSTOM, "[经度:" + doubleBDLongitude + " 纬度:" + doubleBDLatitude + "]");
+                mAllRecord.add(item);
+            }
+            cursor.close();
+
+            if (mAllRecord.size() == 0) {
+                mRecordListView.setVisibility(View.GONE);
+                noRecordText.setVisibility(View.VISIBLE);
+            } else {
+                noRecordText.setVisibility(View.GONE);
+                mRecordListView.setVisibility(View.VISIBLE);
+
+                try {
+                    SimpleAdapter simAdapt = new SimpleAdapter(
+                            mContext,
+                            mAllRecord,
+                            R.layout.history_item,
+                            new String[]{HistoryActivity.KEY_ID, HistoryActivity.KEY_LOCATION, HistoryActivity.KEY_TIME, HistoryActivity.KEY_LNG_LAT_WGS, HistoryActivity.KEY_LNG_LAT_CUSTOM}, // 与下面数组元素要一一对应
+                            new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
+                    mRecordListView.setAdapter(simAdapt);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+        } catch (Exception e) {
+            Log.e("HistoryActivity", "SQLiteDatabase init error");
+            e.printStackTrace();
+        }
+    }
+
 
     private void processDirection(boolean auto, double angle, double r) {
         if (r <= 0) {
@@ -485,17 +605,17 @@ public class JoyStick extends View {
                     x = nowX;
                     y = nowY;
                     switch (mCurWin) {
-                        case MAP:
+                        case WINDOW_TYPE_MAP:
                             mWindowParamMap.x = mWindowParamMap.x + movedX;
                             mWindowParamMap.y = mWindowParamMap.y + movedY;
                             mWindowManager.updateViewLayout(view, mWindowParamMap);
                             break;
-//                        case HISTORY:
-//                            mWindowParamHistory.x = mWindowParamHistory.x + movedX;
-//                            mWindowParamHistory.y = mWindowParamHistory.y + movedY;
-//                            mWindowManager.updateViewLayout(view, mWindowParamHistory);
-//                            break;
-                        case JOYSTICK:
+                        case WINDOW_TYPE_HISTORY:
+                            mWindowParamHistory.x = mWindowParamHistory.x + movedX;
+                            mWindowParamHistory.y = mWindowParamHistory.y + movedY;
+                            mWindowManager.updateViewLayout(view, mWindowParamHistory);
+                            break;
+                        case WINDOW_TYPE_JOYSTICK:
                             mWindowParamJoyStick.x = mWindowParamJoyStick.x + movedX;
                             mWindowParamJoyStick.y = mWindowParamJoyStick.y + movedY;
                             mWindowManager.updateViewLayout(view, mWindowParamJoyStick);
@@ -539,8 +659,8 @@ public class JoyStick extends View {
     }
 
     public enum WINDOW_TYPE {
-        JOYSTICK,
-        MAP,
-//        HISTORY
+        WINDOW_TYPE_JOYSTICK,
+        WINDOW_TYPE_MAP,
+        WINDOW_TYPE_HISTORY
     }
 }

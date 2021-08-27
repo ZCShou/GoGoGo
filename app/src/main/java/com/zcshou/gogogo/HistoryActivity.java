@@ -32,13 +32,14 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.zcshou.database.DataBaseHistoryLocation;
+import com.zcshou.utils.AppUtils;
 
 public class HistoryActivity extends BaseActivity {
-    private static final String KEY_ID = "KEY_ID";
-    private static final String KEY_LOCATION = "KEY_LOCATION";
-    private static final String KEY_TIME = "KEY_TIME";
-    private static final String KEY_LNG_LAT_WGS = "KEY_LNG_LAT_WGS";
-    private static final String KEY_LNG_LAT_CUSTOM = "KEY_LNG_LAT_CUSTOM";
+    public static final String KEY_ID = "KEY_ID";
+    public static final String KEY_LOCATION = "KEY_LOCATION";
+    public static final String KEY_TIME = "KEY_TIME";
+    public static final String KEY_LNG_LAT_WGS = "KEY_LNG_LAT_WGS";
+    public static final String KEY_LNG_LAT_CUSTOM = "KEY_LNG_LAT_CUSTOM";
 
     private ListView mRecordListView;
     private SQLiteDatabase mHistoryLocationDB;
@@ -151,7 +152,7 @@ public class HistoryActivity extends BaseActivity {
                 double doubleBDLatitude = bigDecimalBDLatitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
                 item.put(KEY_ID, Integer.toString(ID));
                 item.put(KEY_LOCATION, Location);
-                item.put(KEY_TIME, timeStamp2Date(Long.toString(TimeStamp)));
+                item.put(KEY_TIME, AppUtils.timeStamp2Date(Long.toString(TimeStamp)));
                 item.put(KEY_LNG_LAT_WGS, "[经度:" + doubleLongitude + " 纬度:" + doubleLatitude + "]");
                 item.put(KEY_LNG_LAT_CUSTOM, "[经度:" + doubleBDLongitude + " 纬度:" + doubleBDLatitude + "]");
                 data.add(item);
@@ -163,16 +164,6 @@ public class HistoryActivity extends BaseActivity {
         }
 
         return data;
-    }
-
-    private String timeStamp2Date(String seconds) {
-        if (seconds == null || seconds.isEmpty() || seconds.equals("null")) {
-            return "";
-        }
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-
-        return sdf.format(new Date(Long.parseLong(seconds + "000")));
     }
 
     // 删除旧数据
@@ -213,7 +204,6 @@ public class HistoryActivity extends BaseActivity {
         mSearchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
         mSearchView.setSubmitButtonEnabled(false);//显示提交按钮
         mSearchView.setFocusable(false);
-        mSearchView.requestFocusFromTouch();
         mSearchView.clearFocus();
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
