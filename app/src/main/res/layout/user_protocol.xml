@@ -18,6 +18,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
+        android:layout_marginBottom="10dp"
         android:layout_height="400dp">
 
         <TextView
@@ -42,32 +43,23 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
         android:orientation="horizontal">
 
-        <TextView
+        <Button
             android:id="@+id/tv_cancel"
-            android:layout_width="0dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:padding="14dp"
-            android:text="@string/welcome_protocol_disagree"
-            android:textColor="#282828"
-            android:textStyle="bold" />
+            android:text="@string/welcome_protocol_disagree"/>
 
         <Space
-            android:layout_width="1dp"
+            android:layout_width="60dp"
             android:layout_height="match_parent"/>
 
-        <TextView
+        <Button
             android:id="@+id/tv_agree"
-            android:layout_width="0dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:padding="14dp"
-            android:text="@string/welcome_protocol_agree"
-            android:textColor="#282828"
-            android:textStyle="bold" />
+            android:text="@string/welcome_protocol_agree"/>
     </LinearLayout>
 </LinearLayout>

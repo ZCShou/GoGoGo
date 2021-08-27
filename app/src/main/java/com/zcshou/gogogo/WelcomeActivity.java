@@ -179,13 +179,13 @@ public class WelcomeActivity extends AppCompatActivity {
         alertDialog.setCancelable(false);
         Window window = alertDialog.getWindow();
         if (window != null) {
-            window.setContentView(R.layout.welcom_protocol);
+            window.setContentView(R.layout.user_protocol);
             window.setGravity(Gravity.CENTER);
             window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
 
             TextView tvContent = window.findViewById(R.id.tv_content);
-            TextView tvCancel = window.findViewById(R.id.tv_cancel);
-            TextView tvAgree = window.findViewById(R.id.tv_agree);
+            Button tvCancel = window.findViewById(R.id.tv_cancel);
+            Button tvAgree = window.findViewById(R.id.tv_agree);
             final CheckBox tvCheck = window.findViewById(R.id.tv_check);
             SpannableStringBuilder ssb = new SpannableStringBuilder();
             ssb.append(getResources().getString(R.string.protocol));
@@ -196,7 +196,7 @@ public class WelcomeActivity extends AppCompatActivity {
                 alertDialog.cancel();
                 finish();
             });
- 
+
             tvAgree.setOnClickListener(v -> {
                 if (tvCheck.isChecked()) {
                     //实例化Editor对象

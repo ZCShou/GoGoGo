@@ -938,13 +938,13 @@ public class MainActivity extends BaseActivity
         Window window = alertDialog.getWindow();
         if (window != null) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);      // 防止出现闪屏
-            window.setContentView(R.layout.welcom_protocol);
+            window.setContentView(R.layout.user_protocol);
             window.setGravity(Gravity.CENTER);
             window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
 
             TextView tvContent = window.findViewById(R.id.tv_content);
-            TextView tvCancel = window.findViewById(R.id.tv_cancel);
-            TextView tvAgree = window.findViewById(R.id.tv_agree);
+            Button tvCancel = window.findViewById(R.id.tv_cancel);
+            Button tvAgree = window.findViewById(R.id.tv_agree);
             CheckBox tvCheck = window.findViewById(R.id.tv_check);
             tvCheck.setVisibility(GONE);
             SpannableStringBuilder ssb = new SpannableStringBuilder();

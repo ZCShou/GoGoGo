@@ -39,7 +39,7 @@
     <FrameLayout
         android:layout_marginTop="50dp"
         android:layout_width="match_parent"
-        android:layout_height="600dp">
+        android:layout_height="450dp">
 
         <com.baidu.mapapi.map.MapView
             android:id="@+id/map_joystick"
@@ -52,7 +52,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center_horizontal|center_vertical|bottom"
-            android:layout_marginBottom="80dp"
+            android:layout_marginBottom="40dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"
             android:src="@drawable/ic_fly"
