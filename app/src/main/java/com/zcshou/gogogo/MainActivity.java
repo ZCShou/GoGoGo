@@ -121,7 +121,7 @@ public class MainActivity extends BaseActivity
     private static double mCurLat = ServiceGo.DEFAULT_LAT;  /* WGS84 坐标系的纬度 */
     private static double mCurLng = ServiceGo.DEFAULT_LNG;  /* WGS84 坐标系的经度 */
     private SensorManager mSensorManager;
-    private Sensor mSensor;
+    private Sensor mSensorAccelerometer;
     private float mLastDirection = 0.0f;
     // http
     private RequestQueue mRequestQueue;
@@ -220,7 +220,7 @@ public class MainActivity extends BaseActivity
     protected void onResume() {
         XLog.i("MainActivity: onResume");
         mMapView.onResume();
-        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         super.onResume();
     }
 
@@ -455,9 +455,9 @@ public class MainActivity extends BaseActivity
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);// 获取传感器管理服务
         if (mSensorManager != null) {
-            mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            if (mSensor != null) {
-                mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_UI);
+            mSensorAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            if (mSensorAccelerometer != null) {
+                mSensorManager.registerListener(this, mSensorAccelerometer, SensorManager.SENSOR_DELAY_UI);
             }
         }
     }
