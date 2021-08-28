@@ -65,6 +65,7 @@ import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
+import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
@@ -114,7 +115,6 @@ public class MainActivity extends BaseActivity
     private double mCurrentLat = 0.0;
     private double mCurrentLon = 0.0;
     private float mCurrentDirection = 0.0f;
-    private float mCurrentAccuracy;
     public static LatLng mCurLatLngMap = new LatLng(36.547743718042415, 117.07018449827267);
     public static BitmapDescriptor mMapIndicator = BitmapDescriptorFactory.fromResource(R.drawable.icon_gcoding);
     private boolean isFirstLoc = true; // 是否首次定位
@@ -122,7 +122,15 @@ public class MainActivity extends BaseActivity
     private static double mCurLng = ServiceGo.DEFAULT_LNG;  /* WGS84 坐标系的经度 */
     private SensorManager mSensorManager;
     private Sensor mSensorAccelerometer;
-    private float mLastDirection = 0.0f;
+    private Sensor mSensorMagnetic;
+    //加速度传感器数据
+    float[] mAccValues = new float[3];
+    //地磁传感器数据
+    float[] mMagValues = new float[3];
+    //旋转矩阵，用来保存磁场和加速度的数据
+    float[] mR = new float[9];
+    //模拟方向传感器的数据（原始数据为弧度）
+    float[] mDirectionvalues = new float[3];
     // http
     private RequestQueue mRequestQueue;
 
@@ -220,7 +228,8 @@ public class MainActivity extends BaseActivity
     protected void onResume() {
         XLog.i("MainActivity: onResume");
         mMapView.onResume();
-        mSensorManager.registerListener(this, mSensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mSensorAccelerometer, SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(this, mSensorMagnetic, SensorManager.SENSOR_DELAY_UI);
         super.onResume();
     }
 
@@ -359,20 +368,19 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        float x = sensorEvent.values[0];
-
-        if (Math.abs(x - mLastDirection) > 1.0) {
-            mCurrentDirection = x;
-            MyLocationData locData = new MyLocationData.Builder()
-                    .accuracy(mCurrentAccuracy)
-                    .direction(mCurrentDirection)   // 此处设置开发者获取到的方向信息，顺时针0-360
-                    .latitude(mCurrentLat)
-                    .longitude(mCurrentLon)
-                    .build();
-            mBaiduMap.setMyLocationData(locData);
+        if(sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+            mAccValues = sensorEvent.values;
+        }
+        else if(sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
+            mMagValues = sensorEvent.values;
         }
 
-        mLastDirection = x;
+        SensorManager.getRotationMatrix(mR, null, mAccValues, mMagValues);
+        SensorManager.getOrientation(mR, mDirectionvalues);
+        mCurrentDirection = (float) Math.toDegrees(mDirectionvalues[0]);    // 弧度转角度
+        if (mCurrentDirection < 0) {    // 由 -180 ~ + 180 转为 0 ~ 360
+            mCurrentDirection += 360;
+        }
     }
 
     @Override
@@ -459,6 +467,10 @@ public class MainActivity extends BaseActivity
             if (mSensorAccelerometer != null) {
                 mSensorManager.registerListener(this, mSensorAccelerometer, SensorManager.SENSOR_DELAY_UI);
             }
+            mSensorMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+            if (mSensorMagnetic != null) {
+                mSensorManager.registerListener(this, mSensorMagnetic, SensorManager.SENSOR_DELAY_UI);
+            }
         }
     }
 
@@ -476,13 +488,15 @@ public class MainActivity extends BaseActivity
                 mCurrentCity = bdLocation.getCity();
                 mCurrentLat = bdLocation.getLatitude();
                 mCurrentLon = bdLocation.getLongitude();
-                mCurrentAccuracy = bdLocation.getRadius();
+//                mCurrentAccuracy = bdLocation.getRadius();
                 MyLocationData locData = new MyLocationData.Builder()
                         .accuracy(bdLocation.getRadius())
                         .direction(mCurrentDirection)// 此处设置开发者获取到的方向信息，顺时针0-360
                         .latitude(bdLocation.getLatitude())
                         .longitude(bdLocation.getLongitude()).build();
                 mBaiduMap.setMyLocationData(locData);
+                MyLocationConfiguration configuration = new MyLocationConfiguration(MyLocationConfiguration.LocationMode.NORMAL, true, null);
+                mBaiduMap.setMyLocationConfiguration(configuration);
 
                 if (isMove) {
                     isMove = false;
