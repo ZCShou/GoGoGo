@@ -39,6 +39,8 @@ public class HistoryActivity extends BaseActivity {
     public static final String KEY_LNG_LAT_CUSTOM = "KEY_LNG_LAT_CUSTOM";
 
     private ListView mRecordListView;
+    private TextView noRecordText;
+    private LinearLayout mSearchLayout;
     private SQLiteDatabase mHistoryLocationDB;
     private List<Map<String, Object>> mAllRecord;
     private SharedPreferences sharedPreferences;
@@ -56,7 +58,7 @@ public class HistoryActivity extends BaseActivity {
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        initDataBaseHistoryLocation();
+        initLocationDataBase();
 
         initSearchView();
 
@@ -89,11 +91,9 @@ public class HistoryActivity extends BaseActivity {
                     .setMessage("确定要删除全部历史记录吗?")//这里是中间显示的具体信息
                     .setPositiveButton("确定",
                             (dialog, which) -> {
-                                boolean deleteRet = deleteRecord(-1);
-
-                                if (deleteRet) {
+                                if (deleteRecord(-1)) {
                                     DisplayToast("删除成功!");
-                                    initRecordListView();
+                                    updateRecordList();
                                 }
                             })
                     .setNegativeButton("取消",
@@ -106,7 +106,7 @@ public class HistoryActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void initDataBaseHistoryLocation() {
+    private void initLocationDataBase() {
         try {
             DataBaseHistoryLocation hisLocDBHelper = new DataBaseHistoryLocation(getApplicationContext());
             mHistoryLocationDB = hisLocDBHelper.getWritableDatabase();
@@ -161,7 +161,6 @@ public class HistoryActivity extends BaseActivity {
         return data;
     }
 
-    // 删除旧数据
     private void recordArchive() {
         final double limits = Double.parseDouble(sharedPreferences.getString("setting_pos_history", getResources().getString(R.string.setting_pos_history_default)));
         final long weekSecond = (long) (limits * 24 * 60 * 60);
@@ -249,37 +248,9 @@ public class HistoryActivity extends BaseActivity {
     }
 
     private void initRecordListView() {
-        TextView noRecordText = findViewById(R.id.record_no_textview);
-        LinearLayout mSearchLayout = findViewById(R.id.search_linear);
+        noRecordText = findViewById(R.id.record_no_textview);
+        mSearchLayout = findViewById(R.id.search_linear);
         mRecordListView = findViewById(R.id.record_list_view);
-
-        mAllRecord = fetchAllRecord();
-
-        if (mAllRecord.size() == 0) {
-            mRecordListView.setVisibility(View.GONE);
-            mSearchLayout.setVisibility(View.GONE);
-            noRecordText.setVisibility(View.VISIBLE);
-        } else {
-            noRecordText.setVisibility(View.GONE);
-            mRecordListView.setVisibility(View.VISIBLE);
-            mSearchLayout.setVisibility(View.VISIBLE);
-
-            try {
-                SimpleAdapter simAdapt = new SimpleAdapter(
-                        this,
-                        mAllRecord,
-                        R.layout.history_item,
-                        new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_CUSTOM}, // 与下面数组元素要一一对应
-                        new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
-                mRecordListView.setAdapter(simAdapt);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        setSearchResultClickListener();
-    }
-
-    private void setSearchResultClickListener() {
         mRecordListView.setOnItemClickListener((adapterView, view, i, l) -> {
             String bd09Longitude;
             String bd09Latitude;
@@ -315,7 +286,7 @@ public class HistoryActivity extends BaseActivity {
 
                                 if (deleteRet) {
                                     DisplayToast("删除成功!");
-                                    initRecordListView();
+                                    updateRecordList();
                                 }
                             })
                     .setNegativeButton("取消",
@@ -324,8 +295,35 @@ public class HistoryActivity extends BaseActivity {
                     .show();
             return true;
         });
+
+        updateRecordList();
     }
 
+    private void updateRecordList() {
+        mAllRecord = fetchAllRecord();
+
+        if (mAllRecord.size() == 0) {
+            mRecordListView.setVisibility(View.GONE);
+            mSearchLayout.setVisibility(View.GONE);
+            noRecordText.setVisibility(View.VISIBLE);
+        } else {
+            noRecordText.setVisibility(View.GONE);
+            mRecordListView.setVisibility(View.VISIBLE);
+            mSearchLayout.setVisibility(View.VISIBLE);
+
+            try {
+                SimpleAdapter simAdapt = new SimpleAdapter(
+                        this,
+                        mAllRecord,
+                        R.layout.history_item,
+                        new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_CUSTOM},
+                        new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
+                mRecordListView.setAdapter(simAdapt);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     public void DisplayToast(String str) {
         Toast toast = Toast.makeText(this, str, Toast.LENGTH_LONG);
