@@ -212,15 +212,15 @@ public class MainActivity extends BaseActivity
     protected void onPause() {
         XLog.i("MainActivity: onPause");
         mMapView.onPause();
-        super.onPause();
         mSensorManager.unregisterListener(this);
-        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        super.onPause();
     }
 
     @Override
     protected void onResume() {
         XLog.i("MainActivity: onResume");
         mMapView.onResume();
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
         super.onResume();
     }
 
@@ -242,9 +242,10 @@ public class MainActivity extends BaseActivity
             stopService(serviceGoIntent);
         }
 
+        mSensorManager.unregisterListener(this);
+
         // 退出时销毁定位
         mLocClient.stop();
-
         // 关闭定位图层
         mBaiduMap.setMyLocationEnabled(false);
         mMapView.onDestroy();
