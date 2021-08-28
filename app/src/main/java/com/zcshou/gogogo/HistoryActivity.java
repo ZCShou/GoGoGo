@@ -116,8 +116,6 @@ public class HistoryActivity extends BaseActivity {
         }
 
         recordArchive();
-
-        mAllRecord = fetchAllRecord();
     }
 
     //sqlite 操作 查询所有记录
@@ -254,6 +252,8 @@ public class HistoryActivity extends BaseActivity {
         TextView noRecordText = findViewById(R.id.record_no_textview);
         LinearLayout mSearchLayout = findViewById(R.id.search_linear);
         mRecordListView = findViewById(R.id.record_list_view);
+
+        mAllRecord = fetchAllRecord();
 
         if (mAllRecord.size() == 0) {
             mRecordListView.setVisibility(View.GONE);

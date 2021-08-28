@@ -107,6 +107,12 @@ public class MainActivity extends BaseActivity
     public static final String LAT_MSG_ID = "LAT_VALUE";
     public static final String LNG_MSG_ID = "LNG_VALUE";
 
+    public static final String POI_NAME = "POI_NAME";
+    public static final String POI_ADDRESS = "POI_ADDRESS";
+    public static final String POI_LONGITUDE = "POI_LONGITUDE";
+    public static final String POI_LATITUDE = "POI_LATITUDE";
+
+
     // 百度地图相关
     private MapView mMapView;
     private static BaiduMap mBaiduMap = null;
@@ -130,7 +136,7 @@ public class MainActivity extends BaseActivity
     //旋转矩阵，用来保存磁场和加速度的数据
     float[] mR = new float[9];
     //模拟方向传感器的数据（原始数据为弧度）
-    float[] mDirectionvalues = new float[3];
+    float[] mDirectionValues = new float[3];
     // http
     private RequestQueue mRequestQueue;
 
@@ -303,8 +309,18 @@ public class MainActivity extends BaseActivity
                             MainActivity.this,
                             data,
                             R.layout.search_record_item,
-                            new String[] {"search_key", "search_description", "search_timestamp", "search_isLoc", "search_longitude", "search_latitude"}, // 与下面数组元素要一一对应
-                            new int[] {R.id.search_key, R.id.search_description, R.id.search_timestamp, R.id.search_isLoc, R.id.search_longitude, R.id.search_latitude});
+                            new String[] {DataBaseHistorySearch.DB_COLUMN_KEY,
+                                    DataBaseHistorySearch.DB_COLUMN_DESCRIPTION,
+                                    DataBaseHistorySearch.DB_COLUMN_TIMESTAMP,
+                                    DataBaseHistorySearch.DB_COLUMN_IS_LOCATION,
+                                    DataBaseHistorySearch.DB_COLUMN_LONGITUDE_CUSTOM,
+                                    DataBaseHistorySearch.DB_COLUMN_LATITUDE_CUSTOM},
+                            new int[] {R.id.search_key,
+                                    R.id.search_description,
+                                    R.id.search_timestamp,
+                                    R.id.search_isLoc,
+                                    R.id.search_longitude,
+                                    R.id.search_latitude});
                     mSearchHistoryList.setAdapter(simAdapt);
                     mHistoryLayout.setVisibility(View.VISIBLE);
                 }
@@ -376,8 +392,8 @@ public class MainActivity extends BaseActivity
         }
 
         SensorManager.getRotationMatrix(mR, null, mAccValues, mMagValues);
-        SensorManager.getOrientation(mR, mDirectionvalues);
-        mCurrentDirection = (float) Math.toDegrees(mDirectionvalues[0]);    // 弧度转角度
+        SensorManager.getOrientation(mR, mDirectionValues);
+        mCurrentDirection = (float) Math.toDegrees(mDirectionValues[0]);    // 弧度转角度
         if (mCurrentDirection < 0) {    // 由 -180 ~ + 180 转为 0 ~ 360
             mCurrentDirection += 360;
         }
@@ -621,44 +637,36 @@ public class MainActivity extends BaseActivity
         RadioButton rbBD = view.findViewById(R.id.pos_type_bd);
 
         Button btnGo = view.findViewById(R.id.joystick_latlng_ok);
-        btnGo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String dialog_lng_str = dialog_lng.getText().toString();
-                String dialog_lat_str = dialog_lat.getText().toString();
+        btnGo.setOnClickListener(v -> {
+            String dialog_lng_str = dialog_lng.getText().toString();
+            String dialog_lat_str = dialog_lat.getText().toString();
 
-                if (TextUtils.isEmpty(dialog_lng_str) || TextUtils.isEmpty(dialog_lat_str)) {
-                    DisplayToast("输入不能为空");
+            if (TextUtils.isEmpty(dialog_lng_str) || TextUtils.isEmpty(dialog_lat_str)) {
+                DisplayToast("输入不能为空");
+            } else {
+                double dialog_lng_double = Double.parseDouble(dialog_lng_str);
+                double dialog_lat_double = Double.parseDouble(dialog_lat_str);
+
+                if (dialog_lng_double > 180.0 || dialog_lng_double < -180.0 || dialog_lat_double > 90.0 || dialog_lat_double < -90.0) {
+                    DisplayToast("经纬度超出限制!\n-180.0<经度<180.0\n-90.0<纬度<90.0");
                 } else {
-                    double dialog_lng_double = Double.parseDouble(dialog_lng_str);
-                    double dialog_lat_double = Double.parseDouble(dialog_lat_str);
-
-                    if (dialog_lng_double > 180.0 || dialog_lng_double < -180.0 || dialog_lat_double > 90.0 || dialog_lat_double < -90.0) {
-                        DisplayToast("经纬度超出限制!\n-180.0<经度<180.0\n-90.0<纬度<90.0");
+                    if (rbBD.isChecked()) {
+                        mCurLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
                     } else {
-                        if (rbBD.isChecked()) {
-                            mCurLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
-                        } else {
-                            double[] latLon = MapUtils.wgs2bd09(dialog_lat_double, dialog_lng_double);
-                            mCurLatLngMap = new LatLng(latLon[0], latLon[0]);
-                        }
-
-                        MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mCurLatLngMap);
-                        mBaiduMap.setMapStatus(mapstatusupdate);
-                        markSelectedPosition();
-                        dialog.dismiss();
+                        double[] latLon = MapUtils.wgs2bd09(dialog_lat_double, dialog_lng_double);
+                        mCurLatLngMap = new LatLng(latLon[0], latLon[0]);
                     }
+
+                    MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mCurLatLngMap);
+                    mBaiduMap.setMapStatus(mapstatusupdate);
+                    markSelectedPosition();
+                    dialog.dismiss();
                 }
             }
         });
 
         Button btnCancel = view.findViewById(R.id.joystick_latlng_cancel);
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
     }
 
     // 在地图上显示历史位置
@@ -904,15 +912,12 @@ public class MainActivity extends BaseActivity
             });
 
             DatePicker mDatePicker = window.findViewById(R.id.date_picker);
-            mDatePicker.setOnDateChangedListener(new DatePicker.OnDateChangedListener() {
-                @Override
-                public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                    try {
-                        mReg.put("DateTime", 1111);
-                        mRegReq.setText(mReg.toString());
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+            mDatePicker.setOnDateChangedListener((view, year, monthOfYear, dayOfMonth) -> {
+                try {
+                    mReg.put("DateTime", 1111);
+                    mRegReq.setText(mReg.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             });
 
@@ -1025,7 +1030,7 @@ public class MainActivity extends BaseActivity
             //搜索历史 插表参数
             ContentValues contentValues = new ContentValues();
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_KEY, ((TextView) view.findViewById(R.id.poi_name)).getText().toString());
-            contentValues.put(DataBaseHistorySearch.DB_COLUMN_DESCRIPTION, ((TextView) view.findViewById(R.id.poi_addr)).getText().toString());
+            contentValues.put(DataBaseHistorySearch.DB_COLUMN_DESCRIPTION, ((TextView) view.findViewById(R.id.poi_address)).getText().toString());
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_IS_LOCATION, 1);
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_LONGITUDE_CUSTOM, lng);
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_LATITUDE_CUSTOM, lat);
@@ -1120,7 +1125,12 @@ public class MainActivity extends BaseActivity
                                         MainActivity.this,
                                         data,
                                         R.layout.search_record_item,
-                                        new String[] {"search_key", "search_description", "search_timestamp", "search_isLoc", "search_longitude", "search_latitude"}, // 与下面数组元素要一一对应
+                                        new String[] {DataBaseHistorySearch.DB_COLUMN_KEY,
+                                                DataBaseHistorySearch.DB_COLUMN_DESCRIPTION,
+                                                DataBaseHistorySearch.DB_COLUMN_TIMESTAMP,
+                                                DataBaseHistorySearch.DB_COLUMN_IS_LOCATION,
+                                                DataBaseHistorySearch.DB_COLUMN_LONGITUDE_CUSTOM,
+                                                DataBaseHistorySearch.DB_COLUMN_LATITUDE_CUSTOM}, // 与下面数组元素要一一对应
                                         new int[] {R.id.search_key, R.id.search_description, R.id.search_timestamp, R.id.search_isLoc, R.id.search_longitude, R.id.search_latitude});
                                 mSearchHistoryList.setAdapter(simAdapt);
                                 mHistoryLayout.setVisibility(View.VISIBLE);
@@ -1162,10 +1172,10 @@ public class MainActivity extends BaseActivity
                         }
 
                         Map<String, Object> poiItem = new HashMap<>();
-                        poiItem.put("key_name", suggestionResult.getAllSuggestions().get(i).key);
-                        poiItem.put("key_addr", suggestionResult.getAllSuggestions().get(i).city + " " + suggestionResult.getAllSuggestions().get(i).district);
-                        poiItem.put("key_lng", "" + suggestionResult.getAllSuggestions().get(i).pt.longitude);
-                        poiItem.put("key_lat", "" + suggestionResult.getAllSuggestions().get(i).pt.latitude);
+                        poiItem.put(POI_NAME, suggestionResult.getAllSuggestions().get(i).key);
+                        poiItem.put(POI_ADDRESS, suggestionResult.getAllSuggestions().get(i).city + " " + suggestionResult.getAllSuggestions().get(i).district);
+                        poiItem.put(POI_LONGITUDE, "" + suggestionResult.getAllSuggestions().get(i).pt.longitude);
+                        poiItem.put(POI_LATITUDE, "" + suggestionResult.getAllSuggestions().get(i).pt.latitude);
                         data.add(poiItem);
                     }
 
@@ -1173,8 +1183,8 @@ public class MainActivity extends BaseActivity
                             MainActivity.this,
                             data,
                             R.layout.poi_search_item,
-                            new String[] {"key_name", "key_addr", "key_lng", "key_lat"}, // 与下面数组元素要一一对应
-                            new int[] {R.id.poi_name, R.id.poi_addr, R.id.poi_longitude, R.id.poi_latitude});
+                            new String[] {POI_NAME, POI_ADDRESS, POI_LONGITUDE, POI_LATITUDE}, // 与下面数组元素要一一对应
+                            new int[] {R.id.poi_name, R.id.poi_address, R.id.poi_longitude, R.id.poi_latitude});
                     mSearchList.setAdapter(simAdapt);
                     // mSearchList.setVisibility(View.VISIBLE);
                     mSearchLayout.setVisibility(View.VISIBLE);
@@ -1218,9 +1228,7 @@ public class MainActivity extends BaseActivity
                         e.printStackTrace();
                     }
                 })
-                .setNegativeButton("取消", (dialog, which) -> {
-                    DisplayToast("悬浮窗权限未开启，无法启动模拟位置");
-                })
+                .setNegativeButton("取消", (dialog, which) -> DisplayToast("悬浮窗权限未开启，无法启动模拟位置"))
                 .show();
     }
 
@@ -1238,9 +1246,7 @@ public class MainActivity extends BaseActivity
                         e.printStackTrace();
                     }
                 })
-                .setNegativeButton("取消",(dialog, which) -> {
-                    DisplayToast("定位服务未开启，无法启动模拟位置");
-                })
+                .setNegativeButton("取消",(dialog, which) -> DisplayToast("定位服务未开启，无法启动模拟位置"))
                 .show();
     }
 
@@ -1313,12 +1319,12 @@ public class MainActivity extends BaseActivity
 
             while (cursor.moveToNext()) {
                 Map<String, Object> searchHistoryItem = new HashMap<>();
-                searchHistoryItem.put("search_key", cursor.getString(1));
-                searchHistoryItem.put("search_description", cursor.getString(2));
-                searchHistoryItem.put("search_timestamp", "" + cursor.getInt(3));
-                searchHistoryItem.put("search_isLoc", "" + cursor.getInt(4));
-                searchHistoryItem.put("search_longitude", "" + cursor.getString(7));
-                searchHistoryItem.put("search_latitude", "" + cursor.getString(8));
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_KEY, cursor.getString(1));
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_DESCRIPTION, cursor.getString(2));
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_TIMESTAMP, "" + cursor.getInt(3));
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_IS_LOCATION, "" + cursor.getInt(4));
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_LONGITUDE_CUSTOM, "" + cursor.getString(7));
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_LATITUDE_CUSTOM, "" + cursor.getString(8));
                 data.add(searchHistoryItem);
             }
             cursor.close();

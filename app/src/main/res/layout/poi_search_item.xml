@@ -23,7 +23,7 @@
             android:textSize="20sp" />
 
         <TextView
-            android:id="@+id/poi_addr"
+            android:id="@+id/poi_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="" />
