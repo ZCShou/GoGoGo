@@ -1,8 +1,11 @@
 package com.zcshou.database;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.elvishew.xlog.XLog;
 
 public class DataBaseHistoryLocation extends SQLiteOpenHelper {
     public static final String TABLE_NAME = "HistoryLocation";
@@ -35,5 +38,18 @@ public class DataBaseHistoryLocation extends SQLiteOpenHelper {
         String sql = "DROP TABLE IF EXISTS " + TABLE_NAME;
         sqLiteDatabase.execSQL(sql);
         onCreate(sqLiteDatabase);
+    }
+
+    // 保存选择的位置
+    public static void saveHistoryLocation(SQLiteDatabase sqLiteDatabase, ContentValues contentValues) {
+        try {
+            // 先删除原来的记录，再插入新记录
+            String location = contentValues.get(DB_COLUMN_LOCATION).toString();
+            sqLiteDatabase.delete(TABLE_NAME, DB_COLUMN_LOCATION + " = ?", new String[] {location});
+            sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
+        } catch (Exception e) {
+            XLog.e("DATABASE: insert error");
+            e.printStackTrace();
+        }
     }
 }

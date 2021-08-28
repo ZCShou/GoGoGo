@@ -1,8 +1,11 @@
 package com.zcshou.database;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.elvishew.xlog.XLog;
 
 public class DataBaseHistorySearch extends SQLiteOpenHelper {
     public static final String TABLE_NAME = "HistorySearch";
@@ -15,6 +18,10 @@ public class DataBaseHistorySearch extends SQLiteOpenHelper {
     public static final String DB_COLUMN_LATITUDE_WGS84 = "DB_COLUMN_LATITUDE_WGS84";
     public static final String DB_COLUMN_LONGITUDE_CUSTOM = "DB_COLUMN_LONGITUDE_CUSTOM";
     public static final String DB_COLUMN_LATITUDE_CUSTOM = "DB_COLUMN_LATITUDE_CUSTOM";
+    // 搜索的关键字
+    public static final int DB_SEARCH_TYPE_KEY = 0;
+    // 搜索结果
+    public static final int DB_SEARCH_TYPE_RESULT = 1;
 
     private static final int DB_VERSION = 1;
     private static final String DB_NAME = "HistorySearch.db";
@@ -38,5 +45,17 @@ public class DataBaseHistorySearch extends SQLiteOpenHelper {
         String sql = "DROP TABLE IF EXISTS " + TABLE_NAME;
         sqLiteDatabase.execSQL(sql);
         onCreate(sqLiteDatabase);
+    }
+
+    public static void saveHistorySearch(SQLiteDatabase sqLiteDatabase, ContentValues contentValues) {
+        try {
+            // 先删除原来的记录，再插入新记录
+            String searchKey = contentValues.get(DataBaseHistorySearch.DB_COLUMN_KEY).toString();
+            sqLiteDatabase.delete(DataBaseHistorySearch.TABLE_NAME, DataBaseHistorySearch.DB_COLUMN_KEY + " = ?", new String[] {searchKey});
+            sqLiteDatabase.insert(DataBaseHistorySearch.TABLE_NAME, null, contentValues);
+        } catch (Exception e) {
+            XLog.e("DATABASE: insert error");
+            e.printStackTrace();
+        }
     }
 }

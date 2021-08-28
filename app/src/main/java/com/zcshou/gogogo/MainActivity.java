@@ -156,7 +156,6 @@ public class MainActivity extends BaseActivity
     private LinearLayout mHistoryLayout;
     private MenuItem searchItem;
     private SuggestionSearch mSuggestionSearch;
-    private boolean isSubmit;
 
     private boolean isLimit = true;
     private static final long mTS = 1636588801;
@@ -333,7 +332,6 @@ public class MainActivity extends BaseActivity
             @Override
             public boolean onQueryTextSubmit(String query) {
                 try {
-                    isSubmit = true;
                     mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
                             .keyword(query)
                             .city(mCurrentCity)
@@ -341,11 +339,11 @@ public class MainActivity extends BaseActivity
                     //搜索历史 插表参数
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(DataBaseHistorySearch.DB_COLUMN_KEY, query);
-                    contentValues.put(DataBaseHistorySearch.DB_COLUMN_DESCRIPTION, "搜索...");
-                    contentValues.put(DataBaseHistorySearch.DB_COLUMN_IS_LOCATION, 0);
+                    contentValues.put(DataBaseHistorySearch.DB_COLUMN_DESCRIPTION, "搜索关键字");
+                    contentValues.put(DataBaseHistorySearch.DB_COLUMN_IS_LOCATION, DataBaseHistorySearch.DB_SEARCH_TYPE_KEY);
                     contentValues.put(DataBaseHistorySearch.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
 
-                    saveSelectedSearchItem(mSearchHistoryDB, contentValues);
+                    DataBaseHistorySearch.saveHistorySearch(mSearchHistoryDB, contentValues);
                     mBaiduMap.clear();
                     mSearchLayout.setVisibility(View.INVISIBLE);
                 } catch (Exception e) {
@@ -1031,14 +1029,14 @@ public class MainActivity extends BaseActivity
             ContentValues contentValues = new ContentValues();
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_KEY, ((TextView) view.findViewById(R.id.poi_name)).getText().toString());
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_DESCRIPTION, ((TextView) view.findViewById(R.id.poi_address)).getText().toString());
-            contentValues.put(DataBaseHistorySearch.DB_COLUMN_IS_LOCATION, 1);
+            contentValues.put(DataBaseHistorySearch.DB_COLUMN_IS_LOCATION, DataBaseHistorySearch.DB_SEARCH_TYPE_RESULT);
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_LONGITUDE_CUSTOM, lng);
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_LATITUDE_CUSTOM, lat);
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
 
-            saveSelectedSearchItem(mSearchHistoryDB, contentValues);
+            DataBaseHistorySearch.saveHistorySearch(mSearchHistoryDB, contentValues);
             mSearchLayout.setVisibility(View.INVISIBLE);
             searchItem.collapseActionView();
         });
@@ -1071,33 +1069,18 @@ public class MainActivity extends BaseActivity
                 ContentValues contentValues = new ContentValues();
                 contentValues.put(DataBaseHistorySearch.DB_COLUMN_KEY, searchKey);
                 contentValues.put(DataBaseHistorySearch.DB_COLUMN_DESCRIPTION, searchDescription);
-                contentValues.put(DataBaseHistorySearch.DB_COLUMN_IS_LOCATION, 1);
+                contentValues.put(DataBaseHistorySearch.DB_COLUMN_IS_LOCATION, DataBaseHistorySearch.DB_SEARCH_TYPE_RESULT);
                 contentValues.put(DataBaseHistorySearch.DB_COLUMN_LONGITUDE_CUSTOM, lng);
                 contentValues.put(DataBaseHistorySearch.DB_COLUMN_LATITUDE_CUSTOM, lat);
                 contentValues.put(DataBaseHistorySearch.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
                 contentValues.put(DataBaseHistorySearch.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
                 contentValues.put(DataBaseHistorySearch.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
 
-                saveSelectedSearchItem(mSearchHistoryDB, contentValues);
+                DataBaseHistorySearch.saveHistorySearch(mSearchHistoryDB, contentValues);
             } else if (searchIsLoc.equals("0")) { //如果仅仅是搜索
                 try {
-                    isSubmit = true;
-                    mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
-                            .keyword(searchKey)
-                            .city(mCurrentCity)
-                    );
-                    mBaiduMap.clear();
-                    mHistoryLayout.setVisibility(View.INVISIBLE);
-                    searchItem.collapseActionView();
-                    //更新表
-                    //搜索历史 插表参数
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(DataBaseHistorySearch.DB_COLUMN_KEY, searchKey);
-                    contentValues.put(DataBaseHistorySearch.DB_COLUMN_DESCRIPTION, "搜索...");
-                    contentValues.put(DataBaseHistorySearch.DB_COLUMN_IS_LOCATION, 0);
-                    contentValues.put(DataBaseHistorySearch.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-
-                    saveSelectedSearchItem(mSearchHistoryDB, contentValues);
+                    // 重新搜索之前的关键字
+                    searchView.setQuery(searchKey, true);
                 } catch (Exception e) {
                     DisplayToast("搜索失败，请检查网络连接");
                     XLog.d("搜索失败，请检查网络连接");
@@ -1156,13 +1139,6 @@ public class MainActivity extends BaseActivity
             if (suggestionResult == null || suggestionResult.getAllSuggestions() == null) {
                 DisplayToast("没有找到检索结果");
             } else { //获取在线建议检索结果
-                if (isSubmit) {
-                    mSearchLayout.setVisibility(View.INVISIBLE);
-                    //标注搜索点 关闭搜索列表
-                    // searchView.clearFocus();  //可以收起键盘
-                    searchItem.collapseActionView(); //关闭搜索视图
-                    isSubmit = false;
-                } else {
                     List<Map<String, Object>> data = new ArrayList<>();
                     int retCnt = suggestionResult.getAllSuggestions().size();
 
@@ -1189,7 +1165,6 @@ public class MainActivity extends BaseActivity
                     // mSearchList.setVisibility(View.VISIBLE);
                     mSearchLayout.setVisibility(View.VISIBLE);
                 }
-            }
         });
     }
 
@@ -1282,31 +1257,6 @@ public class MainActivity extends BaseActivity
             e.printStackTrace();
         }
     }
-    // 保存选择的位置
-    private void saveSelectedLocation(SQLiteDatabase sqLiteDatabase, ContentValues contentValues) {
-        try {
-            // 先删除原来的记录，再插入新记录
-            String location = contentValues.get(DataBaseHistoryLocation.DB_COLUMN_LOCATION).toString();
-            sqLiteDatabase.delete(DataBaseHistoryLocation.TABLE_NAME, DataBaseHistoryLocation.DB_COLUMN_LOCATION + " = ?", new String[] {location});
-            sqLiteDatabase.insert(DataBaseHistoryLocation.TABLE_NAME, null, contentValues);
-        } catch (Exception e) {
-            XLog.e("DATABASE: insert error");
-            e.printStackTrace();
-        }
-    }
-
-    //保存搜索选项
-    private void saveSelectedSearchItem(SQLiteDatabase sqLiteDatabase, ContentValues contentValues) {
-        try {
-            // 先删除原来的记录，再插入新记录
-            String searchKey = contentValues.get(DataBaseHistorySearch.DB_COLUMN_KEY).toString();
-            sqLiteDatabase.delete(DataBaseHistorySearch.TABLE_NAME, DataBaseHistorySearch.DB_COLUMN_KEY + " = ?", new String[] {searchKey});
-            sqLiteDatabase.insert(DataBaseHistorySearch.TABLE_NAME, null, contentValues);
-        } catch (Exception e) {
-            XLog.e("DATABASE: insert error");
-            e.printStackTrace();
-        }
-    }
 
     //获取查询历史
     private List<Map<String, Object>> getSearchHistory() {
@@ -1366,7 +1316,7 @@ public class MainActivity extends BaseActivity
                     contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
                     contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
 
-                    saveSelectedLocation(mLocationHistoryDB, contentValues);
+                    DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
                 } else { //位置获取失败
                     //插表参数
                     ContentValues contentValues = new ContentValues();
@@ -1377,7 +1327,7 @@ public class MainActivity extends BaseActivity
                     contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
                     contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
 
-                    saveSelectedLocation(mLocationHistoryDB, contentValues);
+                    DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
                 }
             } catch (JSONException e) {
                 XLog.e("JSON: resolve json error");
@@ -1390,7 +1340,7 @@ public class MainActivity extends BaseActivity
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
 
-                saveSelectedLocation(mLocationHistoryDB, contentValues);
+                DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
                 e.printStackTrace();
             }
         }, error -> {
@@ -1405,7 +1355,7 @@ public class MainActivity extends BaseActivity
             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
 
-            saveSelectedLocation(mLocationHistoryDB, contentValues);
+            DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
         });
         // 给请求设置tag
         stringRequest.setTag("MapAPI");
