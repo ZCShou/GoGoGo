@@ -468,7 +468,6 @@ public class JoyStick extends View {
         ListView mRecordListView = mHistoryLayout.findViewById(R.id.joystick_his_record_list_view);
         TextView tips = mHistoryLayout.findViewById(R.id.joystick_his_tips);
         SearchView mSearchView = mHistoryLayout.findViewById(R.id.joystick_his_searchView);
-        mSearchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
         mSearchView.setOnSearchClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -535,6 +534,7 @@ public class JoyStick extends View {
                 mAllRecord.add(item);
             }
             cursor.close();
+            mHistoryLocationDB.close();
 
             if (mAllRecord.size() == 0) {
                 mRecordListView.setVisibility(View.GONE);
