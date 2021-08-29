@@ -31,11 +31,11 @@ allprojects {
             url 'https://maven.aliyun.com/repository/google'
         }
     }
-//    gradle.projectsEvaluated {
-//        tasks.withType(JavaCompile) { // 用于显示过时 API 的详细信息
-//            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-//        }
-//    }
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) { // 用于显示过时 API 的详细信息
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
+    }
 }
 
 task clean(type: Delete) {

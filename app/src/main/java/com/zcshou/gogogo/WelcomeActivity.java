@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
@@ -23,13 +22,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
 import com.zcshou.utils.GoUtils;
+import com.zcshou.utils.GoUtils.TimeCount;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class WelcomeActivity extends AppCompatActivity {
     private Button startBtn;
-    private TimeCount time;
+    private TimeCount mTimer;
     private boolean isNetwork = false;
 
     private static final String KEY_IS_FIRST_USAGE = "KEY_IS_FIRST_USAGE";
@@ -61,8 +61,21 @@ public class WelcomeActivity extends AppCompatActivity {
         // 生成默认参数的值（一定要尽可能早的调用，因为后续有些界面可能需要使用参数）
         PreferenceManager.setDefaultValues(this, R.xml.preferences_main, false);
 
+        /* 定时器 */
         int cnt = Integer.parseInt(getResources().getString(R.string.welcome_btn_cnt));
-        time = new TimeCount(cnt, 1000);
+        mTimer = new TimeCount(cnt, 1000);
+        mTimer.setListener(new TimeCount.TimeCountListener() {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                startBtn.setText(String.format(Locale.getDefault(), "%d秒", millisUntilFinished / 1000));
+            }
+
+            @Override
+            public void onFinish() {
+                startMainActivity();
+            }
+        });
+
         startBtn = findViewById(R.id.startButton);
         startBtn.setOnClickListener(v -> startMainActivity());
         startBtn.setClickable(false);        // 放在 setOnClickListener 之后才能生效
@@ -99,7 +112,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        time.cancel();
+        mTimer.cancel();
 
         super.onDestroy();
     }
@@ -116,7 +129,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
             if (i >= ReqPermissions.size()) {
                 isPermission = true;
-                time.start();
+                mTimer.start();
             } else {
                 startBtn.setText(getResources().getString(R.string.welcome_permission_error));
                 startBtn.setClickable(true);
@@ -154,7 +167,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
         if (ReqPermissions.size() <= 0) {
             isPermission = true;
-            time.start();
+            mTimer.start();
         } else {
             requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
         }
@@ -170,7 +183,7 @@ public class WelcomeActivity extends AppCompatActivity {
                 checkDefaultPermissions();
             }
         }
-        time.cancel();
+        mTimer.cancel();
     }
 
     private void showProtocolDialog() {
@@ -208,29 +221,13 @@ public class WelcomeActivity extends AppCompatActivity {
                 }
 
                 if (isPermission) {
-                    time.start();
+                    mTimer.start();
                 } else {
                     checkDefaultPermissions();
                 }
 
                 alertDialog.cancel();
             });
-        }
-    }
-
-    class TimeCount extends CountDownTimer {
-        public TimeCount(long millisInFuture, long countDownInterval) {
-            super(millisInFuture, countDownInterval);//参数依次为总时长,和计时的时间间隔
-        }
-
-        @Override
-        public void onFinish() {//计时完毕时触发
-            startMainActivity();
-        }
-
-        @Override
-        public void onTick(long millisUntilFinished) { //计时过程显示
-            startBtn.setText(String.format(Locale.getDefault(), "%d秒", millisUntilFinished / 1000));
         }
     }
 }

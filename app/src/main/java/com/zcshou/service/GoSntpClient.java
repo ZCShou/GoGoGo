@@ -21,7 +21,6 @@ import android.util.Log;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 
 /**
@@ -38,7 +37,7 @@ public class GoSntpClient {
     private static final String TAG = "GoSntpClient";
     private static final boolean DBG = true;
 
-    private static final int REFERENCE_TIME_OFFSET = 16;
+//    private static final int REFERENCE_TIME_OFFSET = 16;
     private static final int ORIGINATE_TIME_OFFSET = 24;
     private static final int RECEIVE_TIME_OFFSET = 32;
     private static final int TRANSMIT_TIME_OFFSET = 40;
@@ -50,7 +49,7 @@ public class GoSntpClient {
     private static final int NTP_MODE_BROADCAST = 5;
     private static final int NTP_VERSION = 3;
 
-    private static final int NTP_LEAP_NOSYNC = 3;
+    private static final int NTP_LEAP_NO_SYNC = 3;
     private static final int NTP_STRATUM_DEATH = 0;
     private static final int NTP_STRATUM_MAX = 15;
 
@@ -72,21 +71,7 @@ public class GoSntpClient {
             super(message);
         }
     }
-
-    public boolean host2Address(String host) {
-        try {
-            InetAddress address = InetAddress.getByName(host);
-            if (address != null) {
-                Log.d(TAG, "Server address: " + address.toString());
-                return true;
-            }
-        } catch (UnknownHostException e) {
-            Log.e(TAG, "UnknownHost: " + host + " ,msg: " + e.getMessage());
-            return false;
-        }
-        return false;
-    }
-
+    
     /**
      * Sends an SNTP request to the given host and processes the response.
      *
@@ -112,7 +97,7 @@ public class GoSntpClient {
             // get current time and write it to the request packet
             final long requestTime = System.currentTimeMillis();
             final long requestTicks = SystemClock.elapsedRealtime();
-            writeTimeStamp(buffer, TRANSMIT_TIME_OFFSET, requestTime);
+            writeTimeStamp(buffer, requestTime);
 
             socket.send(request);
 
@@ -155,9 +140,6 @@ public class GoSntpClient {
             mNtpTimeReference = responseTicks;
             mRoundTripTime = roundTripTime;
         } catch (Exception e) {
-//            if (DBG) {
-//                Log.e(TAG, "Error address: " + address.toString());
-//            }
             Log.e(TAG, "Request time from ntp server failed ,msg: " + e.getMessage());
             return false;
         } finally {
@@ -200,7 +182,7 @@ public class GoSntpClient {
     private static void checkValidServerReply(
             byte leap, byte mode, int stratum, long transmitTime)
             throws InvalidServerReplyException {
-        if (leap == NTP_LEAP_NOSYNC) {
+        if (leap == NTP_LEAP_NO_SYNC) {
             throw new InvalidServerReplyException("unsynchronized server");
         }
         if ((mode != NTP_MODE_SERVER) && (mode != NTP_MODE_BROADCAST)) {
@@ -250,7 +232,8 @@ public class GoSntpClient {
      * Writes system time (milliseconds since January 1, 1970) as an NTP time stamp
      * at the given offset in the buffer.
      */
-    private void writeTimeStamp(byte[] buffer, int offset, long time) {
+    private void writeTimeStamp(byte[] buffer, long time) {
+        int offset = TRANSMIT_TIME_OFFSET;
         // Special case: zero means zero.
         if (time == 0) {
             Arrays.fill(buffer, offset, offset + 8, (byte) 0x00);

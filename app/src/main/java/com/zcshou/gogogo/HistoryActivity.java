@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.zcshou.database.DataBaseHistoryLocation;
-import com.zcshou.utils.AppUtils;
+import com.zcshou.utils.GoUtils;
 
 public class HistoryActivity extends BaseActivity {
     public static final String KEY_ID = "KEY_ID";
@@ -147,7 +147,7 @@ public class HistoryActivity extends BaseActivity {
                 double doubleBDLatitude = bigDecimalBDLatitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
                 item.put(KEY_ID, Integer.toString(ID));
                 item.put(KEY_LOCATION, Location);
-                item.put(KEY_TIME, AppUtils.timeStamp2Date(Long.toString(TimeStamp)));
+                item.put(KEY_TIME, GoUtils.timeStamp2Date(Long.toString(TimeStamp)));
                 item.put(KEY_LNG_LAT_WGS, "[经度:" + doubleLongitude + " 纬度:" + doubleLatitude + "]");
                 item.put(KEY_LNG_LAT_CUSTOM, "[经度:" + doubleBDLongitude + " 纬度:" + doubleBDLatitude + "]");
                 data.add(item);

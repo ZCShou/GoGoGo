@@ -11,7 +11,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreferenceCompat;
 
 import com.elvishew.xlog.XLog;
-import com.zcshou.utils.AppUtils;
+import com.zcshou.utils.GoUtils;
 
 /* */
 public class FragmentSettings extends PreferenceFragmentCompat {
@@ -23,7 +23,7 @@ public class FragmentSettings extends PreferenceFragmentCompat {
 
         // 设置版本号
         String verName;
-        verName = AppUtils.getVersionName(FragmentSettings.this.getContext());
+        verName = GoUtils.getVersionName(FragmentSettings.this.getContext());
         Preference pfVersion = findPreference("setting_version");
         if (pfVersion != null) {
             pfVersion.setSummary(verName);

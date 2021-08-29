@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.PixelFormat;
-import android.os.CountDownTimer;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -36,7 +35,7 @@ import com.baidu.mapapi.model.LatLng;
 import com.zcshou.database.DataBaseHistoryLocation;
 import com.zcshou.gogogo.HistoryActivity;
 import com.zcshou.gogogo.R;
-import com.zcshou.utils.AppUtils;
+import com.zcshou.utils.GoUtils;
 import com.zcshou.utils.MapUtils;
 
 import java.math.BigDecimal;
@@ -47,26 +46,28 @@ import java.util.Map;
 
 public class JoyStick extends View {
     private static final int DivGo = 1000;    /* 移动的时间间隔，单位 ms */
-    private final Context mContext;
+    private static final int WINDOW_TYPE_JOYSTICK = 0;
+    private static final int WINDOW_TYPE_MAP = 1;
+    private static final int WINDOW_TYPE_HISTORY = 2;
 
+    private final Context mContext;
     private WindowManager.LayoutParams mWindowParamJoyStick;
     private WindowManager.LayoutParams mWindowParamMap;
     private WindowManager.LayoutParams mWindowParamHistory;
     private WindowManager mWindowManager;
+    private int mCurWin = WINDOW_TYPE_JOYSTICK;
     private final LayoutInflater inflater;
-    private View mJoystickLayout;
-    private FrameLayout mMapLayout;
-    private FrameLayout mHistoryLayout;
-    private JoyStickClickListener mListener;
     private boolean isWalk;
     private ImageButton btnWalk;
     private boolean isRun;
     private ImageButton btnRun;
     private boolean isBike;
     private ImageButton btnBike;
+    private JoyStickClickListener mListener;
 
     // 移动
-    private TimeCount time;
+    private View mJoystickLayout;
+    private GoUtils.TimeCount mTimer;
     private boolean isMove;
     private double mSpeed = 1.2;        /* 默认的速度，单位 m/s */
     private double mAngle = 0;
@@ -74,16 +75,16 @@ public class JoyStick extends View {
     private double disLng = 0;
     private double disLat = 0;
     private final SharedPreferences sharedPreferences;
-
+    /* 历史记录悬浮窗相关 */
+    private FrameLayout mHistoryLayout;
+    /* 地图悬浮窗相关 */
+    private FrameLayout mMapLayout;
     private final BitmapDescriptor mMapIndicator = BitmapDescriptorFactory.fromResource(R.drawable.icon_position);
     private MapView mMapView;
     private BaiduMap mBaiduMap;
     private double mLng;
     private double mLat;
     private LatLng mCurMapLngLat;
-
-
-    private WINDOW_TYPE mCurWin = WINDOW_TYPE.WINDOW_TYPE_JOYSTICK;
 
     public JoyStick(Context context) {
         super(context);
@@ -254,7 +255,22 @@ public class JoyStick extends View {
     @SuppressLint("InflateParams")
     private void initJoyStickView() {
         /* 移动计时器 */
-        time = new TimeCount(DivGo, DivGo);
+        mTimer = new GoUtils.TimeCount(DivGo, DivGo);
+        mTimer.setListener(new GoUtils.TimeCount.TimeCountListener() {
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）且转换为 km
+                disLng = mSpeed * (double)(DivGo / 1000) * mR * Math.cos(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
+                disLat = mSpeed * (double)(DivGo / 1000) * mR * Math.sin(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
+                mListener.onMoveInfo(mSpeed, disLng, disLat);
+                mTimer.start();
+            }
+        });
         // 获取参数区设置的速度
         mSpeed = Double.parseDouble(sharedPreferences.getString("setting_walk", getResources().getString(R.string.setting_walk_default)));
 
@@ -267,7 +283,7 @@ public class JoyStick extends View {
         ImageButton btnPosition = mJoystickLayout.findViewById(R.id.joystick_position);
         btnPosition.setOnClickListener(v -> {
             if (mMapLayout.getParent() == null) {
-                mCurWin = WINDOW_TYPE.WINDOW_TYPE_MAP;
+                mCurWin = WINDOW_TYPE_MAP;
                 show();
                 MapStatus.Builder builder = new MapStatus.Builder();
                 builder.target(mCurMapLngLat).zoom(18.0f);
@@ -279,7 +295,7 @@ public class JoyStick extends View {
         ImageButton btnHistory = mJoystickLayout.findViewById(R.id.joystick_history);
         btnHistory.setOnClickListener(v -> {
             if (mHistoryLayout.getParent() == null) {
-                mCurWin = WINDOW_TYPE.WINDOW_TYPE_HISTORY;
+                mCurWin = WINDOW_TYPE_HISTORY;
                 show();
             }
         });
@@ -353,23 +369,15 @@ public class JoyStick extends View {
 
         TextView tips = mMapLayout.findViewById(R.id.joystick_map_tips);
         SearchView mSearchView = mMapLayout.findViewById(R.id.joystick_map_searchView);
-        mSearchView.setOnSearchClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                tips.setVisibility(GONE);
-            }
-        });
-        mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                tips.setVisibility(VISIBLE);
-                return false;       /* 这里必须返回false，否则需要自行处理搜索框的折叠 */
-            }
+        mSearchView.setOnSearchClickListener(v -> tips.setVisibility(GONE));
+        mSearchView.setOnCloseListener(() -> {
+            tips.setVisibility(VISIBLE);
+            return false;       /* 这里必须返回false，否则需要自行处理搜索框的折叠 */
         });
 
         ImageButton btnOk = mMapLayout.findViewById(R.id.btnGo);
         btnOk.setOnClickListener(v -> {
-            mCurWin = WINDOW_TYPE.WINDOW_TYPE_JOYSTICK;
+            mCurWin = WINDOW_TYPE_JOYSTICK;
             show();
             mListener.onPositionInfo(mLng, mLat);
         });
@@ -377,7 +385,7 @@ public class JoyStick extends View {
 
         ImageButton btnCancel = mMapLayout.findViewById(R.id.map_close);
         btnCancel.setOnClickListener(v -> {
-            mCurWin = WINDOW_TYPE.WINDOW_TYPE_JOYSTICK;
+            mCurWin = WINDOW_TYPE_JOYSTICK;
             show();
         });
 
@@ -460,7 +468,7 @@ public class JoyStick extends View {
 
         ImageButton btnCancel = mHistoryLayout.findViewById(R.id.joystick_his_close);
         btnCancel.setOnClickListener(v -> {
-            mCurWin = WINDOW_TYPE.WINDOW_TYPE_JOYSTICK;
+            mCurWin = WINDOW_TYPE_JOYSTICK;
             show();
         });
 
@@ -468,18 +476,10 @@ public class JoyStick extends View {
         ListView mRecordListView = mHistoryLayout.findViewById(R.id.joystick_his_record_list_view);
         TextView tips = mHistoryLayout.findViewById(R.id.joystick_his_tips);
         SearchView mSearchView = mHistoryLayout.findViewById(R.id.joystick_his_searchView);
-        mSearchView.setOnSearchClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                tips.setVisibility(GONE);
-            }
-        });
-        mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                tips.setVisibility(VISIBLE);
-                return false;       /* 这里必须返回false，否则需要自行处理搜索框的折叠 */
-            }
+        mSearchView.setOnSearchClickListener(v -> tips.setVisibility(GONE));
+        mSearchView.setOnCloseListener(() -> {
+            tips.setVisibility(VISIBLE);
+            return false;       /* 这里必须返回false，否则需要自行处理搜索框的折叠 */
         });
 
         mRecordListView.setOnItemClickListener((adapterView, view, i, l) -> {
@@ -492,7 +492,7 @@ public class JoyStick extends View {
             wgs84Longitude = latLngStr2[0].substring(latLngStr2[0].indexOf(":") + 1);
             wgs84Latitude = latLngStr2[1].substring(latLngStr2[1].indexOf(":") + 1);
 
-            mCurWin = WINDOW_TYPE.WINDOW_TYPE_JOYSTICK;
+            mCurWin = WINDOW_TYPE_JOYSTICK;
             show();
             mListener.onPositionInfo(Double.parseDouble(wgs84Longitude), Double.parseDouble(wgs84Latitude));
         });
@@ -528,7 +528,7 @@ public class JoyStick extends View {
                 double doubleBDLatitude = bigDecimalBDLatitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
                 item.put(HistoryActivity.KEY_ID, Integer.toString(ID));
                 item.put(HistoryActivity.KEY_LOCATION, Location);
-                item.put(HistoryActivity.KEY_TIME, AppUtils.timeStamp2Date(Long.toString(TimeStamp)));
+                item.put(HistoryActivity.KEY_TIME, GoUtils.timeStamp2Date(Long.toString(TimeStamp)));
                 item.put(HistoryActivity.KEY_LNG_LAT_WGS, "[经度:" + doubleLongitude + " 纬度:" + doubleLatitude + "]");
                 item.put(HistoryActivity.KEY_LNG_LAT_CUSTOM, "[经度:" + doubleBDLongitude + " 纬度:" + doubleBDLatitude + "]");
                 mAllRecord.add(item);
@@ -565,18 +565,18 @@ public class JoyStick extends View {
 
     private void processDirection(boolean auto, double angle, double r) {
         if (r <= 0) {
-            time.cancel();
+            mTimer.cancel();
             isMove = false;
         } else {
             mAngle = angle;
             mR = r;
             if (auto) {
                 if (!isMove) {
-                    time.start();
+                    mTimer.start();
                     isMove = true;
                 }
             } else {
-                time.cancel();
+                mTimer.cancel();
                 isMove = false;
                 // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）且转换为 km
                 disLng = mSpeed * (double)(DivGo / 1000) * mR * Math.cos(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
@@ -634,33 +634,6 @@ public class JoyStick extends View {
 
     public interface JoyStickClickListener {
         void onMoveInfo(double speed, double disLng, double disLat);
-
         void onPositionInfo(double lng, double lat);
-    }
-
-    class TimeCount extends CountDownTimer {
-        public TimeCount(long millisInFuture, long countDownInterval) {
-            super(millisInFuture, countDownInterval);//参数依次为总时长,和计时的时间间隔
-        }
-
-        @Override
-        public void onFinish() {//计时完毕时触发
-            // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）且转换为 km
-            disLng = mSpeed * (double)(DivGo / 1000) * mR * Math.cos(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
-            disLat = mSpeed * (double)(DivGo / 1000) * mR * Math.sin(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
-            mListener.onMoveInfo(mSpeed, disLng, disLat);
-            time.start();
-        }
-
-        @Override
-        public void onTick(long millisUntilFinished) { //计时过程显示
-
-        }
-    }
-
-    public enum WINDOW_TYPE {
-        WINDOW_TYPE_JOYSTICK,
-        WINDOW_TYPE_MAP,
-        WINDOW_TYPE_HISTORY
     }
 }

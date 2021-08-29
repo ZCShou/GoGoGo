@@ -14,18 +14,18 @@ android {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 27
         targetSdkVersion 29
-        versionCode 175
-        versionName '1.7.5' // 语义化版本 https://semver.org/lang/zh-CN/
+        versionCode 176
+        versionName '1.7.6' // 语义化版本 https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-    ndkVersion '22.1.7171670'
+    ndkVersion '23.0.7599858'
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    buildToolsVersion '30.0.3'
+    buildToolsVersion '31.0.0'
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
