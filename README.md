@@ -33,6 +33,14 @@
 
 其次，就是参考 ISSUE 中的各个问题的说明。
 
+## 参考
+由于本人也是个新手，纯属业余瞎搞，因此，在写影梭的过程中，参考了很多网友分享的技术文章、示例代码等。包括但不限于以下列出的几个：
+1. https://github.com/Hilaver/MockGPS
+2. https://github.com/bxxfighting/together-go
+3. https://github.com/P72B/Mocklation
+
+还有些 CSDN 上的文章，目前不记得地址了，如果您发现其中有直接引用或借鉴您的地方，请与我联系，谢谢！
+
 ## 🍟 截图
 ![按键型摇杆.jpg](./docs/按键型摇杆.jpg)
 ![圆形摇杆.jpg](./docs/圆形摇杆.jpg)
@@ -49,5 +57,5 @@
 
 
 ## 🍟 许可证
-
+GPL-3.0 © ZCShou
 
