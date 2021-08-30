@@ -1,7 +1,6 @@
 package com.zcshou.gogogo;
 
 import android.app.Application;
-import android.os.Environment;
 
 import com.baidu.mapapi.SDKInitializer;
 
@@ -17,16 +16,11 @@ import com.elvishew.xlog.printer.file.clean.FileLastModifiedCleanStrategy;
 import com.elvishew.xlog.printer.file.naming.ChangelessFileNameGenerator;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 public class GoApplication extends Application {
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd", Locale.CHINA);
-    private static final String timeStr = formatter.format(new Date(System.currentTimeMillis()));
-    private static final String APP_NAME = "GoGoGo";
-    private static final String LOG_FILE_NAME = APP_NAME + "_" + timeStr + ".log";
-    private static final long MAX_TIME = 1000 * 60 * 60 * 24 * 5; // 5 days
+    public static final String APP_NAME = "GoGoGo";
+    public static final String LOG_FILE_NAME = APP_NAME + ".log";
+    private static final long MAX_TIME = 1000 * 60 * 60 * 24 * 3; // 3 days
 
     @Override
     public void onCreate() {
@@ -64,7 +58,7 @@ public class GoApplication extends Application {
         Printer androidPrinter = new AndroidPrinter(true);  // 通过 android.util.Log 打印日志的打印器
         Printer consolePrinter = new ConsolePrinter();                  // 通过 System.out 打印日志到控制台的打印器
         Printer filePrinter = new FilePrinter                           // 打印日志到文件的打印器
-                .Builder(new File(Environment.getExternalStorageDirectory(),
+                .Builder(new File(getExternalFilesDir(null),
                 APP_NAME).getPath())                             // 指定保存日志文件的路径
                 .fileNameGenerator(new ChangelessFileNameGenerator(LOG_FILE_NAME))         // 指定日志文件名生成器，默认为 ChangelessFileNameGenerator("log")
                 .backupStrategy(new NeverBackupStrategy())              // 指定日志文件备份策略，默认为 FileSizeBackupStrategy(1024 * 1024)

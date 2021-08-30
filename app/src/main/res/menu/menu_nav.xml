@@ -28,7 +28,7 @@
     <item android:title="@string/nav_menu_more">
         <menu>
             <item
-                android:id="@+id/nav_bug_report"
+                android:id="@+id/nav_feedback"
                 android:icon="@drawable/ic_menu_feedback"
                 android:title="@string/nav_menu_feedback" />
             <item

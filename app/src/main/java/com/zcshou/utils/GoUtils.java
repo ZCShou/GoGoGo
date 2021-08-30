@@ -1,6 +1,7 @@
 package com.zcshou.utils;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
@@ -165,6 +166,31 @@ public class GoUtils {
             return packageInfo.versionName;
 
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * 获取App的名称
+     *
+     * @param context 上下文
+     *
+     * @return 名称
+     */
+    public static String getAppName(Context context) {
+        PackageManager pm = context.getPackageManager();
+        //获取包信息
+        try {
+            PackageInfo packageInfo = pm.getPackageInfo(context.getPackageName(), 0);
+            //获取应用 信息
+            ApplicationInfo applicationInfo = packageInfo.applicationInfo;
+            //获取albelRes
+            int labelRes = applicationInfo.labelRes;
+            //返回App的名称
+            return context.getResources().getString(labelRes);
+        } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
 

@@ -78,6 +78,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -94,6 +95,7 @@ import com.zcshou.service.ServiceGo;
 import com.zcshou.database.DataBaseHistoryLocation;
 import com.zcshou.database.DataBaseHistorySearch;
 import com.zcshou.service.GoSntpClient;
+import com.zcshou.utils.ShareUtils;
 import com.zcshou.utils.GoUtils;
 import com.zcshou.utils.MapUtils;
 
@@ -808,14 +810,12 @@ public class MainActivity extends BaseActivity
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(intent);
             } else if (id == R.id.nav_contact) {
-                Intent i = new Intent(Intent.ACTION_SEND);
-                // i.setType("text/plain"); //模拟器请使用这行
-                i.setType("message/rfc822"); // 真机上使用这行
-                i.putExtra(Intent.EXTRA_EMAIL,
-                        new String[] {"zcsexp@gmail.com"});
-                i.putExtra(Intent.EXTRA_SUBJECT, "SUGGESTION");
-                startActivity(Intent.createChooser(i,
-                        "Select email application."));
+
+                Intent intent = new Intent();
+                intent.setAction("android.intent.action.VIEW");
+                Uri content_url = Uri.parse("https://gitee.com/zcshou/gogogo/issues");
+                intent.setData(content_url);
+                startActivity(intent);
             } else if (id == R.id.nav_dev) {
                 try {
                     Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
@@ -824,6 +824,9 @@ public class MainActivity extends BaseActivity
                     DisplayToast("无法跳转到开发者选项,请先确保您的设备已处于开发者模式");
                     e.printStackTrace();
                 }
+            } else if (id == R.id.nav_feedback) {
+                File file = new File(getExternalFilesDir(null).toPath() + "/" + GoApplication.APP_NAME  + "/" + GoApplication.LOG_FILE_NAME);
+                ShareUtils.shareFile(this, file, item.getTitle().toString());
             }
 
             DrawerLayout drawer = findViewById(R.id.drawer_layout);
