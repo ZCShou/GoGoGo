@@ -6,6 +6,7 @@
         <item name="colorPrimaryDark">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="buttonStyle">@style/AppTheme.Button</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
     <!-- 无ActionBar -->
