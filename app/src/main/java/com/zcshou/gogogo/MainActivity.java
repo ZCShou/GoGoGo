@@ -14,7 +14,6 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
@@ -85,21 +84,14 @@ import org.json.JSONObject;
 import java.io.File;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import com.zcshou.service.ServiceGo;
 import com.zcshou.database.DataBaseHistoryLocation;
 import com.zcshou.database.DataBaseHistorySearch;
-import com.zcshou.service.GoSntpClient;
 import com.zcshou.utils.ShareUtils;
 import com.zcshou.utils.GoUtils;
 import com.zcshou.utils.MapUtils;
@@ -164,8 +156,6 @@ public class MainActivity extends BaseActivity
     private MenuItem searchItem;
     private SuggestionSearch mSuggestionSearch;
 
-    private boolean isLimit = true;
-    private static final long mTS = 1636588801;
     private boolean isMockServStart = false;
     private boolean isMove = false;
     private ServiceGo.ServiceGoBinder mServiceBinder;
@@ -210,10 +200,6 @@ public class MainActivity extends BaseActivity
         initSearchView();
 
         setGoBtnListener();
-
-        TimeTask timeTask = new TimeTask();
-        ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
-        threadExecutor.submit(timeTask);
 
         mConnection = new ServiceConnection() {
             @Override
@@ -915,16 +901,11 @@ public class MainActivity extends BaseActivity
         View navHeaderView = mNavigationView.getHeaderView(0);
 
         TextView mUserName = navHeaderView.findViewById(R.id.user_name);
-        TextView mUserLimitInfo = navHeaderView.findViewById(R.id.user_limit);
+//        TextView mUserLimitInfo = navHeaderView.findViewById(R.id.user_limit);
         ImageView mUserIcon = navHeaderView.findViewById(R.id.user_icon);
 
         if (sharedPreferences.getString("setting_reg_code", null) != null) {
-
-            // mUserName.setText("ZCShou");
-
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
-            simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-            mUserLimitInfo.setText(String.format(Locale.getDefault(), "有效期: %s", simpleDateFormat.format(new Date(mTS*1000))));
+             mUserName.setText(getResources().getString(R.string.app_author));
         } else {
             mUserIcon.setOnClickListener(v -> {
                 DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -1463,9 +1444,8 @@ public class MainActivity extends BaseActivity
     }
 
     private void startGoLocation(View v) {
-        if (!isLimit && GoUtils.isNetworkAvailable(this)) {    // 时间限制
-            //悬浮窗权限判断
-            if (!Settings.canDrawOverlays(getApplicationContext())) {
+        if (GoUtils.isNetworkAvailable(this)) {
+            if (!Settings.canDrawOverlays(getApplicationContext())) {//悬浮窗权限判断
                 showEnableFloatWindowDialog();
                 XLog.e("无悬浮窗权限!");
             } else {
@@ -1519,32 +1499,6 @@ public class MainActivity extends BaseActivity
     private void setGoBtnListener() {
         mButtonStart = findViewById(R.id.faBtnStart);
         mButtonStart.setOnClickListener(this::startGoLocation);
-    }
-
-    private class TimeTask implements Runnable {
-        private final String[] ntpServerPool = {"ntp1.aliyun.com", "ntp2.aliyun.com", "ntp3.aliyun.com", "ntp4.aliyun.com", "ntp5.aliyun.com", "ntp6.aliyun.com", "ntp7.aliyun.com",
-                "cn.pool.ntp.org", "cn.ntp.org.cn", "sg.pool.ntp.org", "tw.pool.ntp.org", "jp.pool.ntp.org", "hk.pool.ntp.org", "th.pool.ntp.org",
-                "time.windows.com", "time.nist.gov", "time.apple.com", "time.asia.apple.com",
-                "dns1.synet.edu.cn", "news.neu.edu.cn", "dns.sjtu.edu.cn", "dns2.synet.edu.cn", "ntp.glnet.edu.cn", "s2g.time.edu.cn",
-                "ntp-sz.chl.la", "ntp.gwadar.cn", "3.asia.pool.ntp.org"};
-
-        @Override
-        public void run() {
-            GoSntpClient GoSntpClient = new GoSntpClient();
-            int i;
-            for (i = 0; i < ntpServerPool.length; i++) {
-                if (GoSntpClient.requestTime(ntpServerPool[i], 30000)) {
-                    long now = GoSntpClient.getNtpTime() + SystemClock.elapsedRealtime() - GoSntpClient.getNtpTimeReference();
-                    if (now / 1000 < mTS) {
-                        isLimit = false;
-                    }
-                    break;
-                }
-            }
-            if (i >= ntpServerPool.length) {
-                isLimit = true;
-            }
-        }
     }
 
     public void DisplayToast(String str) {
