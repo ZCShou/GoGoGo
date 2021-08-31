@@ -7,7 +7,7 @@ import com.baidu.mapapi.SDKInitializer;
 import com.elvishew.xlog.LogConfiguration;
 import com.elvishew.xlog.LogLevel;
 import com.elvishew.xlog.XLog;
-import com.elvishew.xlog.printer.AndroidPrinter;
+//import com.elvishew.xlog.printer.AndroidPrinter;
 import com.elvishew.xlog.printer.ConsolePrinter;
 import com.elvishew.xlog.printer.Printer;
 import com.elvishew.xlog.printer.file.FilePrinter;
@@ -55,7 +55,7 @@ public class GoApplication extends Application {
 //                .addInterceptor(new MyInterceptor())                   // 添加一个日志拦截器
                 .build();
 
-        Printer androidPrinter = new AndroidPrinter(true);  // 通过 android.util.Log 打印日志的打印器
+//        Printer androidPrinter = new AndroidPrinter(true);  // 通过 android.util.Log 打印日志的打印器
         Printer consolePrinter = new ConsolePrinter();                  // 通过 System.out 打印日志到控制台的打印器
         Printer filePrinter = new FilePrinter                           // 打印日志到文件的打印器
                 .Builder(new File(getExternalFilesDir(null),
@@ -65,10 +65,11 @@ public class GoApplication extends Application {
                 .cleanStrategy(new FileLastModifiedCleanStrategy(MAX_TIME))     // 指定日志文件清除策略，默认为 NeverCleanStrategy()
                 .build();
 
-        XLog.init(                                                 // 初始化 XLog
-                config,                                                // 指定日志配置，如果不指定，会默认使用 new LogConfiguration.Builder().build()
-                androidPrinter,                                        // 添加任意多的打印器。如果没有添加任何打印器，会默认使用 AndroidPrinter(Android)/ConsolePrinter(java)
-                consolePrinter,
-                filePrinter);
+//        XLog.init(                                                 // 初始化 XLog
+//                config,                                                // 指定日志配置，如果不指定，会默认使用 new LogConfiguration.Builder().build()
+//                androidPrinter,                                        // 添加任意多的打印器。如果没有添加任何打印器，会默认使用 AndroidPrinter(Android)/ConsolePrinter(java)
+//                consolePrinter,
+//                filePrinter);
+        XLog.init(config, consolePrinter, filePrinter);
     }
 }

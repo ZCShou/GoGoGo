@@ -40,6 +40,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
@@ -48,13 +49,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.preference.PreferenceManager;
 
-import com.android.volley.NetworkResponse;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
@@ -82,8 +76,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -99,6 +93,12 @@ import com.zcshou.utils.MapUtils;
 import static android.view.View.GONE;
 
 import com.elvishew.xlog.XLog;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class MainActivity extends BaseActivity
         implements SensorEventListener {
@@ -136,12 +136,12 @@ public class MainActivity extends BaseActivity
     float[] mR = new float[9];
     //模拟方向传感器的数据（原始数据为弧度）
     float[] mDirectionValues = new float[3];
-    // http
-    private RequestQueue mRequestQueue;
 
     // 历史记录数据库
     private SQLiteDatabase mLocationHistoryDB;
     private SQLiteDatabase mSearchHistoryDB;
+
+    private OkHttpClient mOkHttpClient;
 
     // UI相关
     NavigationView mNavigationView;
@@ -182,11 +182,10 @@ public class MainActivity extends BaseActivity
 
         XLog.i("MainActivity: onCreate");
 
+        mOkHttpClient = new OkHttpClient();
+
         //sqlite相关
         initStoreHistory();
-
-        //http init
-        mRequestQueue = Volley.newRequestQueue(this);
 
         initBaiduMap();
 
@@ -709,7 +708,6 @@ public class MainActivity extends BaseActivity
 
     //坐标转换
     private void transformCoordinate(final String longitude, final String latitude) {
-        //参数坐标系：bd09
         final double error = 0.00000001;
         final String safeCode = getResources().getString(R.string.safecode);
         final String ak = getResources().getString(R.string.ak);
@@ -717,148 +715,153 @@ public class MainActivity extends BaseActivity
         String mapApiUrl = "https://api.map.baidu.com/geoconv/v1/?coords=" + longitude + "," + latitude +
                 "&from=5&to=3&ak=" + ak + "&mcode=" + safeCode;
         XLog.d("transformCoordinate: " + mapApiUrl);
-        //bd09坐标转gcj02
-        StringRequest stringRequest = new StringRequest(mapApiUrl, response -> {
-            try {
-                JSONObject getRetJson = new JSONObject(response);
-                XLog.d("transformCoordinate:" + getRetJson.toString());
 
-                //如果api接口转换成功
-                if (Integer.parseInt(getRetJson.getString("status")) == 0) {
-                    XLog.d("HTTP: call api[bd09_to_gcj02] success");
-                    JSONArray coordinateArr = getRetJson.getJSONArray("result");
-                    JSONObject coordinate = coordinateArr.getJSONObject(0);
-                    String gcj02Longitude = coordinate.getString("x");
-                    String gcj02Latitude = coordinate.getString("y");
-                    XLog.d("bd09Longitude is " + longitude + ", " + "bd09Latitude is " + latitude);
-                    XLog.d("gcj02Longitude is " + gcj02Longitude + ", " + "gcj02Latitude is " + gcj02Latitude);
-                    BigDecimal bigDecimalGcj02Longitude = BigDecimal.valueOf(Double.parseDouble(gcj02Longitude));
-                    BigDecimal bigDecimalGcj02Latitude = BigDecimal.valueOf(Double.parseDouble(gcj02Latitude));
-                    BigDecimal bigDecimalBd09Longitude = BigDecimal.valueOf(Double.parseDouble(longitude));
-                    BigDecimal bigDecimalBd09Latitude = BigDecimal.valueOf(Double.parseDouble(latitude));
-                    double gcj02LongitudeDouble = bigDecimalGcj02Longitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
-                    double gcj02LatitudeDouble = bigDecimalGcj02Latitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
-                    double bd09LongitudeDouble = bigDecimalBd09Longitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
-                    double bd09LatitudeDouble = bigDecimalBd09Latitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
-                    XLog.d("gcj02LongitudeDouble is " + gcj02LongitudeDouble + ", " + "gcj02LatitudeDouble is " + gcj02LatitudeDouble);
-                    XLog.d("bd09LongitudeDouble is " + bd09LongitudeDouble + ", " + "bd09LatitudeDouble is " + bd09LatitudeDouble);
-
-                    //如果bd09转gcj02 结果误差很小  认为该坐标在国外
-                    if ((Math.abs(gcj02LongitudeDouble - bd09LongitudeDouble)) <= error && (Math.abs(gcj02LatitudeDouble - bd09LatitudeDouble)) <= error) {
-                        //不进行坐标转换
-                        mCurLat = Double.parseDouble(latitude);
-                        mCurLng = Double.parseDouble(longitude);
-                        XLog.d("OUT OF CHN, NO NEED TO TRANSFORM COORDINATE");
-                    } else {
-                        //离线转换坐标系
-                        // double latLng[] = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
-                        double[] latLng = MapUtils.gcj02towgs84(Double.parseDouble(gcj02Longitude), Double.parseDouble(gcj02Latitude));
-                        mCurLng = latLng[0];
-                        mCurLat = latLng[1];
-                        XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
-                    }
-                }
-                //api接口转换失败 认为在国内
-                else {
-                    //离线转换坐标系
-                    double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
-                    mCurLng = latLng[0];
-                    mCurLat = latLng[1];
-                    XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
-                }
-            } catch (JSONException e) {
-                XLog.e("JSON: resolve json error");
-                e.printStackTrace();
-                //离线转换坐标系
+        okhttp3.Request request = new okhttp3.Request.Builder().url(mapApiUrl).get().build();
+        final Call call = mOkHttpClient.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                XLog.e("HTTP: HTTP GET FAILED");
+                //http 请求失败 离线转换坐标系
                 double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
                 mCurLng = latLng[0];
                 mCurLat = latLng[1];
                 XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
             }
-        }, error1 -> {
-            XLog.e("HTTP: HTTP GET FAILED");
-            //http 请求失败 离线转换坐标系
-            double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
-            mCurLng = latLng[0];
-            mCurLat = latLng[1];
-            XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
+                ResponseBody responseBody = response.body();
+                if (responseBody != null) {
+                    String resp = responseBody.string();
+                    try {
+                        JSONObject getRetJson = new JSONObject(resp);
+                        XLog.d("transformCoordinate:" + getRetJson.toString());
+
+                        //如果api接口转换成功
+                        if (Integer.parseInt(getRetJson.getString("status")) == 0) {
+                            XLog.d("HTTP: call api[bd09_to_gcj02] success");
+                            JSONArray coordinateArr = getRetJson.getJSONArray("result");
+                            JSONObject coordinate = coordinateArr.getJSONObject(0);
+                            String gcj02Longitude = coordinate.getString("x");
+                            String gcj02Latitude = coordinate.getString("y");
+                            XLog.d("bd09Longitude is " + longitude + ", " + "bd09Latitude is " + latitude);
+                            XLog.d("gcj02Longitude is " + gcj02Longitude + ", " + "gcj02Latitude is " + gcj02Latitude);
+                            BigDecimal bigDecimalGcj02Longitude = BigDecimal.valueOf(Double.parseDouble(gcj02Longitude));
+                            BigDecimal bigDecimalGcj02Latitude = BigDecimal.valueOf(Double.parseDouble(gcj02Latitude));
+                            BigDecimal bigDecimalBd09Longitude = BigDecimal.valueOf(Double.parseDouble(longitude));
+                            BigDecimal bigDecimalBd09Latitude = BigDecimal.valueOf(Double.parseDouble(latitude));
+                            double gcj02LongitudeDouble = bigDecimalGcj02Longitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
+                            double gcj02LatitudeDouble = bigDecimalGcj02Latitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
+                            double bd09LongitudeDouble = bigDecimalBd09Longitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
+                            double bd09LatitudeDouble = bigDecimalBd09Latitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
+                            XLog.d("gcj02LongitudeDouble is " + gcj02LongitudeDouble + ", " + "gcj02LatitudeDouble is " + gcj02LatitudeDouble);
+                            XLog.d("bd09LongitudeDouble is " + bd09LongitudeDouble + ", " + "bd09LatitudeDouble is " + bd09LatitudeDouble);
+
+                            //如果bd09转gcj02 结果误差很小  认为该坐标在国外
+                            if ((Math.abs(gcj02LongitudeDouble - bd09LongitudeDouble)) <= error && (Math.abs(gcj02LatitudeDouble - bd09LatitudeDouble)) <= error) {
+                                //不进行坐标转换
+                                mCurLat = Double.parseDouble(latitude);
+                                mCurLng = Double.parseDouble(longitude);
+                                XLog.d("OUT OF CHN, NO NEED TO TRANSFORM COORDINATE");
+                            } else {
+                                //离线转换坐标系
+                                double[] latLng = MapUtils.gcj02towgs84(Double.parseDouble(gcj02Longitude), Double.parseDouble(gcj02Latitude));
+                                mCurLng = latLng[0];
+                                mCurLat = latLng[1];
+                                XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
+                            }
+                        } else {
+                            //离线转换坐标系
+                            double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
+                            mCurLng = latLng[0];
+                            mCurLat = latLng[1];
+                            XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
+                        }
+                    } catch (JSONException e) {
+                        XLog.e("JSON: resolve json error");
+                        e.printStackTrace();
+                        //离线转换坐标系
+                        double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
+                        mCurLng = latLng[0];
+                        mCurLat = latLng[1];
+                        XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
+                    }
+                }
+            }
         });
-        // 给请求设置tag
-        stringRequest.setTag("MapAPI");
-        // 添加tag到请求队列
-        mRequestQueue.add(stringRequest);
     }
 
     private void checkUpdateVersion() {
         String mapApiUrl = "https://gitee.com/api/v5/repos/zcshou/gogogo/releases/latest";
-        StringRequest stringRequest = new StringRequest(mapApiUrl, new Response.Listener<String>() {
-            public void onResponse(String response) {
-                try {
-                    JSONObject getRetJson = new JSONObject(response);
-                    XLog.d("checkUpdateVersion:" + getRetJson.toString());
 
-                    String curVersion = GoUtils.getVersionName(MainActivity.this);
+        okhttp3.Request request = new okhttp3.Request.Builder().url(mapApiUrl).get().build();
+        final Call call = mOkHttpClient.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
 
-                    if (curVersion != null
-                            && (!getRetJson.getString("name").contains(curVersion)
-                            || !getRetJson.getString("tag_name").contains(curVersion))) {
-                        final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(MainActivity.this).create();
-                        alertDialog.show();
-                        alertDialog.setCancelable(false);
-                        Window window = alertDialog.getWindow();
-                        if (window != null) {
-                            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);      // 防止出现闪屏
-                            window.setContentView(R.layout.update);
-                            window.setGravity(Gravity.CENTER);
-                            window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
+            }
 
-                            TextView updateTitle = window.findViewById(R.id.update_title);
-                            updateTitle.setText(getRetJson.getString("name"));
-                            TextView updateTime = window.findViewById(R.id.update_time);
-                            updateTime.setText(getRetJson.getString("created_at"));
-                            TextView updateCommit = window.findViewById(R.id.update_commit);
-                            updateCommit.setText(getRetJson.getString("target_commitish"));
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
+                ResponseBody responseBody = response.body();
+                if (responseBody != null) {
+                    String resp = responseBody.string();
+                    // 注意，该请求在子线程，不能直接操作界面
+                    runOnUiThread(() -> {
+                        try {
+                            JSONObject getRetJson = new JSONObject(resp);
+                            XLog.d("checkUpdateVersion:" + getRetJson.toString());
 
-                            TextView updateContent = window.findViewById(R.id.update_content);
-                            SpannableStringBuilder ssb = new SpannableStringBuilder();
-                            ssb.append(getRetJson.getString("body"));
-                            updateContent.setMovementMethod(LinkMovementMethod.getInstance());
-                            updateContent.setText(ssb, TextView.BufferType.SPANNABLE);
+                            String curVersion = GoUtils.getVersionName(MainActivity.this);
 
-                            Button updateCancel = window.findViewById(R.id.update_ignore);
-                            updateCancel.setOnClickListener(v -> {
-                                alertDialog.cancel();
-                            });
+                            if (curVersion != null
+                                    && (!getRetJson.getString("name").contains(curVersion)
+                                    || !getRetJson.getString("tag_name").contains(curVersion))) {
+                                final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(MainActivity.this).create();
+                                alertDialog.show();
+                                alertDialog.setCancelable(false);
+                                Window window = alertDialog.getWindow();
+                                if (window != null) {
+                                    window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);      // 防止出现闪屏
+                                    window.setContentView(R.layout.update);
+                                    window.setGravity(Gravity.CENTER);
+                                    window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
 
-                            Button updateAgree = window.findViewById(R.id.update_agree);
-                            updateAgree.setOnClickListener(v -> {
-                                alertDialog.cancel();
-                                Uri uri = Uri.parse("https://gitee.com/zcshou/gogogo/releases");
-                                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                                startActivity(intent);
-                            });
+                                    TextView updateTitle = window.findViewById(R.id.update_title);
+                                    updateTitle.setText(getRetJson.getString("name"));
+                                    TextView updateTime = window.findViewById(R.id.update_time);
+                                    updateTime.setText(getRetJson.getString("created_at"));
+                                    TextView updateCommit = window.findViewById(R.id.update_commit);
+                                    updateCommit.setText(getRetJson.getString("target_commitish"));
+
+                                    TextView updateContent = window.findViewById(R.id.update_content);
+                                    SpannableStringBuilder ssb = new SpannableStringBuilder();
+                                    ssb.append(getRetJson.getString("body"));
+                                    updateContent.setMovementMethod(LinkMovementMethod.getInstance());
+                                    updateContent.setText(ssb, TextView.BufferType.SPANNABLE);
+
+                                    Button updateCancel = window.findViewById(R.id.update_ignore);
+                                    updateCancel.setOnClickListener(v -> alertDialog.cancel());
+
+                                    Button updateAgree = window.findViewById(R.id.update_agree);
+                                    updateAgree.setOnClickListener(v -> {
+                                        alertDialog.cancel();
+                                        Uri uri = Uri.parse("https://gitee.com/zcshou/gogogo/releases");
+                                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                                        startActivity(intent);
+                                    });
+                                }
+                            }
+                        } catch (JSONException e) {
+                            XLog.e("JSON: resolve json error");
+                            e.printStackTrace();
                         }
-                    }
-                } catch (JSONException e) {
-                    XLog.e("JSON: resolve json error");
-                    e.printStackTrace();
+                    });
                 }
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-            }
-        }){
-            // 重载 parseNetworkResponse，以处理中文乱码的问题
-            protected Response<String>  parseNetworkResponse(NetworkResponse response)
-            {
-                String parsed;
-                parsed = new String(response.data, StandardCharsets.UTF_8);
-                return Response.success(parsed, HttpHeaderParser.parseCacheHeaders(response));
-            }
-        };
-        stringRequest.setTag("UpdateVersion");
-        mRequestQueue.add(stringRequest);
+        });
     }
 
     private void initNavigationView() {
@@ -1355,40 +1358,15 @@ public class MainActivity extends BaseActivity
         //bd09坐标的位置信息
         String mapApiUrl = "https://api.map.baidu.com/reverse_geocoding/v3/?ak=" + ak + "&output=json&coordtype=" + mapType + "&location=" + latitude + "," + longitude + "&mcode=" + safeCode;
         XLog.d("recordGetPositionInfo:" + mapApiUrl);
-        StringRequest stringRequest = new StringRequest(mapApiUrl, response -> {
-            try {
-                JSONObject getRetJson = new JSONObject(response);
-                XLog.d("recordGetPositionInfo:" + getRetJson.toString());
 
-                //位置获取成功
-                if (Integer.parseInt(getRetJson.getString("status")) == 0) {
-                    JSONObject posInfoJson = getRetJson.getJSONObject("result");
-                    String formatted_address = posInfoJson.getString("formatted_address");
-                    XLog.d(formatted_address);
-                    //插表参数
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, formatted_address);
-                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
-                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
-                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
-                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
 
-                    DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
-                } else { //位置获取失败
-                    //插表参数
-                    ContentValues contentValues = new ContentValues();
-                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
-                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
-                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
-                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
-                    contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
-
-                    DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
-                }
-            } catch (JSONException e) {
-                XLog.e("JSON: resolve json error");
+        okhttp3.Request request = new okhttp3.Request.Builder().url(mapApiUrl).get().build();
+        final Call call = mOkHttpClient.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                //http 请求失败
+                XLog.e("HTTP: HTTP GET FAILED");
                 //插表参数
                 ContentValues contentValues = new ContentValues();
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
@@ -1399,26 +1377,61 @@ public class MainActivity extends BaseActivity
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
 
                 DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
-                e.printStackTrace();
             }
-        }, error -> {
-            //http 请求失败
-            XLog.e("HTTP: HTTP GET FAILED");
-            //插表参数
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
-            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
-            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
-            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
-            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
 
-            DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                ResponseBody responseBody = response.body();
+                if (responseBody != null) {
+                    String resp = responseBody.string();
+                    try {
+                        JSONObject getRetJson = new JSONObject(resp);
+                        XLog.d("recordGetPositionInfo:" + getRetJson.toString());
+
+                        //位置获取成功
+                        if (Integer.parseInt(getRetJson.getString("status")) == 0) {
+                            JSONObject posInfoJson = getRetJson.getJSONObject("result");
+                            String formatted_address = posInfoJson.getString("formatted_address");
+                            XLog.d(formatted_address);
+                            //插表参数
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, formatted_address);
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
+
+                            DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
+                        } else { //位置获取失败
+                            //插表参数
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
+
+                            DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
+                        }
+                    } catch (JSONException e) {
+                        XLog.e("JSON: resolve json error");
+                        //插表参数
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
+
+                        DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
+                        e.printStackTrace();
+                    }
+                }
+            }
         });
-        // 给请求设置tag
-        stringRequest.setTag("MapAPI");
-        // 添加tag到请求队列
-        mRequestQueue.add(stringRequest);
     }
 
     private void doGoLocation() {
