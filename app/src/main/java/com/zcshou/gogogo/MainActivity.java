@@ -49,7 +49,11 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.preference.PreferenceManager;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.baidu.location.BDAbstractLocationListener;
@@ -80,6 +84,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -221,6 +226,8 @@ public class MainActivity extends BaseActivity
 
             }
         };
+
+        checkUpdateVersion();
     }
 
     @Override
@@ -796,7 +803,77 @@ public class MainActivity extends BaseActivity
         mRequestQueue.add(stringRequest);
     }
 
+    private void checkUpdateVersion() {
+        String mapApiUrl = "https://gitee.com/api/v5/repos/zcshou/gogogo/releases/latest";
+        StringRequest stringRequest = new StringRequest(mapApiUrl, new Response.Listener<String>() {
+            public void onResponse(String response) {
+                try {
+                    JSONObject getRetJson = new JSONObject(response);
+                    XLog.d("checkUpdateVersion:" + getRetJson.toString());
 
+                    String curVersion = GoUtils.getVersionName(MainActivity.this);
+
+                    if (curVersion != null
+                            && (!getRetJson.getString("name").contains(curVersion)
+                            || !getRetJson.getString("tag_name").contains(curVersion))) {
+                        final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(MainActivity.this).create();
+                        alertDialog.show();
+                        alertDialog.setCancelable(false);
+                        Window window = alertDialog.getWindow();
+                        if (window != null) {
+                            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);      // 防止出现闪屏
+                            window.setContentView(R.layout.update);
+                            window.setGravity(Gravity.CENTER);
+                            window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
+
+                            TextView updateTitle = window.findViewById(R.id.update_title);
+                            updateTitle.setText(getRetJson.getString("name"));
+                            TextView updateTime = window.findViewById(R.id.update_time);
+                            updateTime.setText(getRetJson.getString("created_at"));
+                            TextView updateCommit = window.findViewById(R.id.update_commit);
+                            updateCommit.setText(getRetJson.getString("target_commitish"));
+
+                            TextView updateContent = window.findViewById(R.id.update_content);
+                            SpannableStringBuilder ssb = new SpannableStringBuilder();
+                            ssb.append(getRetJson.getString("body"));
+                            updateContent.setMovementMethod(LinkMovementMethod.getInstance());
+                            updateContent.setText(ssb, TextView.BufferType.SPANNABLE);
+
+                            Button updateCancel = window.findViewById(R.id.update_ignore);
+                            updateCancel.setOnClickListener(v -> {
+                                alertDialog.cancel();
+                            });
+
+                            Button updateAgree = window.findViewById(R.id.update_agree);
+                            updateAgree.setOnClickListener(v -> {
+                                alertDialog.cancel();
+                                Uri uri = Uri.parse("https://gitee.com/zcshou/gogogo/releases");
+                                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                                startActivity(intent);
+                            });
+                        }
+                    }
+                } catch (JSONException e) {
+                    XLog.e("JSON: resolve json error");
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        }){
+            // 重载 parseNetworkResponse，以处理中文乱码的问题
+            protected Response<String>  parseNetworkResponse(NetworkResponse response)
+            {
+                String parsed;
+                parsed = new String(response.data, StandardCharsets.UTF_8);
+                return Response.success(parsed, HttpHeaderParser.parseCacheHeaders(response));
+            }
+        };
+        stringRequest.setTag("UpdateVersion");
+        mRequestQueue.add(stringRequest);
+    }
 
     private void initNavigationView() {
         mNavigationView = findViewById(R.id.nav_view);
@@ -810,11 +887,8 @@ public class MainActivity extends BaseActivity
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(intent);
             } else if (id == R.id.nav_contact) {
-
-                Intent intent = new Intent();
-                intent.setAction("android.intent.action.VIEW");
-                Uri content_url = Uri.parse("https://gitee.com/zcshou/gogogo/issues");
-                intent.setData(content_url);
+                Uri uri = Uri.parse("https://gitee.com/zcshou/gogogo/issues");
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
             } else if (id == R.id.nav_dev) {
                 try {

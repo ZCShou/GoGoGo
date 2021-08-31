@@ -37,6 +37,13 @@
     <string name="input_latlng_baidu">BD09 坐标系</string>
     <string name="input_latlng_gps">GPS 坐标系</string>
 
+    <!-- 更新 -->
+    <string name="update_title">新版本可用</string>
+    <string name="update_download">立即下载</string>
+    <string name="update_ignore">忽略一次</string>
+    <string name="update_time">更新时间：</string>
+    <string name="update_commit">提交信息：</string>
+
     <!-- 历史记录页面 -->
     <string name="history_idle">暂无历史记录</string>
     <string name="action_delete">删除</string>
