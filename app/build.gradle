@@ -53,7 +53,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
     implementation 'androidx.preference:preference:1.1.1'
     implementation 'com.google.android.material:material:1.4.0'
-    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.14.9'
     implementation 'com.elvishew:xlog:1.11.0'            // xLog 日志库
     implementation files('libs/BaiduLBS_Android.jar')
     testImplementation 'junit:junit:4.13.1'
