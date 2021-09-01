@@ -90,7 +90,7 @@ public class RockerView extends View {
             viewCenterX = (float)size / 2;
             viewCenterY = (float)size / 2;
             outerCircleRadius = size / 2;
-            innerCircleRadius = size / 6;
+            innerCircleRadius = size / 5;
             dstRect = new Rect(
                     (int) (innerCenterX - mRockerBitmap.getWidth()),
                     (int) (innerCenterY - mRockerBitmap.getHeight()),
