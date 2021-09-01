@@ -372,17 +372,14 @@ public class MainActivity extends BaseActivity
             }
         });
 
-        // 搜索框的清楚按钮
+        // 搜索框的清除按钮
         ImageView closeButton = (ImageView)searchView.findViewById(R.id.search_close_btn);
-        closeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditText et = (EditText) findViewById(R.id.search_src_text);
-                et.setText("");
-                searchView.setQuery("", false);
-                mSearchLayout.setVisibility(View.INVISIBLE);
-                mHistoryLayout.setVisibility(View.VISIBLE);
-            }
+        closeButton.setOnClickListener(v -> {
+            EditText et = (EditText) findViewById(R.id.search_src_text);
+            et.setText("");
+            searchView.setQuery("", false);
+            mSearchLayout.setVisibility(View.INVISIBLE);
+            mHistoryLayout.setVisibility(View.VISIBLE);
         });
 
         return true;
