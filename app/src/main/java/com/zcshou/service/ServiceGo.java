@@ -40,6 +40,7 @@ public class ServiceGo extends Service {
     private LocationManager mLocManager;
     private HandlerThread mLocHandlerThread;
     private Handler mLocHandler;
+    private boolean isStop = false;
     // 通知栏消息
     private static final int SERVICE_GO_NOTE_ID = 1;
     private static final String SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW = "ShowJoyStick";
@@ -88,10 +89,11 @@ public class ServiceGo extends Service {
 
     @Override
     public void onDestroy() {
-        mJoyStick.destroy();
-
-        mLocHandlerThread.quit();
+        isStop = true;
         mLocHandler.removeMessages(HANDLER_MSG_ID);
+        mLocHandlerThread.quit();
+
+        mJoyStick.destroy();
 
         removeTestProviderNetwork();
         removeTestProviderGPS();
@@ -170,12 +172,14 @@ public class ServiceGo extends Service {
             // 这里的Handler对象可以看作是绑定在HandlerThread子线程中，所以handlerMessage里的操作是在子线程中运行的
             public void handleMessage(@NonNull Message msg) {
                 try {
-                    Thread.sleep(80);
+                    Thread.sleep(100);
 
-                    setLocationNetwork();
-                    setLocationGPS();
+                    if (!isStop) {
+                        setLocationNetwork();
+                        setLocationGPS();
 
-                    sendEmptyMessage(HANDLER_MSG_ID);
+                        sendEmptyMessage(HANDLER_MSG_ID);
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     Thread.currentThread().interrupt();
