@@ -178,9 +178,9 @@ public class MainActivity extends BaseActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
         XLog.i("MainActivity: onCreate");
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         mOkHttpClient = new OkHttpClient();
 
@@ -529,13 +529,12 @@ public class MainActivity extends BaseActivity
                         builder.target(mCurLatLngMap).zoom(18.0f);
                         mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
 
-                        XLog.d("First Baidu LatLng: " + mCurLatLngMap);
+                        XLog.i("First Baidu LatLng: " + mCurLatLngMap);
 
                         // 这里将百度地图位置转换为 GPS 坐标
                         double[] latLng = MapUtils.bd2wgs(mCurLatLngMap.longitude, mCurLatLngMap.latitude);
                         mCurLng = latLng[0];
                         mCurLat = latLng[1];
-                        XLog.d("First LatLng: " + mCurLng + "   " + mCurLat);
                     }
                 }
             }
@@ -550,7 +549,7 @@ public class MainActivity extends BaseActivity
              * @param diagnosticMessage 具体的诊断信息释义
              */
             public void onLocDiagnosticMessage(int locType, int diagnosticType, String diagnosticMessage) {
-                XLog.d("Baidu ERROR: " + locType + "-" + diagnosticType + "-" + diagnosticMessage);
+                XLog.i("Baidu ERROR: " + locType + "-" + diagnosticType + "-" + diagnosticMessage);
             }
         });
         LocationClientOption locationOption = new LocationClientOption();
@@ -678,7 +677,7 @@ public class MainActivity extends BaseActivity
             }
         } catch (Exception e) {
             ret = false;
-            XLog.e("UNKNOWN: showHistoryLocation error");
+            XLog.e("ERROR: showHistoryLocation");
             e.printStackTrace();
         }
 
@@ -711,22 +710,19 @@ public class MainActivity extends BaseActivity
         final double error = 0.00000001;
         final String safeCode = getResources().getString(R.string.safecode);
         final String ak = getResources().getString(R.string.ak);
-        //判断bd09坐标是否在国内
         String mapApiUrl = "https://api.map.baidu.com/geoconv/v1/?coords=" + longitude + "," + latitude +
                 "&from=5&to=3&ak=" + ak + "&mcode=" + safeCode;
-        XLog.d("transformCoordinate: " + mapApiUrl);
 
         okhttp3.Request request = new okhttp3.Request.Builder().url(mapApiUrl).get().build();
         final Call call = mOkHttpClient.newCall(request);
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                XLog.e("HTTP: HTTP GET FAILED");
+                XLog.e("ERROR: HTTP GET FAILED");
                 //http 请求失败 离线转换坐标系
                 double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
                 mCurLng = latLng[0];
                 mCurLat = latLng[1];
-                XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
             }
 
             @Override
@@ -736,17 +732,11 @@ public class MainActivity extends BaseActivity
                     String resp = responseBody.string();
                     try {
                         JSONObject getRetJson = new JSONObject(resp);
-                        XLog.d("transformCoordinate:" + getRetJson.toString());
-
-                        //如果api接口转换成功
                         if (Integer.parseInt(getRetJson.getString("status")) == 0) {
-                            XLog.d("HTTP: call api[bd09_to_gcj02] success");
                             JSONArray coordinateArr = getRetJson.getJSONArray("result");
                             JSONObject coordinate = coordinateArr.getJSONObject(0);
                             String gcj02Longitude = coordinate.getString("x");
                             String gcj02Latitude = coordinate.getString("y");
-                            XLog.d("bd09Longitude is " + longitude + ", " + "bd09Latitude is " + latitude);
-                            XLog.d("gcj02Longitude is " + gcj02Longitude + ", " + "gcj02Latitude is " + gcj02Latitude);
                             BigDecimal bigDecimalGcj02Longitude = BigDecimal.valueOf(Double.parseDouble(gcj02Longitude));
                             BigDecimal bigDecimalGcj02Latitude = BigDecimal.valueOf(Double.parseDouble(gcj02Latitude));
                             BigDecimal bigDecimalBd09Longitude = BigDecimal.valueOf(Double.parseDouble(longitude));
@@ -755,37 +745,28 @@ public class MainActivity extends BaseActivity
                             double gcj02LatitudeDouble = bigDecimalGcj02Latitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
                             double bd09LongitudeDouble = bigDecimalBd09Longitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
                             double bd09LatitudeDouble = bigDecimalBd09Latitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
-                            XLog.d("gcj02LongitudeDouble is " + gcj02LongitudeDouble + ", " + "gcj02LatitudeDouble is " + gcj02LatitudeDouble);
-                            XLog.d("bd09LongitudeDouble is " + bd09LongitudeDouble + ", " + "bd09LatitudeDouble is " + bd09LatitudeDouble);
 
                             //如果bd09转gcj02 结果误差很小  认为该坐标在国外
                             if ((Math.abs(gcj02LongitudeDouble - bd09LongitudeDouble)) <= error && (Math.abs(gcj02LatitudeDouble - bd09LatitudeDouble)) <= error) {
-                                //不进行坐标转换
                                 mCurLat = Double.parseDouble(latitude);
                                 mCurLng = Double.parseDouble(longitude);
-                                XLog.d("OUT OF CHN, NO NEED TO TRANSFORM COORDINATE");
                             } else {
-                                //离线转换坐标系
                                 double[] latLng = MapUtils.gcj02towgs84(Double.parseDouble(gcj02Longitude), Double.parseDouble(gcj02Latitude));
                                 mCurLng = latLng[0];
                                 mCurLat = latLng[1];
-                                XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
                             }
                         } else {
-                            //离线转换坐标系
+                            XLog.e("ERROR:http get ");
                             double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
                             mCurLng = latLng[0];
                             mCurLat = latLng[1];
-                            XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
                         }
                     } catch (JSONException e) {
-                        XLog.e("JSON: resolve json error");
+                        XLog.e("ERROR: resolve json");
                         e.printStackTrace();
-                        //离线转换坐标系
                         double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
                         mCurLng = latLng[0];
                         mCurLat = latLng[1];
-                        XLog.d("IN CHN, NEED TO TRANSFORM COORDINATE");
                     }
                 }
             }
@@ -812,8 +793,6 @@ public class MainActivity extends BaseActivity
                     runOnUiThread(() -> {
                         try {
                             JSONObject getRetJson = new JSONObject(resp);
-                            XLog.d("checkUpdateVersion:" + getRetJson.toString());
-
                             String curVersion = GoUtils.getVersionName(MainActivity.this);
 
                             if (curVersion != null
@@ -855,7 +834,7 @@ public class MainActivity extends BaseActivity
                                 }
                             }
                         } catch (JSONException e) {
-                            XLog.e("JSON: resolve json error");
+                            XLog.e("ERROR:  resolve json");
                             e.printStackTrace();
                         }
                     });
@@ -1140,15 +1119,14 @@ public class MainActivity extends BaseActivity
                 DataBaseHistorySearch.saveHistorySearch(mSearchHistoryDB, contentValues);
             } else if (searchIsLoc.equals("0")) { //如果仅仅是搜索
                 try {
-                    // 重新搜索之前的关键字
                     searchView.setQuery(searchKey, true);
                 } catch (Exception e) {
                     DisplayToast("搜索失败，请检查网络连接");
-                    XLog.d("搜索失败，请检查网络连接");
+                    XLog.e("ERROR: 搜索失败，请检查网络连接");
                     e.printStackTrace();
                 }
-            } else {    //其他情况
-                XLog.d("搜索失败，参数非法");
+            } else {
+                XLog.e("ERROR:搜索失败，参数非法");
             }
         });
         mSearchHistoryList.setOnItemLongClickListener((parent, view, position, id) -> {
@@ -1180,8 +1158,8 @@ public class MainActivity extends BaseActivity
                                 mHistoryLayout.setVisibility(View.VISIBLE);
                             }
                         } catch (Exception e) {
-                            XLog.e("DATABASE: delete error");
-                            DisplayToast("DELETE ERROR[UNKNOWN]");
+                            XLog.e("ERROR: delete database error");
+                            DisplayToast("删除记录出错");
                             e.printStackTrace();
                         }
                     })
@@ -1314,7 +1292,7 @@ public class MainActivity extends BaseActivity
             DataBaseHistorySearch dbHistory = new DataBaseHistorySearch(getApplicationContext());
             mSearchHistoryDB = dbHistory.getWritableDatabase();
         } catch (Exception e) {
-            XLog.e("DATABASE: sqlite init error");
+            XLog.e("ERROR: sqlite init error");
             e.printStackTrace();
         }
     }
@@ -1340,7 +1318,7 @@ public class MainActivity extends BaseActivity
             }
             cursor.close();
         } catch (Exception e) {
-            XLog.e("DATABASE: query error");
+            XLog.e("ERROR: query error");
             e.printStackTrace();
         }
 
@@ -1357,8 +1335,6 @@ public class MainActivity extends BaseActivity
         final double longitude = mCurLatLngMap.longitude;
         //bd09坐标的位置信息
         String mapApiUrl = "https://api.map.baidu.com/reverse_geocoding/v3/?ak=" + ak + "&output=json&coordtype=" + mapType + "&location=" + latitude + "," + longitude + "&mcode=" + safeCode;
-        XLog.d("recordGetPositionInfo:" + mapApiUrl);
-
 
         okhttp3.Request request = new okhttp3.Request.Builder().url(mapApiUrl).get().build();
         final Call call = mOkHttpClient.newCall(request);
@@ -1386,13 +1362,11 @@ public class MainActivity extends BaseActivity
                     String resp = responseBody.string();
                     try {
                         JSONObject getRetJson = new JSONObject(resp);
-                        XLog.d("recordGetPositionInfo:" + getRetJson.toString());
 
                         //位置获取成功
                         if (Integer.parseInt(getRetJson.getString("status")) == 0) {
                             JSONObject posInfoJson = getRetJson.getJSONObject("result");
                             String formatted_address = posInfoJson.getString("formatted_address");
-                            XLog.d(formatted_address);
                             //插表参数
                             ContentValues contentValues = new ContentValues();
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, formatted_address);
@@ -1436,9 +1410,6 @@ public class MainActivity extends BaseActivity
 
     private void doGoLocation() {
         if (!isMockServStart) {
-            XLog.d("Current Baidu LatLng: " + mCurLatLngMap.longitude + "  " + mCurLatLngMap.latitude);
-
-            //start mock location service
             Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
             bindService(serviceGoIntent, mConnection, BIND_AUTO_CREATE);    // 绑定服务和活动，之后活动就可以去调服务的方法了
             serviceGoIntent.putExtra(LNG_MSG_ID, mCurLng);
