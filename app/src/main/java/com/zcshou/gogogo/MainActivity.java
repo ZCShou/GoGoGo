@@ -279,11 +279,6 @@ public class MainActivity extends BaseActivity
         getMenuInflater().inflate(R.menu.menu_main, menu);
         //找到searchView
         searchItem = menu.findItem(R.id.action_search);
-        searchView = (SearchView) searchItem.getActionView();
-        searchView.setIconified(false);// 设置searchView处于展开状态
-        searchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
-        searchView.setIconifiedByDefault(true);//默认为true在框内，设置false则在框外
-        searchView.setSubmitButtonEnabled(false);//显示提交按钮
         searchItem.setOnActionExpandListener(new  MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
@@ -322,6 +317,11 @@ public class MainActivity extends BaseActivity
             }
         });
 
+        searchView = (SearchView) searchItem.getActionView();
+        searchView.setIconified(false);// 设置searchView处于展开状态
+        searchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
+        searchView.setIconifiedByDefault(true);//默认为true在框内，设置false则在框外
+        searchView.setSubmitButtonEnabled(false);//显示提交按钮
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -371,6 +371,20 @@ public class MainActivity extends BaseActivity
                 return true;
             }
         });
+
+        // 搜索框的清楚按钮
+        ImageView closeButton = (ImageView)searchView.findViewById(R.id.search_close_btn);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText et = (EditText) findViewById(R.id.search_src_text);
+                et.setText("");
+                searchView.setQuery("", false);
+                mSearchLayout.setVisibility(View.INVISIBLE);
+                mHistoryLayout.setVisibility(View.VISIBLE);
+            }
+        });
+
         return true;
     }
 
@@ -1033,7 +1047,6 @@ public class MainActivity extends BaseActivity
 
 
     private void initSearchView() {
-        searchView = findViewById(R.id.action_search);
         mSearchList = findViewById(R.id.search_list_view);
         mSearchLayout = findViewById(R.id.search_linear);
         mSearchHistoryList = findViewById(R.id.search_history_list_view);
