@@ -3,15 +3,17 @@
 buildscript {
     
     repositories {
-        maven {
-            url 'https://maven.aliyun.com/repository/jcenter'
-        }
-        maven {
-            url 'https://maven.aliyun.com/repository/google'
-        }
+//        maven {
+//            url 'https://maven.aliyun.com/repository/jcenter'
+//        }
+//        maven {
+//            url 'https://maven.aliyun.com/repository/google'
+//        }
+        google()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.1'
+        classpath 'com.android.tools.build:gradle:7.0.2'
         
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -21,15 +23,18 @@ buildscript {
 
 allprojects {
     repositories {
-        maven {
-            url 'https://maven.aliyun.com/repository/jcenter'
-        }
-        maven {
-            url 'https://maven.aliyun.com/repository/central'
-        }
-        maven {
-            url 'https://maven.aliyun.com/repository/google'
-        }
+//        maven {
+//            url 'https://maven.aliyun.com/repository/jcenter'
+//        }
+//        maven {
+//            url 'https://maven.aliyun.com/repository/central'
+//        }
+//        maven {
+//            url 'https://maven.aliyun.com/repository/google'
+//        }
+        google()
+        mavenCentral()
+
     }
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile) { // 用于显示过时 API 的详细信息

@@ -372,10 +372,10 @@ public class MainActivity extends BaseActivity
             }
         });
 
-        // 搜索框的清除按钮
-        ImageView closeButton = (ImageView)searchView.findViewById(R.id.search_close_btn);
+        // 搜索框的清除按钮(该按钮属于安卓系统图标)
+        ImageView closeButton = (ImageView)searchView.findViewById(androidx.appcompat.R.id.search_close_btn);
         closeButton.setOnClickListener(v -> {
-            EditText et = (EditText) findViewById(R.id.search_src_text);
+            EditText et = (EditText) findViewById(androidx.appcompat.R.id.search_src_text);
             et.setText("");
             searchView.setQuery("", false);
             mSearchLayout.setVisibility(View.INVISIBLE);
