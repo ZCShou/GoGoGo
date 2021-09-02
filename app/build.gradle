@@ -17,6 +17,7 @@ android {
         versionCode 180
         versionName '1.8.0' // 语义化版本 https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        resConfigs "zh", "zh-rCN", "en", "en-rUS" // 仅保留中文和英文
     }
     ndkVersion '23.0.7599858'
     buildTypes {
