@@ -23,8 +23,6 @@ import android.widget.SearchView;
 import androidx.preference.PreferenceManager;
 
 import com.baidu.mapapi.map.BaiduMap;
-import com.baidu.mapapi.map.BitmapDescriptor;
-import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
@@ -34,6 +32,7 @@ import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
 import com.zcshou.database.DataBaseHistoryLocation;
 import com.zcshou.gogogo.HistoryActivity;
+import com.zcshou.gogogo.MainActivity;
 import com.zcshou.gogogo.R;
 import com.zcshou.utils.GoUtils;
 import com.zcshou.utils.MapUtils;
@@ -79,7 +78,6 @@ public class JoyStick extends View {
     private FrameLayout mHistoryLayout;
     /* 地图悬浮窗相关 */
     private FrameLayout mMapLayout;
-    private final BitmapDescriptor mMapIndicator = BitmapDescriptorFactory.fromResource(R.drawable.icon_position);
     private MapView mMapView;
     private BaiduMap mBaiduMap;
     private double mLng;
@@ -404,7 +402,7 @@ public class JoyStick extends View {
              */
             public void onMapClick(LatLng point) {
                 mCurMapLngLat = point;
-                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(mMapIndicator);
+                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
                 mBaiduMap.clear();
                 mBaiduMap.addOverlay(ooA);
                 /*  */
@@ -418,7 +416,7 @@ public class JoyStick extends View {
              */
             public void onMapPoiClick(MapPoi poi) {
                 mCurMapLngLat = poi.getPosition();
-                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(mMapIndicator);
+                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
                 mBaiduMap.clear();
                 mBaiduMap.addOverlay(ooA);
                 /*  */
@@ -434,7 +432,7 @@ public class JoyStick extends View {
              */
             public void onMapLongClick(LatLng point) {
                 mCurMapLngLat = point;
-                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(mMapIndicator);
+                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
                 mBaiduMap.clear();
                 mBaiduMap.addOverlay(ooA);
                 /*  */
@@ -450,7 +448,7 @@ public class JoyStick extends View {
              */
             public void onMapDoubleClick(LatLng point) {
                 mCurMapLngLat = point;
-                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(mMapIndicator);
+                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
                 mBaiduMap.clear();
                 mBaiduMap.addOverlay(ooA);
                 /*  */
@@ -549,7 +547,7 @@ public class JoyStick extends View {
                             mAllRecord,
                             R.layout.history_item,
                             new String[]{HistoryActivity.KEY_ID, HistoryActivity.KEY_LOCATION, HistoryActivity.KEY_TIME, HistoryActivity.KEY_LNG_LAT_WGS, HistoryActivity.KEY_LNG_LAT_CUSTOM}, // 与下面数组元素要一一对应
-                            new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
+                            new int[]{R.id.LocationID, R.id.LocationText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
                     mRecordListView.setAdapter(simAdapt);
                 } catch (Exception e) {
                     e.printStackTrace();

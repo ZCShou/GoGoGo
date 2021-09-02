@@ -121,29 +121,29 @@ public class MainActivity extends BaseActivity
 
 
     // 百度地图相关
-    private MapView mMapView;
+    public final static BitmapDescriptor mMapIndicator = BitmapDescriptorFactory.fromResource(R.drawable.icon_gcoding);
     private static BaiduMap mBaiduMap = null;
+    private static LatLng mCurLatLngMap = new LatLng(36.547743718042415, 117.07018449827267);
+    private static double mCurLat = ServiceGo.DEFAULT_LAT;  /* WGS84 坐标系的纬度 */
+    private static double mCurLng = ServiceGo.DEFAULT_LNG;  /* WGS84 坐标系的经度 */
+    private MapView mMapView;
     private LocationClient mLocClient = null;
     private String mCurrentCity = null;
     private double mCurrentLat = 0.0;
     private double mCurrentLon = 0.0;
     private float mCurrentDirection = 0.0f;
-    public static LatLng mCurLatLngMap = new LatLng(36.547743718042415, 117.07018449827267);
-    public static BitmapDescriptor mMapIndicator = BitmapDescriptorFactory.fromResource(R.drawable.icon_gcoding);
     private boolean isFirstLoc = true; // 是否首次定位
-    private static double mCurLat = ServiceGo.DEFAULT_LAT;  /* WGS84 坐标系的纬度 */
-    private static double mCurLng = ServiceGo.DEFAULT_LNG;  /* WGS84 坐标系的经度 */
     private SensorManager mSensorManager;
     private Sensor mSensorAccelerometer;
     private Sensor mSensorMagnetic;
     //加速度传感器数据
-    float[] mAccValues = new float[3];
+    private float[] mAccValues = new float[3];
     //地磁传感器数据
-    float[] mMagValues = new float[3];
+    private float[] mMagValues = new float[3];
     //旋转矩阵，用来保存磁场和加速度的数据
-    float[] mR = new float[9];
+    private final float[] mR = new float[9];
     //模拟方向传感器的数据（原始数据为弧度）
-    float[] mDirectionValues = new float[3];
+    private final float[] mDirectionValues = new float[3];
     private GeoCoder mGeoCoder;
 
     // 历史记录数据库
@@ -418,7 +418,7 @@ public class MainActivity extends BaseActivity
 
     private void initBaiduMap() {
         // 地图初始化
-        mMapView = findViewById(R.id.bmapView);
+        mMapView = findViewById(R.id.bdMapView);
         mMapView.showZoomControls(false);
         mBaiduMap = mMapView.getMap();
         mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
@@ -642,11 +642,11 @@ public class MainActivity extends BaseActivity
     private void initListenerMapBtn() {
         RadioGroup mGroupMapType = this.findViewById(R.id.RadioGroupMapType);
         mGroupMapType.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.normal) {
+            if (checkedId == R.id.mapNormal) {
                 mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
             }
 
-            if (checkedId == R.id.statellite) {
+            if (checkedId == R.id.mapSatellite) {
                 mBaiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
             }
         });
@@ -670,7 +670,7 @@ public class MainActivity extends BaseActivity
         AlertDialog dialog;
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("请输入经度和纬度");
-        View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.input_latlng, null);
+        View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.input_position, null);
         builder.setView(view);
         dialog = builder.show();
 
@@ -678,7 +678,7 @@ public class MainActivity extends BaseActivity
         EditText dialog_lat = view.findViewById(R.id.joystick_latitude);
         RadioButton rbBD = view.findViewById(R.id.pos_type_bd);
 
-        Button btnGo = view.findViewById(R.id.joystick_latlng_ok);
+        Button btnGo = view.findViewById(R.id.input_position_ok);
         btnGo.setOnClickListener(v -> {
             String dialog_lng_str = dialog_lng.getText().toString();
             String dialog_lat_str = dialog_lat.getText().toString();
@@ -707,7 +707,7 @@ public class MainActivity extends BaseActivity
             }
         });
 
-        Button btnCancel = view.findViewById(R.id.joystick_latlng_cancel);
+        Button btnCancel = view.findViewById(R.id.input_position_cancel);
         btnCancel.setOnClickListener(v -> dialog.dismiss());
     }
 

@@ -13,7 +13,7 @@
         android:layout_height="match_parent">
 
         <com.baidu.mapapi.map.MapView
-            android:id="@+id/bmapView"
+            android:id="@+id/bdMapView"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:clickable="true"
@@ -30,7 +30,7 @@
             android:orientation="vertical">
 
             <RadioButton
-                android:id="@+id/normal"
+                android:id="@+id/mapNormal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -38,7 +38,7 @@
                 android:text="@string/map_pic_normal" />
 
             <RadioButton
-                android:id="@+id/statellite"
+                android:id="@+id/mapSatellite"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

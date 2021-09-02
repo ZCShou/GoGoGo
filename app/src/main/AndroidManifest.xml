@@ -71,7 +71,9 @@
             android:enabled="true"
             android:process=":remote" />
 
-        <service android:name="com.zcshou.service.ServiceGo" />
+        <service
+            android:exported="false"
+            android:name="com.zcshou.service.ServiceGo" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -87,7 +89,9 @@
             android:name=".WelcomeActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:exported="true"
+            android:theme="@style/AppTheme.NoActionBar"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -99,16 +103,19 @@
             android:label="@string/app_name"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
+            android:exported="false"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".SettingsActivity"
             android:label="@string/app_settings"
+            android:exported="false"
             android:screenOrientation="portrait" />
 
         <activity
             android:name=".HistoryActivity"
             android:label="@string/app_history"
+            android:exported="false"
             android:screenOrientation="portrait"/>
 
     </application>

@@ -29,13 +29,12 @@
     "6. 如果用户自行安装本软件，即表明用户信任软件作者，自愿选择安装本软件，并接受本协议所有条款。 如果用户不接受本协议，请立即删除。\n"
     </string>
     <!-- 主界面 -->
-    <string name="fabtn_start">启动定位</string>
     <string name="label_longitude">经度</string>
     <string name="label_latitude">纬度</string>
-    <string name="input_latlng_ok">传送</string>
-    <string name="input_latlng_cancel">取消</string>
-    <string name="input_latlng_baidu">BD09 坐标系</string>
-    <string name="input_latlng_gps">GPS 坐标系</string>
+    <string name="input_position_ok">传送</string>
+    <string name="input_position_cancel">取消</string>
+    <string name="input_position_baidu">BD09 坐标系</string>
+    <string name="input_position_gps">GPS 坐标系</string>
 
     <!-- 更新 -->
     <string name="update_title">新版本可用</string>

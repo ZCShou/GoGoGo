@@ -9,9 +9,9 @@ public class MapUtils {
 //    public static float[] MARS_WEIGHT = {0.034f,0.068f,0.152f,0.228f,0.304f};
     
     //坐标转换相关
-    static double pi = 3.14159265358979324;
-    static double a = 6378245.0;
-    static double ee = 0.00669342162296594323;
+    public final static double pi = 3.14159265358979324;
+    public final static double a = 6378245.0;
+    public final static double ee = 0.00669342162296594323;
     public final static double x_pi = 3.14159265358979324 * 3000.0 / 180.0;
     
     public static double[] bd2wgs(double lon, double lat) {

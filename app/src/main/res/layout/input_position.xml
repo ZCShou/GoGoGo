@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
     android:orientation="vertical">
 
     <EditText
@@ -40,13 +39,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:checked="true"
-            android:text="@string/input_latlng_baidu" />
+            android:text="@string/input_position_baidu" />
 
         <RadioButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/input_latlng_gps" />
+            android:text="@string/input_position_gps" />
     </RadioGroup>
 
 
@@ -62,20 +61,20 @@
             android:layout_weight="1" />
 
         <Button
-            android:id="@+id/joystick_latlng_cancel"
+            android:id="@+id/input_position_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/input_latlng_cancel"/>
+            android:text="@string/input_position_cancel"/>
 
         <Space
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
         <Button
-            android:id="@+id/joystick_latlng_ok"
+            android:id="@+id/input_position_ok"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/input_latlng_ok"/>
+            android:text="@string/input_position_ok"/>
 
         <Space
             android:layout_width="0dp"

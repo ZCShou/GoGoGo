@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:paddingStart="10dp"
@@ -14,7 +14,7 @@
         android:visibility="gone"/>
 
     <TextView
-        android:id="@+id/LoctionText"
+        android:id="@+id/LocationText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20sp" />

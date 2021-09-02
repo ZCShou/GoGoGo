@@ -216,7 +216,7 @@ public class HistoryActivity extends BaseActivity {
                             mAllRecord,
                             R.layout.history_item,
                             new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_CUSTOM}, // 与下面数组元素要一一对应
-                            new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
+                            new int[]{R.id.LocationID, R.id.LocationText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
                     mRecordListView.setAdapter(simAdapt);
                 } else {
                     List<Map<String, Object>> searchRet = new ArrayList<>();
@@ -231,7 +231,7 @@ public class HistoryActivity extends BaseActivity {
                                 searchRet,
                                 R.layout.history_item,
                                 new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_CUSTOM}, // 与下面数组元素要一一对应
-                                new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
+                                new int[]{R.id.LocationID, R.id.LocationText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
                         mRecordListView.setAdapter(simAdapt);
                     } else {
                         DisplayToast("未搜索到指定内容");
@@ -240,7 +240,7 @@ public class HistoryActivity extends BaseActivity {
                                 mAllRecord,
                                 R.layout.history_item,
                                 new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_CUSTOM}, // 与下面数组元素要一一对应
-                                new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
+                                new int[]{R.id.LocationID, R.id.LocationText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
                         mRecordListView.setAdapter(simAdapt);
                     }
                 }
@@ -320,7 +320,7 @@ public class HistoryActivity extends BaseActivity {
                         mAllRecord,
                         R.layout.history_item,
                         new String[]{KEY_ID, KEY_LOCATION, KEY_TIME, KEY_LNG_LAT_WGS, KEY_LNG_LAT_CUSTOM},
-                        new int[]{R.id.LocationID, R.id.LoctionText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
+                        new int[]{R.id.LocationID, R.id.LocationText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
                 mRecordListView.setAdapter(simAdapt);
             } catch (Exception e) {
                 e.printStackTrace();
