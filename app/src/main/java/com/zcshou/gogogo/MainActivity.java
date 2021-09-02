@@ -31,6 +31,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -56,6 +57,7 @@ import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
@@ -65,6 +67,12 @@ import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.search.core.SearchResult;
+import com.baidu.mapapi.search.geocode.GeoCodeResult;
+import com.baidu.mapapi.search.geocode.GeoCoder;
+import com.baidu.mapapi.search.geocode.OnGetGeoCoderResultListener;
+import com.baidu.mapapi.search.geocode.ReverseGeoCodeOption;
+import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -136,6 +144,7 @@ public class MainActivity extends BaseActivity
     float[] mR = new float[9];
     //模拟方向传感器的数据（原始数据为弧度）
     float[] mDirectionValues = new float[3];
+    private GeoCoder mGeoCoder;
 
     // 历史记录数据库
     private SQLiteDatabase mLocationHistoryDB;
@@ -415,6 +424,55 @@ public class MainActivity extends BaseActivity
         mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
         mBaiduMap.setMyLocationEnabled(true);
 
+        View poiView = View.inflate(MainActivity.this, R.layout.poi_info, null);
+        TextView poiAddress = poiView.findViewById(R.id.poi_address);
+        TextView poiLongitude = poiView.findViewById(R.id.poi_longitude);
+        TextView poiLatitude = poiView.findViewById(R.id.poi_latitude);
+        ImageButton ibSave = poiView.findViewById(R.id.poi_save);
+        ibSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                XLog.i(poiAddress.getText());
+            }
+        });
+        ImageButton ibCopy = poiView.findViewById(R.id.poi_copy);
+        ibCopy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                XLog.i(poiAddress.getText());
+            }
+        });
+        ImageButton ibShare = poiView.findViewById(R.id.poi_share);
+        ibShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ShareUtils.shareText(MainActivity.this, "分享位置", poiLongitude.getText()+","+poiLatitude.getText());
+                XLog.i(poiAddress.getText());
+            }
+        });
+
+        mGeoCoder = GeoCoder.newInstance();
+        mGeoCoder.setOnGetGeoCodeResultListener(new OnGetGeoCoderResultListener() {
+            @Override
+            public void onGetGeoCodeResult(GeoCodeResult geoCodeResult) {
+                XLog.i(geoCodeResult.getLocation());
+            }
+
+            @Override
+            public void onGetReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
+                if (reverseGeoCodeResult == null || reverseGeoCodeResult.error != SearchResult.ERRORNO.NO_ERROR) {
+                    XLog.i("找不到该地址!");
+                } else {
+                    poiLatitude.setText(String.valueOf(reverseGeoCodeResult.getLocation().latitude));
+                    poiLongitude.setText(String.valueOf(reverseGeoCodeResult.getLocation().longitude));
+                    poiAddress.setText(reverseGeoCodeResult.getAddress());
+                    final InfoWindow mInfoWindow = new InfoWindow(poiView, reverseGeoCodeResult.getLocation(), -100);
+                    mBaiduMap.showInfoWindow(mInfoWindow);
+                }
+            }
+        });
+
+
         mBaiduMap.setOnMapTouchListener(event -> {
 
         });
@@ -425,6 +483,7 @@ public class MainActivity extends BaseActivity
              */
             public void onMapClick(LatLng point) {
                 mCurLatLngMap = point;
+
                 //百度坐标系转wgs坐标系
                 transformCoordinate(String.valueOf(point.longitude), String.valueOf(point.latitude));
                 markSelectedPosition();
@@ -446,6 +505,7 @@ public class MainActivity extends BaseActivity
              */
             public void onMapLongClick(LatLng point) {
                 mCurLatLngMap = point;
+                mGeoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(point));
                 //百度坐标系转wgs坐标系
                 transformCoordinate(String.valueOf(point.longitude), String.valueOf(point.latitude));
                 markSelectedPosition();
@@ -457,10 +517,7 @@ public class MainActivity extends BaseActivity
              * 双击地图
              */
             public void onMapDoubleClick(LatLng point) {
-                mCurLatLngMap = point;
-                //百度坐标系转wgs坐标系
-                transformCoordinate(String.valueOf(point.longitude), String.valueOf(point.latitude));
-                markSelectedPosition();
+                mBaiduMap.animateMapStatus(MapStatusUpdateFactory.zoomIn());
             }
         });
 
