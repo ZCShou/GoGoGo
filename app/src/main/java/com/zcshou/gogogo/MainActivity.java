@@ -382,9 +382,9 @@ public class MainActivity extends BaseActivity
         });
 
         // 搜索框的清除按钮(该按钮属于安卓系统图标)
-        ImageView closeButton = (ImageView)searchView.findViewById(androidx.appcompat.R.id.search_close_btn);
+        ImageView closeButton = searchView.findViewById(androidx.appcompat.R.id.search_close_btn);
         closeButton.setOnClickListener(v -> {
-            EditText et = (EditText) findViewById(androidx.appcompat.R.id.search_src_text);
+            EditText et = findViewById(androidx.appcompat.R.id.search_src_text);
             et.setText("");
             searchView.setQuery("", false);
             mSearchLayout.setVisibility(View.INVISIBLE);
@@ -429,26 +429,13 @@ public class MainActivity extends BaseActivity
         TextView poiLongitude = poiView.findViewById(R.id.poi_longitude);
         TextView poiLatitude = poiView.findViewById(R.id.poi_latitude);
         ImageButton ibSave = poiView.findViewById(R.id.poi_save);
-        ibSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                XLog.i(poiAddress.getText());
-            }
-        });
+        ibSave.setOnClickListener(v -> XLog.i(poiAddress.getText()));
         ImageButton ibCopy = poiView.findViewById(R.id.poi_copy);
-        ibCopy.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                XLog.i(poiAddress.getText());
-            }
-        });
+        ibCopy.setOnClickListener(v -> XLog.i(poiAddress.getText()));
         ImageButton ibShare = poiView.findViewById(R.id.poi_share);
-        ibShare.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ShareUtils.shareText(MainActivity.this, "分享位置", poiLongitude.getText()+","+poiLatitude.getText());
-                XLog.i(poiAddress.getText());
-            }
+        ibShare.setOnClickListener(v -> {
+            ShareUtils.shareText(MainActivity.this, "分享位置", poiLongitude.getText()+","+poiLatitude.getText());
+            XLog.i(poiAddress.getText());
         });
 
         mGeoCoder = GeoCoder.newInstance();
@@ -645,10 +632,6 @@ public class MainActivity extends BaseActivity
         locationOption.setOpenGps(true);
         //可选，默认false，设置定位时是否需要海拔信息，默认不需要，除基础定位版本都可用
         locationOption.setIsNeedAltitude(false);
-//        //设置打开自动回调位置模式，该开关打开后，期间只要定位SDK检测到位置变化就会主动回调给开发者，该模式下开发者无需再关心定位间隔是多少，定位SDK本身发现位置变化就会及时回调给开发者
-//        locationOption.setOpenAutoNotifyMode();
-//        //设置打开自动回调位置模式，该开关打开后，期间只要定位SDK检测到位置变化就会主动回调给开发者
-//        locationOption.setOpenAutoNotifyMode(3000,1, LocationClientOption.LOC_SENSITIVITY_HIGHT);
         //需将配置好的LocationClientOption对象，通过setLocOption方法传递给LocationClient对象使用
         mLocClient.setLocOption(locationOption);
         //开始定位
