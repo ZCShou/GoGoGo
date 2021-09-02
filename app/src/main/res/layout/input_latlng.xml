@@ -43,7 +43,6 @@
             android:text="@string/input_latlng_baidu" />
 
         <RadioButton
-            android:id="@+id/pos_type_gps"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"

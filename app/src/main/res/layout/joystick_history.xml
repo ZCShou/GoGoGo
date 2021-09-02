@@ -40,7 +40,6 @@
         android:theme="@style/RippleWhite" />
 
     <LinearLayout
-        android:id="@+id/joystick_his_content"
         android:layout_width="wrap_content"
         android:layout_height="450dp"
         android:layout_marginTop="30dp"

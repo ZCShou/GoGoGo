@@ -46,9 +46,6 @@
 
     <!-- 历史记录页面 -->
     <string name="history_idle">暂无历史记录</string>
-    <string name="action_delete">删除</string>
-    <string name="action_all">全选</string>
-    <string name="action_cancel">取消</string>
 
     <!-- 导航页 -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -57,14 +54,12 @@
     <string name="user_limit_info">未注册版本部分功能受限</string>
     <string name="nav_menu_history">历史记录</string>
     <string name="nav_menu_settings">设置</string>
-    <string name="nav_menu_preference">设置</string>
     <string name="nav_menu_dev">开发人员选项</string>
     <string name="nav_menu_more">更多</string>
     <string name="nav_menu_feedback">问题反馈</string>
     <string name="nav_menu_contact">联系作者</string>
 
     <!-- 设置界面 -->
-    <string name="title_activity_settings">设置</string>
     <string name="setting_group_move">移动</string>
     <string name="setting_joystick">摇杆类型</string>
     <string name="setting_joystick_tips">重启摇杆后生效</string>
