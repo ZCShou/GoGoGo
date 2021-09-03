@@ -36,6 +36,7 @@ public class GoApplication extends Application {
      * Initialize XLog.
      */
     private void initXlog() {
+        File logPath = getExternalFilesDir("Logs");
         LogConfiguration config = new LogConfiguration.Builder()
                 .logLevel(LogLevel.ALL)
                 .tag(APP_NAME)                                         // 指定 TAG，默认为 "X-LOG"
@@ -58,8 +59,7 @@ public class GoApplication extends Application {
 //        Printer androidPrinter = new AndroidPrinter(true);  // 通过 android.util.Log 打印日志的打印器
         Printer consolePrinter = new ConsolePrinter();                  // 通过 System.out 打印日志到控制台的打印器
         Printer filePrinter = new FilePrinter                           // 打印日志到文件的打印器
-                .Builder(new File(getExternalFilesDir(null),
-                APP_NAME).getPath())                             // 指定保存日志文件的路径
+                .Builder(logPath.getPath())                             // 指定保存日志文件的路径
                 .fileNameGenerator(new ChangelessFileNameGenerator(LOG_FILE_NAME))         // 指定日志文件名生成器，默认为 ChangelessFileNameGenerator("log")
                 .backupStrategy(new NeverBackupStrategy())              // 指定日志文件备份策略，默认为 FileSizeBackupStrategy(1024 * 1024)
                 .cleanStrategy(new FileLastModifiedCleanStrategy(MAX_TIME))     // 指定日志文件清除策略，默认为 NeverCleanStrategy()

@@ -17,8 +17,12 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+
+    <uses-permission android:name="android.permission.REPLACE_EXISTING_PACKAGE"/>
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+
     <!-- 允许程序打开网络套接字 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- 允许挂载和反挂载文件系统可移动存储 -->
@@ -69,6 +73,7 @@
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
+            android:exported="false"
             android:process=":remote" />
 
         <service
@@ -88,7 +93,6 @@
         <activity
             android:name=".WelcomeActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait"
             android:exported="true"
             android:theme="@style/AppTheme.NoActionBar"
             >
@@ -102,21 +106,18 @@
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".SettingsActivity"
             android:label="@string/app_settings"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+            android:exported="false" />
 
         <activity
             android:name=".HistoryActivity"
             android:label="@string/app_history"
-            android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:exported="false" />
 
     </application>
 

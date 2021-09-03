@@ -147,9 +147,9 @@ public class WelcomeActivity extends AppCompatActivity {
             ReqPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         }
 
-        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ReqPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
+//        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+//            ReqPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//        }
 
         // 读取电话状态权限
         if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {

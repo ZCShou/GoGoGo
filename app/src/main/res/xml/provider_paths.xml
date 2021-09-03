@@ -1,9 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <external-path
-        name="external_files"
-        path="GoGoGo/" />
-    <external-path
-        name="external_storage_root"
-        path="." />
+    <!-- cache-path 表示内存卡中缓存路径，对应代码为 context.getCacheDir() 接口 -->
+    <cache-path name="cache" path="." />
+    <cache-path name="cache" path="."/>
+
+    <!-- files-path 表示内存卡路径，对应代码为 context.getFileDir() 接口 -->
+    <files-path name="files" path="." />
+    <files-path name="Update" path="Update" />
+
+    <!-- external-files-path 表示SD卡路径，对应代码为 context.getExternalFilesDir() 接口 -->
+    <external-files-path name="external_files" path="." />
+    <external-files-path name="Logs" path="Logs/" />
+    <external-files-path name="Updates" path="Updates/" />
+
+    <external-path name="external" path="." />
+
+    <external-cache-path name="external_cache" path="." />
+
+    <!--
+    <root-path/> 代表设备的根目录new File("/");
+    <files-path/> 代表context.getFilesDir()
+    <cache-path/> 代表context.getCacheDir()
+    <external-path/> 代表Environment.getExternalStorageDirectory()
+    <external-files-path>代表context.getExternalFilesDirs()
+    <external-cache-path>代表getExternalCacheDirs()
+    -->
 </paths>

@@ -177,6 +177,7 @@ public class MainActivity extends BaseActivity
     private DownloadManager mDownloadManager = null;
     private long mDownloadId;
     private BroadcastReceiver mDownloadBdRcv;
+    private String mUpdateFilename;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -856,7 +857,7 @@ public class MainActivity extends BaseActivity
                     e.printStackTrace();
                 }
             } else if (id == R.id.nav_feedback) {
-                File file = new File(getExternalFilesDir(null).toPath() + "/" + GoApplication.APP_NAME  + "/" + GoApplication.LOG_FILE_NAME);
+                File file = new File(getExternalFilesDir("Logs"), GoApplication.LOG_FILE_NAME);
                 ShareUtils.shareFile(this, file, item.getTitle().toString());
             }
 
@@ -1435,9 +1436,9 @@ public class MainActivity extends BaseActivity
                             JSONObject getRetJson = new JSONObject(resp);
                             String curVersion = GoUtils.getVersionName(MainActivity.this);
 
-//                            if (curVersion != null
-//                                    && (!getRetJson.getString("name").contains(curVersion)
-//                                    || !getRetJson.getString("tag_name").contains(curVersion))) {
+                            if (curVersion != null
+                                    && (!getRetJson.getString("name").contains(curVersion)
+                                    || !getRetJson.getString("tag_name").contains(curVersion))) {
                                 final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(MainActivity.this).create();
                                 alertDialog.show();
                                 alertDialog.setCancelable(false);
@@ -1468,15 +1469,16 @@ public class MainActivity extends BaseActivity
                                     JSONArray jsonArray = new JSONArray(getRetJson.getString("assets"));
                                     JSONObject jsonObject = jsonArray.getJSONObject(0);
                                     String download_url = jsonObject.getString("browser_download_url");
-                                    String fileName = jsonObject.getString("name");
+                                    mUpdateFilename = jsonObject.getString("name");
 
                                     Button updateAgree = window.findViewById(R.id.update_agree);
                                     updateAgree.setOnClickListener(v -> {
                                         alertDialog.cancel();
-                                        downloadNewVersion(download_url, fileName);
+                                        GoUtils.DisplayToast(MainActivity.this,"升级文件下载中");
+                                        downloadNewVersion(download_url);
                                     });
                                 }
-//                            }
+                            }
                         } catch (JSONException e) {
                             XLog.e("ERROR:  resolve json");
                             e.printStackTrace();
@@ -1487,7 +1489,7 @@ public class MainActivity extends BaseActivity
         });
     }
 
-    private void downloadNewVersion(String url, String fileName) {
+    private void downloadNewVersion(String url) {
         if (mDownloadManager == null) {
             return;
         }
@@ -1499,8 +1501,13 @@ public class MainActivity extends BaseActivity
         request.setDescription("正在下载新版本...");
         request.setVisibleInDownloadsUi(true);
         request.setMimeType("application/vnd.android.package-archive");
+        File file = new File(getExternalFilesDir("Updates"), mUpdateFilename);
+        if (file.exists()) {
+            if(!file.delete()) {
+                return;
+            }
+        }
         //设置文件存放路径
-        File file = new File(getExternalFilesDir(null), fileName);
         request.setDestinationUri(Uri.fromFile(file));
 
         mDownloadId = mDownloadManager.enqueue(request);
@@ -1510,38 +1517,14 @@ public class MainActivity extends BaseActivity
         Intent install = new Intent(Intent.ACTION_VIEW);
         Uri downloadFileUri = mDownloadManager.getUriForDownloadedFile(mDownloadId);
         if (downloadFileUri != null) {
-            install.setDataAndType(downloadFileUri, "application/vnd.android.package-archive");
-            install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); //添加这一句表示对目标应用临时授权该Uri所代表的文件
-            install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            File file = new File(getExternalFilesDir("Updates"), mUpdateFilename);
+            install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            // 在Broadcast中启动活动需要添加Intent.FLAG_ACTIVITY_NEW_TASK
+            install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            install.setDataAndType(ShareUtils.getUriFromFile(MainActivity.this, file), "application/vnd.android.package-archive");
             startActivity(install);
         } else {
             GoUtils.DisplayToast(this,"请手动安装");
         }
     }
-
-//    private void checkDownloadStatus() {
-//        if (mDownloadManager == null) {
-//            return;
-//        }
-//        DownloadManager.Query query = new DownloadManager.Query();
-//        query.setFilterById(mDownloadId);
-//        Cursor cursor = mDownloadManager.query(query);
-//        if (cursor.moveToFirst()) {
-//            int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
-//            switch (status) {
-//                case DownloadManager.STATUS_PAUSED:
-//                case DownloadManager.STATUS_PENDING:
-//                case DownloadManager.STATUS_RUNNING:
-//                    break;
-//                case DownloadManager.STATUS_SUCCESSFUL:
-//                    installNewVersion();
-//                    cursor.close();
-//                    break;
-//                case DownloadManager.STATUS_FAILED:
-//                    GoUtils.DisplayToast(this,"更新下载失败");
-//                    cursor.close();
-//                    break;
-//            }
-//        }
-//    }
 }
