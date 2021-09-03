@@ -1,8 +1,12 @@
 package com.zcshou.gogogo;
 
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -118,7 +122,6 @@ public class MainActivity extends BaseActivity
     public static final String POI_LONGITUDE = "POI_LONGITUDE";
     public static final String POI_LATITUDE = "POI_LATITUDE";
 
-
     // 百度地图相关
     public final static BitmapDescriptor mMapIndicator = BitmapDescriptorFactory.fromResource(R.drawable.icon_gcoding);
     private static BaiduMap mBaiduMap = null;
@@ -152,10 +155,10 @@ public class MainActivity extends BaseActivity
     private OkHttpClient mOkHttpClient;
 
     // UI相关
-    NavigationView mNavigationView;
-    CheckBox mPtlCheckBox;
-    FloatingActionButton mButtonStart;
-    //位置搜索相关
+    private NavigationView mNavigationView;
+    private CheckBox mPtlCheckBox;
+    private final JSONObject mReg = new JSONObject();
+    private FloatingActionButton mButtonStart;
     private SearchView searchView;
     private ListView mSearchList;
     private ListView mSearchHistoryList;
@@ -169,8 +172,11 @@ public class MainActivity extends BaseActivity
     private ServiceGo.ServiceGoBinder mServiceBinder;
     private ServiceConnection mConnection;
     private SharedPreferences sharedPreferences;
-    private final JSONObject mReg = new JSONObject();
 
+
+    private DownloadManager mDownloadManager = null;
+    private long mDownloadId;
+    private BroadcastReceiver mDownloadBdRcv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -220,6 +226,8 @@ public class MainActivity extends BaseActivity
             }
         };
 
+        initUpdateVersion();
+
         checkUpdateVersion();
     }
 
@@ -257,6 +265,7 @@ public class MainActivity extends BaseActivity
             Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
             stopService(serviceGoIntent);
         }
+        unregisterReceiver(mDownloadBdRcv);
 
         mSensorManager.unregisterListener(this);
 
@@ -1388,6 +1397,21 @@ public class MainActivity extends BaseActivity
         mButtonStart.setOnClickListener(this::startGoLocation);
     }
 
+    
+    
+    private void initUpdateVersion() {
+        mDownloadManager =(DownloadManager) MainActivity.this.getSystemService(DOWNLOAD_SERVICE);
+
+        // 用于监听下载完成后，转到安装界面
+        mDownloadBdRcv = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+//                checkDownloadStatus();
+                installNewVersion(); /* 由于仅监听了下载完成，只要收到广播，就可以进行安装了 */
+            }
+        };
+        registerReceiver(mDownloadBdRcv, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+    }
 
     private void checkUpdateVersion() {
         String mapApiUrl = "https://gitee.com/api/v5/repos/zcshou/gogogo/releases/latest";
@@ -1397,7 +1421,7 @@ public class MainActivity extends BaseActivity
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
+                XLog.i("更新检测失败");
             }
 
             @Override
@@ -1411,9 +1435,9 @@ public class MainActivity extends BaseActivity
                             JSONObject getRetJson = new JSONObject(resp);
                             String curVersion = GoUtils.getVersionName(MainActivity.this);
 
-                            if (curVersion != null
-                                    && (!getRetJson.getString("name").contains(curVersion)
-                                    || !getRetJson.getString("tag_name").contains(curVersion))) {
+//                            if (curVersion != null
+//                                    && (!getRetJson.getString("name").contains(curVersion)
+//                                    || !getRetJson.getString("tag_name").contains(curVersion))) {
                                 final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(MainActivity.this).create();
                                 alertDialog.show();
                                 alertDialog.setCancelable(false);
@@ -1440,15 +1464,19 @@ public class MainActivity extends BaseActivity
                                     Button updateCancel = window.findViewById(R.id.update_ignore);
                                     updateCancel.setOnClickListener(v -> alertDialog.cancel());
 
+                                    /* 这里用来保存下载地址 */
+                                    JSONArray jsonArray = new JSONArray(getRetJson.getString("assets"));
+                                    JSONObject jsonObject = jsonArray.getJSONObject(0);
+                                    String download_url = jsonObject.getString("browser_download_url");
+                                    String fileName = jsonObject.getString("name");
+
                                     Button updateAgree = window.findViewById(R.id.update_agree);
                                     updateAgree.setOnClickListener(v -> {
                                         alertDialog.cancel();
-                                        Uri uri = Uri.parse("https://gitee.com/zcshou/gogogo/releases");
-                                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                                        startActivity(intent);
+                                        downloadNewVersion(download_url, fileName);
                                     });
                                 }
-                            }
+//                            }
                         } catch (JSONException e) {
                             XLog.e("ERROR:  resolve json");
                             e.printStackTrace();
@@ -1458,4 +1486,62 @@ public class MainActivity extends BaseActivity
             }
         });
     }
+
+    private void downloadNewVersion(String url, String fileName) {
+        if (mDownloadManager == null) {
+            return;
+        }
+
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+        request.setAllowedOverRoaming(false);
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setTitle(GoUtils.getAppName(this));
+        request.setDescription("正在下载新版本...");
+        request.setVisibleInDownloadsUi(true);
+        request.setMimeType("application/vnd.android.package-archive");
+        //设置文件存放路径
+        File file = new File(getExternalFilesDir(null), fileName);
+        request.setDestinationUri(Uri.fromFile(file));
+
+        mDownloadId = mDownloadManager.enqueue(request);
+    }
+
+    private void installNewVersion() {
+        Intent install = new Intent(Intent.ACTION_VIEW);
+        Uri downloadFileUri = mDownloadManager.getUriForDownloadedFile(mDownloadId);
+        if (downloadFileUri != null) {
+            install.setDataAndType(downloadFileUri, "application/vnd.android.package-archive");
+            install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); //添加这一句表示对目标应用临时授权该Uri所代表的文件
+            install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(install);
+        } else {
+            GoUtils.DisplayToast(this,"请手动安装");
+        }
+    }
+
+//    private void checkDownloadStatus() {
+//        if (mDownloadManager == null) {
+//            return;
+//        }
+//        DownloadManager.Query query = new DownloadManager.Query();
+//        query.setFilterById(mDownloadId);
+//        Cursor cursor = mDownloadManager.query(query);
+//        if (cursor.moveToFirst()) {
+//            int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+//            switch (status) {
+//                case DownloadManager.STATUS_PAUSED:
+//                case DownloadManager.STATUS_PENDING:
+//                case DownloadManager.STATUS_RUNNING:
+//                    break;
+//                case DownloadManager.STATUS_SUCCESSFUL:
+//                    installNewVersion();
+//                    cursor.close();
+//                    break;
+//                case DownloadManager.STATUS_FAILED:
+//                    GoUtils.DisplayToast(this,"更新下载失败");
+//                    cursor.close();
+//                    break;
+//            }
+//        }
+//    }
 }
