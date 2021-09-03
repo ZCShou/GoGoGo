@@ -39,7 +39,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -350,7 +349,7 @@ public class MainActivity extends BaseActivity
                     mBaiduMap.clear();
                     mSearchLayout.setVisibility(View.INVISIBLE);
                 } catch (Exception e) {
-                    DisplayToast("搜索失败，请检查网络连接");
+                    GoUtils.DisplayToast(MainActivity.this,"搜索失败，请检查网络连接");
                     XLog.d("HTTP: 搜索失败，请检查网络连接");
                     e.printStackTrace();
                 }
@@ -371,7 +370,7 @@ public class MainActivity extends BaseActivity
                                 .city(mCurrentCity)
                         );
                     } catch (Exception e) {
-                        DisplayToast("搜索失败，请检查网络连接");
+                        GoUtils.DisplayToast(MainActivity.this,"搜索失败，请检查网络连接");
                         XLog.d("HTTP: 搜索失败，请检查网络连接");
                         e.printStackTrace();
                     }
@@ -567,7 +566,7 @@ public class MainActivity extends BaseActivity
                     mCurLatLngMap = null;
 
                     if (GoUtils.isWifiEnabled(MainActivity.this)) {
-                        showDisableWifiDialog();
+                        GoUtils.showDisableWifiDialog(MainActivity.this);
                     }
                 }
 
@@ -684,13 +683,13 @@ public class MainActivity extends BaseActivity
             String dialog_lat_str = dialog_lat.getText().toString();
 
             if (TextUtils.isEmpty(dialog_lng_str) || TextUtils.isEmpty(dialog_lat_str)) {
-                DisplayToast("输入不能为空");
+                GoUtils.DisplayToast(this,"输入不能为空");
             } else {
                 double dialog_lng_double = Double.parseDouble(dialog_lng_str);
                 double dialog_lat_double = Double.parseDouble(dialog_lat_str);
 
                 if (dialog_lng_double > 180.0 || dialog_lng_double < -180.0 || dialog_lat_double > 90.0 || dialog_lat_double < -90.0) {
-                    DisplayToast("经纬度超出限制!\n-180.0<经度<180.0\n-90.0<纬度<90.0");
+                    GoUtils.DisplayToast(this, "经纬度超出限制!\n-180.0<经度<180.0\n-90.0<纬度<90.0");
                 } else {
                     if (rbBD.isChecked()) {
                         mCurLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
@@ -824,76 +823,6 @@ public class MainActivity extends BaseActivity
         });
     }
 
-    private void checkUpdateVersion() {
-        String mapApiUrl = "https://gitee.com/api/v5/repos/zcshou/gogogo/releases/latest";
-
-        okhttp3.Request request = new okhttp3.Request.Builder().url(mapApiUrl).get().build();
-        final Call call = mOkHttpClient.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
-                ResponseBody responseBody = response.body();
-                if (responseBody != null) {
-                    String resp = responseBody.string();
-                    // 注意，该请求在子线程，不能直接操作界面
-                    runOnUiThread(() -> {
-                        try {
-                            JSONObject getRetJson = new JSONObject(resp);
-                            String curVersion = GoUtils.getVersionName(MainActivity.this);
-
-                            if (curVersion != null
-                                    && (!getRetJson.getString("name").contains(curVersion)
-                                    || !getRetJson.getString("tag_name").contains(curVersion))) {
-                                final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(MainActivity.this).create();
-                                alertDialog.show();
-                                alertDialog.setCancelable(false);
-                                Window window = alertDialog.getWindow();
-                                if (window != null) {
-                                    window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);      // 防止出现闪屏
-                                    window.setContentView(R.layout.update);
-                                    window.setGravity(Gravity.CENTER);
-                                    window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
-
-                                    TextView updateTitle = window.findViewById(R.id.update_title);
-                                    updateTitle.setText(getRetJson.getString("name"));
-                                    TextView updateTime = window.findViewById(R.id.update_time);
-                                    updateTime.setText(getRetJson.getString("created_at"));
-                                    TextView updateCommit = window.findViewById(R.id.update_commit);
-                                    updateCommit.setText(getRetJson.getString("target_commitish"));
-
-                                    TextView updateContent = window.findViewById(R.id.update_content);
-                                    SpannableStringBuilder ssb = new SpannableStringBuilder();
-                                    ssb.append(getRetJson.getString("body"));
-                                    updateContent.setMovementMethod(LinkMovementMethod.getInstance());
-                                    updateContent.setText(ssb, TextView.BufferType.SPANNABLE);
-
-                                    Button updateCancel = window.findViewById(R.id.update_ignore);
-                                    updateCancel.setOnClickListener(v -> alertDialog.cancel());
-
-                                    Button updateAgree = window.findViewById(R.id.update_agree);
-                                    updateAgree.setOnClickListener(v -> {
-                                        alertDialog.cancel();
-                                        Uri uri = Uri.parse("https://gitee.com/zcshou/gogogo/releases");
-                                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                                        startActivity(intent);
-                                    });
-                                }
-                            }
-                        } catch (JSONException e) {
-                            XLog.e("ERROR:  resolve json");
-                            e.printStackTrace();
-                        }
-                    });
-                }
-            }
-        });
-    }
-
     private void initNavigationView() {
         mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(item -> {
@@ -914,7 +843,7 @@ public class MainActivity extends BaseActivity
                     Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
                     startActivity(intent);
                 } catch (Exception e) {
-                    DisplayToast("无法跳转到开发者选项,请先确保您的设备已处于开发者模式");
+                    GoUtils.DisplayToast(this,"无法跳转到开发者选项,请先确保您的设备已处于开发者模式");
                     e.printStackTrace();
                 }
             } else if (id == R.id.nav_feedback) {
@@ -1023,15 +952,15 @@ public class MainActivity extends BaseActivity
             TextView regAgree = window.findViewById(R.id.reg_agree);
             regAgree.setOnClickListener(v -> {
                 if (!mPtlCheckBox.isChecked()) {
-                    DisplayToast("您必须先阅读并同意免责声明");
+                    GoUtils.DisplayToast(this,"您必须先阅读并同意免责声明");
                     return;
                 }
                 if (TextUtils.isEmpty(regUserName.getText())) {
-                    DisplayToast("用户名不能为空");
+                    GoUtils.DisplayToast(this, "用户名不能为空");
                     return;
                 }
                 if (TextUtils.isEmpty(regResp.getText())) {
-                    DisplayToast("注册码不能为空");
+                    GoUtils.DisplayToast(this,"注册码不能为空");
                     return;
                 }
                 try {
@@ -1104,7 +1033,6 @@ public class MainActivity extends BaseActivity
         mSearchList.setOnItemClickListener((parent, view, position, id) -> {
             String lng = ((TextView) view.findViewById(R.id.poi_longitude)).getText().toString();
             String lat = ((TextView) view.findViewById(R.id.poi_latitude)).getText().toString();
-            // DisplayToast("lng is "+lng+"lat is "+lat);
             mCurLatLngMap = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
             MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mCurLatLngMap);
             //对地图的中心点进行更新，
@@ -1171,7 +1099,7 @@ public class MainActivity extends BaseActivity
                 try {
                     searchView.setQuery(searchKey, true);
                 } catch (Exception e) {
-                    DisplayToast("搜索失败，请检查网络连接");
+                    GoUtils.DisplayToast(this,"搜索失败，请检查网络连接");
                     XLog.e("ERROR: 搜索失败，请检查网络连接");
                     e.printStackTrace();
                 }
@@ -1209,7 +1137,7 @@ public class MainActivity extends BaseActivity
                             }
                         } catch (Exception e) {
                             XLog.e("ERROR: delete database error");
-                            DisplayToast("删除记录出错");
+                            GoUtils.DisplayToast(MainActivity.this,"删除记录出错");
                             e.printStackTrace();
                         }
                     })
@@ -1226,7 +1154,7 @@ public class MainActivity extends BaseActivity
         mSuggestionSearch = SuggestionSearch.newInstance();
         mSuggestionSearch.setOnGetSuggestionResultListener(suggestionResult -> {
             if (suggestionResult == null || suggestionResult.getAllSuggestions() == null) {
-                DisplayToast("没有找到检索结果");
+                GoUtils.DisplayToast(this,"没有找到检索结果");
             } else { //获取在线建议检索结果
                     List<Map<String, Object>> data = new ArrayList<>();
                     int retCnt = suggestionResult.getAllSuggestions().size();
@@ -1257,81 +1185,6 @@ public class MainActivity extends BaseActivity
         });
     }
 
-
-
-    //提醒开启位置模拟的弹框
-    private void showEnableMockLocationDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("启用位置模拟")//这里是表头的内容
-                .setMessage("请在\"开发者选项→选择模拟位置信息应用\"中进行设置")//这里是中间显示的具体信息
-                .setPositiveButton("设置",(dialog, which) -> {
-                    try {
-                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
-                        startActivity(intent);
-                    } catch (Exception e) {
-                        DisplayToast("无法跳转到开发者选项,请先确保您的设备已处于开发者模式");
-                        e.printStackTrace();
-                    }
-                })
-                .setNegativeButton("取消",(dialog, which) -> {
-                })
-                .show();
-    }
-
-    //提醒开启悬浮窗的弹框
-    private void showEnableFloatWindowDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("启用悬浮窗")//这里是表头的内容
-                .setMessage("为了模拟定位的稳定性，建议开启\"显示悬浮窗\"选项")//这里是中间显示的具体信息
-                .setPositiveButton("设置",(dialog, which) -> {
-                    try {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-                        startActivity(intent);
-                    } catch (Exception e) {
-                        DisplayToast("无法跳转到设置界面，请在权限管理中开启该应用的悬浮窗");
-                        e.printStackTrace();
-                    }
-                })
-                .setNegativeButton("取消", (dialog, which) -> DisplayToast("悬浮窗权限未开启，无法启动模拟位置"))
-                .show();
-    }
-
-    //显示开启GPS的提示
-    private void showEnableGpsDialog() {
-        new AlertDialog.Builder(MainActivity.this)
-                .setTitle("启用定位服务")//这里是表头的内容
-                .setMessage("是否开启 GPS 定位服务?")//这里是中间显示的具体信息
-                .setPositiveButton("确定",(dialog, which) -> {
-                    try {
-                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivity(intent);
-                    } catch (Exception e) {
-                        DisplayToast("无法跳转到设置界面，请在手动前往设置界面开启定位服务");
-                        e.printStackTrace();
-                    }
-                })
-                .setNegativeButton("取消",(dialog, which) -> DisplayToast("定位服务未开启，无法启动模拟位置"))
-                .show();
-    }
-
-    // 提醒开启位置模拟的弹框
-    private void showDisableWifiDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("警告")
-                .setMessage("开启 WIFI 后（即使没有连接热点）将导致定位闪回真实位置。建议关闭 WIFI，使用移动流量进行游戏！")
-                .setPositiveButton("去关闭",(dialog, which) -> {
-                    try {
-                        Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                        startActivity(intent);
-                    } catch (Exception e) {
-                        DisplayToast("无法跳转到 WIFI 设置界面，请手动关闭 WIFI");
-                        e.printStackTrace();
-                    }
-                })
-                .setNegativeButton("忽略",(dialog, which) -> {
-                })
-                .show();
-    }
 
     private void initStoreHistory() {
         try {
@@ -1480,11 +1333,11 @@ public class MainActivity extends BaseActivity
     private void startGoLocation(View v) {
         if (GoUtils.isNetworkAvailable(this)) {
             if (!Settings.canDrawOverlays(getApplicationContext())) {//悬浮窗权限判断
-                showEnableFloatWindowDialog();
+                GoUtils.showEnableFloatWindowDialog(this);
                 XLog.e("无悬浮窗权限!");
             } else {
                 if (!GoUtils.isGpsOpened(this)) {
-                    showEnableGpsDialog();
+                    GoUtils.showEnableGpsDialog(this);
                 } else {
                     if (isMockServStart) {
                         if (mCurLatLngMap == null) {
@@ -1500,7 +1353,7 @@ public class MainActivity extends BaseActivity
                         }
                     } else {
                         if (!GoUtils.isAllowMockLocation(this)) {
-                            showEnableMockLocationDialog();
+                            GoUtils.showEnableMockLocationDialog(this);
                             XLog.e("无模拟位置权限!");
                         } else {
                             if (mCurLatLngMap == null) {
@@ -1535,9 +1388,74 @@ public class MainActivity extends BaseActivity
         mButtonStart.setOnClickListener(this::startGoLocation);
     }
 
-    public void DisplayToast(String str) {
-        Toast toast = Toast.makeText(MainActivity.this, str, Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.TOP, 0, 220);
-        toast.show();
+
+    private void checkUpdateVersion() {
+        String mapApiUrl = "https://gitee.com/api/v5/repos/zcshou/gogogo/releases/latest";
+
+        okhttp3.Request request = new okhttp3.Request.Builder().url(mapApiUrl).get().build();
+        final Call call = mOkHttpClient.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
+                ResponseBody responseBody = response.body();
+                if (responseBody != null) {
+                    String resp = responseBody.string();
+                    // 注意，该请求在子线程，不能直接操作界面
+                    runOnUiThread(() -> {
+                        try {
+                            JSONObject getRetJson = new JSONObject(resp);
+                            String curVersion = GoUtils.getVersionName(MainActivity.this);
+
+                            if (curVersion != null
+                                    && (!getRetJson.getString("name").contains(curVersion)
+                                    || !getRetJson.getString("tag_name").contains(curVersion))) {
+                                final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(MainActivity.this).create();
+                                alertDialog.show();
+                                alertDialog.setCancelable(false);
+                                Window window = alertDialog.getWindow();
+                                if (window != null) {
+                                    window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);      // 防止出现闪屏
+                                    window.setContentView(R.layout.update);
+                                    window.setGravity(Gravity.CENTER);
+                                    window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
+
+                                    TextView updateTitle = window.findViewById(R.id.update_title);
+                                    updateTitle.setText(getRetJson.getString("name"));
+                                    TextView updateTime = window.findViewById(R.id.update_time);
+                                    updateTime.setText(getRetJson.getString("created_at"));
+                                    TextView updateCommit = window.findViewById(R.id.update_commit);
+                                    updateCommit.setText(getRetJson.getString("target_commitish"));
+
+                                    TextView updateContent = window.findViewById(R.id.update_content);
+                                    SpannableStringBuilder ssb = new SpannableStringBuilder();
+                                    ssb.append(getRetJson.getString("body"));
+                                    updateContent.setMovementMethod(LinkMovementMethod.getInstance());
+                                    updateContent.setText(ssb, TextView.BufferType.SPANNABLE);
+
+                                    Button updateCancel = window.findViewById(R.id.update_ignore);
+                                    updateCancel.setOnClickListener(v -> alertDialog.cancel());
+
+                                    Button updateAgree = window.findViewById(R.id.update_agree);
+                                    updateAgree.setOnClickListener(v -> {
+                                        alertDialog.cancel();
+                                        Uri uri = Uri.parse("https://gitee.com/zcshou/gogogo/releases");
+                                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                                        startActivity(intent);
+                                    });
+                                }
+                            }
+                        } catch (JSONException e) {
+                            XLog.e("ERROR:  resolve json");
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
     }
 }
