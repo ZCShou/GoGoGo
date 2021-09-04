@@ -195,6 +195,7 @@ public class GoUtils {
                 .setPositiveButton("设置",(dialog, which) -> {
                     try {
                         Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intent);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -213,6 +214,7 @@ public class GoUtils {
                 .setPositiveButton("设置",(dialog, which) -> {
                     try {
                         Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivity(intent);
                     } catch (Exception e) {
                         e.printStackTrace();

@@ -840,6 +840,7 @@ public class MainActivity extends BaseActivity
 
             if (id == R.id.nav_history) {
                 Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
+
                 startActivity(intent);
             } else if (id == R.id.nav_settings) {
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
@@ -1516,15 +1517,18 @@ public class MainActivity extends BaseActivity
     private void installNewVersion() {
         Intent install = new Intent(Intent.ACTION_VIEW);
         Uri downloadFileUri = mDownloadManager.getUriForDownloadedFile(mDownloadId);
+        File file = new File(getExternalFilesDir("Updates"), mUpdateFilename);
         if (downloadFileUri != null) {
-            File file = new File(getExternalFilesDir("Updates"), mUpdateFilename);
             install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             // 在Broadcast中启动活动需要添加Intent.FLAG_ACTIVITY_NEW_TASK
             install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            install.addCategory("android.intent.category.DEFAULT");
             install.setDataAndType(ShareUtils.getUriFromFile(MainActivity.this, file), "application/vnd.android.package-archive");
             startActivity(install);
         } else {
-            GoUtils.DisplayToast(this,"请手动安装");
+            Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + getPackageName()));
+            intent.addCategory("android.intent.category.DEFAULT");
+            startActivity(intent);
         }
     }
 }
