@@ -21,8 +21,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
-import com.zcshou.gogogo.MainActivity;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -30,15 +28,7 @@ import java.util.Locale;
 public class GoUtils {
     //WIFI是否可用
     public static boolean isWifiConnected(Context context) {
-//        ConnectivityManager mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-//        NetworkInfo mWiFiNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
-//
-//        if (mWiFiNetworkInfo != null && mWiFiNetworkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-//            return mWiFiNetworkInfo.isAvailable();
-//        }
-//        return false;
-
-        // 从 API 29 开始，NetworkInfo 被标记为过时
+        // 从 API 29 开始，NetworkInfo 被标记为过时，这里更换新方法
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         Network nw = connectivityManager.getActiveNetwork();
         if (nw == null) {
@@ -55,16 +45,7 @@ public class GoUtils {
 
     //MOBILE网络是否可用
     public static boolean isMobileConnected(Context context) {
-//        ConnectivityManager mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-//        NetworkInfo mMobileNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
-//
-//        if (mMobileNetworkInfo != null && mMobileNetworkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
-//            return mMobileNetworkInfo.isAvailable();
-//        }
-//
-//        return false;
-
-        // 从 API 29 开始，NetworkInfo 被标记为过时
+        // 从 API 29 开始，NetworkInfo 被标记为过时，这里更换新方法
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         Network nw = connectivityManager.getActiveNetwork();
         if (nw == null) {
@@ -76,14 +57,7 @@ public class GoUtils {
 
     // 断是否有网络连接，但是如果该连接的网络无法上网，也会返回true
     public static boolean isNetworkConnected(Context context) {
-//        ConnectivityManager mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-//        NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
-//
-//        if (mNetworkInfo != null) {
-//            return mNetworkInfo.isConnected();
-//        }
-//
-//        return false;
+        // 从 API 29 开始，NetworkInfo 被标记为过时，这里更换新方法
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         Network nw = connectivityManager.getActiveNetwork();
         if (nw == null) return false;
@@ -193,11 +167,8 @@ public class GoUtils {
         //获取包信息
         try {
             PackageInfo packageInfo = pm.getPackageInfo(context.getPackageName(), 0);
-            //获取应用 信息
             ApplicationInfo applicationInfo = packageInfo.applicationInfo;
-            //获取albelRes
             int labelRes = applicationInfo.labelRes;
-            //返回App的名称
             return context.getResources().getString(labelRes);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();

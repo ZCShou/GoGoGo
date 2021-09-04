@@ -7,7 +7,6 @@ import com.baidu.mapapi.SDKInitializer;
 import com.elvishew.xlog.LogConfiguration;
 import com.elvishew.xlog.LogLevel;
 import com.elvishew.xlog.XLog;
-//import com.elvishew.xlog.printer.AndroidPrinter;
 import com.elvishew.xlog.printer.ConsolePrinter;
 import com.elvishew.xlog.printer.Printer;
 import com.elvishew.xlog.printer.file.FilePrinter;
@@ -64,12 +63,6 @@ public class GoApplication extends Application {
                 .backupStrategy(new NeverBackupStrategy())              // 指定日志文件备份策略，默认为 FileSizeBackupStrategy(1024 * 1024)
                 .cleanStrategy(new FileLastModifiedCleanStrategy(MAX_TIME))     // 指定日志文件清除策略，默认为 NeverCleanStrategy()
                 .build();
-
-//        XLog.init(                                                 // 初始化 XLog
-//                config,                                                // 指定日志配置，如果不指定，会默认使用 new LogConfiguration.Builder().build()
-//                androidPrinter,                                        // 添加任意多的打印器。如果没有添加任何打印器，会默认使用 AndroidPrinter(Android)/ConsolePrinter(java)
-//                consolePrinter,
-//                filePrinter);
         XLog.init(config, consolePrinter, filePrinter);
     }
 }
