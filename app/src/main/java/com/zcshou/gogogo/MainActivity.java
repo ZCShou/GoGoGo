@@ -1407,8 +1407,7 @@ public class MainActivity extends BaseActivity
         mDownloadBdRcv = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-//                checkDownloadStatus();
-                installNewVersion(); /* 由于仅监听了下载完成，只要收到广播，就可以进行安装了 */
+                installNewVersion();
             }
         };
         registerReceiver(mDownloadBdRcv, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
@@ -1501,13 +1500,14 @@ public class MainActivity extends BaseActivity
         request.setDescription("正在下载新版本...");
         request.setVisibleInDownloadsUi(true);
         request.setMimeType("application/vnd.android.package-archive");
+
+        // DownloadManager不会覆盖已有的同名文件，需要自己来删除已存在的文件
         File file = new File(getExternalFilesDir("Updates"), mUpdateFilename);
         if (file.exists()) {
             if(!file.delete()) {
                 return;
             }
         }
-        //设置文件存放路径
         request.setDestinationUri(Uri.fromFile(file));
 
         mDownloadId = mDownloadManager.enqueue(request);
