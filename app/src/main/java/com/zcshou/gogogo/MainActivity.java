@@ -2,6 +2,8 @@ package com.zcshou.gogogo;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
@@ -438,14 +440,25 @@ public class MainActivity extends BaseActivity
         TextView poiLongitude = poiView.findViewById(R.id.poi_longitude);
         TextView poiLatitude = poiView.findViewById(R.id.poi_latitude);
         ImageButton ibSave = poiView.findViewById(R.id.poi_save);
-        ibSave.setOnClickListener(v -> XLog.i(poiAddress.getText()));
-        ImageButton ibCopy = poiView.findViewById(R.id.poi_copy);
-        ibCopy.setOnClickListener(v -> XLog.i(poiAddress.getText()));
-        ImageButton ibShare = poiView.findViewById(R.id.poi_share);
-        ibShare.setOnClickListener(v -> {
-            ShareUtils.shareText(MainActivity.this, "分享位置", poiLongitude.getText()+","+poiLatitude.getText());
-            XLog.i(poiAddress.getText());
+        ibSave.setOnClickListener(v -> {
+            recordGetPositionInfo();
+            GoUtils.DisplayToast(this, "已保存位置");
         });
+        ImageButton ibCopy = poiView.findViewById(R.id.poi_copy);
+        ibCopy.setOnClickListener(v -> {
+            //获取剪贴板管理器：
+            ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            // 创建普通字符型ClipData
+            ClipData mClipData = ClipData.newPlainText("Label", mCurLatLngMap.toString());
+            // 将 ClipData内容放到系统剪贴板里。
+            cm.setPrimaryClip(mClipData);
+
+            GoUtils.DisplayToast(this, "已复制到剪切板");
+        });
+        ImageButton ibShare = poiView.findViewById(R.id.poi_share);
+        ibShare.setOnClickListener(v -> ShareUtils.shareText(MainActivity.this, "分享位置", poiLongitude.getText()+","+poiLatitude.getText()));
+        ImageButton ibFly = poiView.findViewById(R.id.poi_fly);
+        ibFly.setOnClickListener(this::startGoLocation);
 
         mGeoCoder = GeoCoder.newInstance();
         mGeoCoder.setOnGetGeoCodeResultListener(new OnGetGeoCoderResultListener() {
@@ -457,7 +470,7 @@ public class MainActivity extends BaseActivity
             @Override
             public void onGetReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
                 if (reverseGeoCodeResult == null || reverseGeoCodeResult.error != SearchResult.ERRORNO.NO_ERROR) {
-                    XLog.i("找不到该地址!");
+                    XLog.i("逆地理位置失败!");
                 } else {
                     poiLatitude.setText(String.valueOf(reverseGeoCodeResult.getLocation().latitude));
                     poiLongitude.setText(String.valueOf(reverseGeoCodeResult.getLocation().longitude));
@@ -514,22 +527,6 @@ public class MainActivity extends BaseActivity
              */
             public void onMapDoubleClick(LatLng point) {
                 mBaiduMap.animateMapStatus(MapStatusUpdateFactory.zoomIn());
-            }
-        });
-
-        mBaiduMap.setOnMapStatusChangeListener(new BaiduMap.OnMapStatusChangeListener() {
-            public void onMapStatusChangeStart(MapStatus status) {
-
-            }
-            @Override
-            public void onMapStatusChangeStart(MapStatus status, int reason) {
-
-            }
-            public void onMapStatusChangeFinish(MapStatus status) {
-
-            }
-            public void onMapStatusChange(MapStatus status) {
-
             }
         });
 
