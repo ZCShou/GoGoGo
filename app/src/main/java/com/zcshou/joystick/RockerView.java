@@ -65,13 +65,13 @@ public class RockerView extends View {
 
         innerCirclePaint = new Paint();
         innerCirclePaint.setColor(ContextCompat.getColor(mContext, R.color.lightgrey));
-        innerCirclePaint.setAlpha(180);
+        innerCirclePaint.setAlpha(200);
         innerCirclePaint.setAntiAlias(true);
 
         isAuto = true;
         Bitmap bitmap = getBitmap(getContext(), R.drawable.ic_lock_close);
         Matrix mMatrix = new Matrix();
-        mMatrix.postScale(0.4f,0.4f);
+        mMatrix.postScale(0.48f,0.48f);
         mRockerBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mMatrix,true);
 
         srcRect = new Rect(0, 0, mRockerBitmap.getWidth(), mRockerBitmap.getHeight());
