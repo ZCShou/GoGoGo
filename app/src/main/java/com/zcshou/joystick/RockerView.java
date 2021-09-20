@@ -65,15 +65,11 @@ public class RockerView extends View {
 
         innerCirclePaint = new Paint();
         innerCirclePaint.setColor(ContextCompat.getColor(mContext, R.color.lightgrey));
-        innerCirclePaint.setAlpha(200);
+        innerCirclePaint.setAlpha(220);
         innerCirclePaint.setAntiAlias(true);
 
         isAuto = true;
-        Bitmap bitmap = getBitmap(getContext(), R.drawable.ic_lock_close);
-        Matrix mMatrix = new Matrix();
-        mMatrix.postScale(0.48f,0.48f);
-        mRockerBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mMatrix,true);
-
+        mRockerBitmap = scaleBitmap(getBitmap(getContext(), R.drawable.ic_lock_close));
         srcRect = new Rect(0, 0, mRockerBitmap.getWidth(), mRockerBitmap.getHeight());
     }
 
@@ -139,7 +135,7 @@ public class RockerView extends View {
             case MotionEvent.ACTION_UP:
                 if (isClick) {
                     isClick = false;
-                    changeRockerCtrl();
+                    toggleLockCtrl();
                     invalidate();
                 }
                 if (!isAuto) {
@@ -199,21 +195,27 @@ public class RockerView extends View {
         }
     }
 
-    private void changeRockerCtrl() {
+    private Bitmap scaleBitmap(Bitmap bitmap) {
+        Matrix mMatrix = new Matrix();
+        mMatrix.postScale(0.45f,0.45f);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mMatrix,true);
+    }
+
+    private void toggleLockCtrl() {
         Bitmap bitmap;
+
+        isAuto = !isAuto;
+
+        if (isAuto) {
+            bitmap = getBitmap(getContext(), R.drawable.ic_lock_close);
+        } else {
+            bitmap = getBitmap(getContext(), R.drawable.ic_lock_open);
+        }
+        
         if (mRockerBitmap != null) {
             mRockerBitmap.recycle();
         }
-        if (isAuto) {
-            bitmap = getBitmap(getContext(), R.drawable.ic_lock_open);
-        } else {
-            bitmap = getBitmap(getContext(), R.drawable.ic_lock_close);
-        }
-        isAuto = !isAuto;
-
-        Matrix mMatrix = new Matrix();
-        mMatrix.postScale(0.4f,0.4f);
-        mRockerBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), mMatrix,true);
+        mRockerBitmap = scaleBitmap(bitmap);
 
         dstRect = new Rect(
                 (int) (innerCenterX - mRockerBitmap.getWidth()),
