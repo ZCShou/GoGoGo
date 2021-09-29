@@ -1496,7 +1496,6 @@ public class MainActivity extends BaseActivity
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         request.setTitle(GoUtils.getAppName(this));
         request.setDescription("正在下载新版本...");
-        request.setVisibleInDownloadsUi(true);
         request.setMimeType("application/vnd.android.package-archive");
 
         // DownloadManager不会覆盖已有的同名文件，需要自己来删除已存在的文件

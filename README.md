@@ -11,11 +11,11 @@
 </div>
 
 <div align="center">
-影梭 - 用于 Android 8.0+ 的虚拟定位软件。
+影梭 - 用于 Android 8.0+ 的虚拟定位软件（无需 ROOT）。
 </div>
 
 ##
-影梭是一个基于 Android 调试 API + 百度地图实现的虚拟定位工具，并且同时实现了一个可以自由移动的摇杆。
+影梭是一个基于 Android 调试 API + 百度地图实现的虚拟定位工具，不需要 ROOT 权限，并且同时实现了一个可以自由移动的摇杆。
 
 下载地址：[发行版](https://gitee.com/zcshou/gogogo/releases/)
 
@@ -36,14 +36,6 @@
 
 其次，就是参考 ISSUE 中的各个问题的说明。
 
-## 参考
-由于本人也是个新手，纯属业余瞎搞，因此，在写影梭的过程中，参考了很多网友分享的技术文章、示例代码等。包括但不限于以下列出的几个：
-1. https://github.com/Hilaver/MockGPS
-2. https://github.com/bxxfighting/together-go
-3. https://github.com/P72B/Mocklation
-
-还有些 CSDN 上的文章，目前不记得地址了，如果您发现其中有直接引用或借鉴您的地方，请与我联系，谢谢！
-
 ## 🍟 截图
 ![摇杆类型.jpg](./docs/摇杆类型.jpg)
 ![位置搜索与记录.jpg](./docs/位置搜索与记录.jpg)
@@ -52,10 +44,17 @@
 ## 🌭 用法
 下载 APK 直接安装即可
 
+## 参考
+由于本人也是个新手，纯属业余瞎搞，因此，在写影梭的过程中，参考了很多网友分享的技术文章、示例代码等。包括但不限于以下列出的几个：
+1. https://github.com/Hilaver/MockGPS
+2. https://github.com/bxxfighting/together-go
+3. https://github.com/P72B/Mocklation
+
+还有些 CSDN 上的文章，目前不记得地址了，如果您发现其中有直接引用或借鉴您的地方，请与我联系，谢谢！
+
 ## 🥦 如何贡献
 1. FORK -> PR
-2. 成为开发者，共同完善影梭
-
+2. 成为影梭开发者，共同完善影梭
 
 ## 🍟 许可证
 GPL-3.0 © ZCShou
