@@ -67,10 +67,8 @@ android {
                 def fileName
                 if (variant.buildType.name == 'release') {
                     fileName = "影梭_${defaultConfig.versionName}.apk"
-                } else if (variant.buildType.name == 'debug') {
-                    fileName = "影梭_${defaultConfig.versionName}_debug.apk"
-                }else{
-                    fileName="影梭_${defaultConfig.versionName}_other.apk"
+                } else {
+                    fileName = "APP_${defaultConfig.versionName}_debug.apk"
                 }
                 outputFileName=fileName
             }

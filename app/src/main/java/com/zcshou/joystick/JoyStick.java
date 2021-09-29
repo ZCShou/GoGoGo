@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -369,8 +370,35 @@ public class JoyStick extends View {
         SearchView mSearchView = mMapLayout.findViewById(R.id.joystick_map_searchView);
         mSearchView.setOnSearchClickListener(v -> tips.setVisibility(GONE));
         mSearchView.setOnCloseListener(() -> {
+            mSearchView.setFocusable(false);
+            mSearchView.clearFocus();
             tips.setVisibility(VISIBLE);
+
+            WindowManager.LayoutParams floatWindowLayoutParamUpdateFlag = mWindowParamMap;
+            floatWindowLayoutParamUpdateFlag.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+            //The Layout Flag is changed back to FLAG_NOT_FOCUSABLE. and the Layout is updated with new Flag
+            mWindowManager.updateViewLayout(mMapLayout, floatWindowLayoutParamUpdateFlag);
+            //INPUT_METHOD_SERVICE with Context is used to retrieve a InputMethodManager for
+            //accessing input methods which is the soft keyboard here
+            InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+            //The soft keyboard slides back in
+            inputMethodManager.hideSoftInputFromWindow(mMapLayout.getApplicationWindowToken(), 0);
+
             return false;       /* 这里必须返回false，否则需要自行处理搜索框的折叠 */
+        });
+        mSearchView.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                mSearchView.setFocusable(true);
+                WindowManager.LayoutParams floatWindowLayoutParamUpdateFlag = mWindowParamMap;
+                //Layout Flag is changed to FLAG_NOT_TOUCH_MODAL which helps to take inputs inside floating window, but
+                //while in EditText the back button won't work and FLAG_LAYOUT_IN_SCREEN flag helps to keep the window
+                //always over the keyboard
+                floatWindowLayoutParamUpdateFlag.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+                //WindowManager is updated with the Updated Parameters
+                mWindowManager.updateViewLayout(mMapLayout, floatWindowLayoutParamUpdateFlag);
+                return false;
+            }
         });
 
         ImageButton btnOk = mMapLayout.findViewById(R.id.btnGo);
