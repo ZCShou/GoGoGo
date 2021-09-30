@@ -84,8 +84,8 @@
     <string name="ak">fb7YwlKY3ntx8hBDGMGLqX2FhlPkDMvv</string>
 
     <!-- 摇杆 -->
-    <string name="joystick_map_tips">搜索或点击地图选择位置</string>
-    <string name="joystick_history_tips">点击选择历史位置</string>
+    <string name="joystick_map_tips">搜索或点击地图位置</string>
+    <string name="joystick_history_tips">搜索或点击历史位置</string>
     <!-- 注册 -->
     <string name="register_title">离线注册</string>
     <string name="register_user_name">用户名</string>

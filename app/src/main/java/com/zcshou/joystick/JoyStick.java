@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.PixelFormat;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -13,9 +14,9 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -26,11 +27,14 @@ import androidx.preference.PreferenceManager;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatus;
+import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.search.sug.SuggestionSearch;
+import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.zcshou.database.DataBaseHistoryLocation;
 import com.zcshou.gogogo.HistoryActivity;
 import com.zcshou.gogogo.MainActivity;
@@ -77,6 +81,9 @@ public class JoyStick extends View {
     private final SharedPreferences sharedPreferences;
     /* 历史记录悬浮窗相关 */
     private FrameLayout mHistoryLayout;
+    private final List<Map<String, Object>> mAllRecord = new ArrayList<> ();
+    private TextView noRecordText;
+    private ListView mRecordListView;
     /* 地图悬浮窗相关 */
     private FrameLayout mMapLayout;
     private MapView mMapView;
@@ -84,6 +91,9 @@ public class JoyStick extends View {
     private double mLng;
     private double mLat;
     private LatLng mCurMapLngLat;
+    private SuggestionSearch mSuggestionSearch;
+    private ListView mSearchList;
+    private LinearLayout mSearchLayout;
 
     public JoyStick(Context context) {
         super(context);
@@ -366,43 +376,114 @@ public class JoyStick extends View {
         mMapLayout = (FrameLayout)inflater.inflate(R.layout.joystick_map, null);
         mMapLayout.setOnTouchListener(new JoyStickOnTouchListener());
 
+        mSearchList = mMapLayout.findViewById(R.id.map_search_list_view);
+        mSearchLayout = mMapLayout.findViewById(R.id.map_search_linear);
+        mSuggestionSearch = SuggestionSearch.newInstance();
+        mSuggestionSearch.setOnGetSuggestionResultListener(suggestionResult -> {
+            if (suggestionResult == null || suggestionResult.getAllSuggestions() == null) {
+                GoUtils.DisplayToast(mContext,"没有找到检索结果");
+            } else {
+                List<Map<String, Object>> data = new ArrayList<>();
+                int retCnt = suggestionResult.getAllSuggestions().size();
+
+                for (int i = 0; i < retCnt; i++) {
+                    if (suggestionResult.getAllSuggestions().get(i).pt == null) {
+                        continue;
+                    }
+
+                    Map<String, Object> poiItem = new HashMap<>();
+                    poiItem.put(MainActivity.POI_NAME, suggestionResult.getAllSuggestions().get(i).key);
+                    poiItem.put(MainActivity.POI_ADDRESS, suggestionResult.getAllSuggestions().get(i).city + " " + suggestionResult.getAllSuggestions().get(i).district);
+                    poiItem.put(MainActivity.POI_LONGITUDE, "" + suggestionResult.getAllSuggestions().get(i).pt.longitude);
+                    poiItem.put(MainActivity.POI_LATITUDE, "" + suggestionResult.getAllSuggestions().get(i).pt.latitude);
+                    data.add(poiItem);
+                }
+
+                SimpleAdapter simAdapt = new SimpleAdapter(
+                        mContext,
+                        data,
+                        R.layout.poi_search_item,
+                        new String[] {MainActivity.POI_NAME, MainActivity.POI_ADDRESS, MainActivity.POI_LONGITUDE, MainActivity.POI_LATITUDE}, // 与下面数组元素要一一对应
+                        new int[] {R.id.poi_name, R.id.poi_address, R.id.poi_longitude, R.id.poi_latitude});
+                mSearchList.setAdapter(simAdapt);
+                mSearchLayout.setVisibility(View.VISIBLE);
+            }
+        });
+        mSearchList.setOnItemClickListener((parent, view, position, id) -> {
+            String lng = ((TextView) view.findViewById(R.id.poi_longitude)).getText().toString();
+            String lat = ((TextView) view.findViewById(R.id.poi_latitude)).getText().toString();
+            mCurMapLngLat = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+            double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
+            mLng = lngLat[0];
+            mLat = lngLat[1];
+
+            MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mCurMapLngLat);
+            //对地图的中心点进行更新，
+            mBaiduMap.setMapStatus(mapstatusupdate);
+
+            MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
+            mBaiduMap.clear();
+            mBaiduMap.addOverlay(ooA);
+
+            mSearchLayout.setVisibility(View.GONE);
+        });
+
         TextView tips = mMapLayout.findViewById(R.id.joystick_map_tips);
         SearchView mSearchView = mMapLayout.findViewById(R.id.joystick_map_searchView);
-        mSearchView.setOnSearchClickListener(v -> tips.setVisibility(GONE));
-        mSearchView.setOnCloseListener(() -> {
-            mSearchView.setFocusable(false);
-            mSearchView.clearFocus();
-            tips.setVisibility(VISIBLE);
+        mSearchView.setOnSearchClickListener(v -> {
+            tips.setVisibility(GONE);
 
-            WindowManager.LayoutParams floatWindowLayoutParamUpdateFlag = mWindowParamMap;
-            floatWindowLayoutParamUpdateFlag.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-            //The Layout Flag is changed back to FLAG_NOT_FOCUSABLE. and the Layout is updated with new Flag
-            mWindowManager.updateViewLayout(mMapLayout, floatWindowLayoutParamUpdateFlag);
-            //INPUT_METHOD_SERVICE with Context is used to retrieve a InputMethodManager for
-            //accessing input methods which is the soft keyboard here
-            InputMethodManager inputMethodManager = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-            //The soft keyboard slides back in
-            inputMethodManager.hideSoftInputFromWindow(mMapLayout.getApplicationWindowToken(), 0);
+            // 特殊处理：这里让搜索框获取焦点，以显示输入法
+            mWindowParamMap.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+            mWindowManager.updateViewLayout(mMapLayout, mWindowParamMap);
+        });
+        mSearchView.setOnCloseListener(() -> {
+            tips.setVisibility(VISIBLE);
+            mSearchLayout.setVisibility(GONE);
+
+            // 关闭时清除焦点
+            mWindowParamMap.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+            mWindowManager.updateViewLayout(mMapLayout, mWindowParamMap);
 
             return false;       /* 这里必须返回false，否则需要自行处理搜索框的折叠 */
         });
-        mSearchView.setOnTouchListener(new OnTouchListener() {
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                mSearchView.setFocusable(true);
-                WindowManager.LayoutParams floatWindowLayoutParamUpdateFlag = mWindowParamMap;
-                //Layout Flag is changed to FLAG_NOT_TOUCH_MODAL which helps to take inputs inside floating window, but
-                //while in EditText the back button won't work and FLAG_LAYOUT_IN_SCREEN flag helps to keep the window
-                //always over the keyboard
-                floatWindowLayoutParamUpdateFlag.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-                //WindowManager is updated with the Updated Parameters
-                mWindowManager.updateViewLayout(mMapLayout, floatWindowLayoutParamUpdateFlag);
+            public boolean onQueryTextSubmit(String query) {
                 return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (!newText.equals("")) {
+                    try {
+                        mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
+                                .keyword(newText)
+                                .city("济南")
+                        );
+                    } catch (Exception e) {
+                        GoUtils.DisplayToast(mContext,"搜索失败，请检查网络连接");
+                        e.printStackTrace();
+                    }
+                }
+
+                return true;
             }
         });
 
         ImageButton btnOk = mMapLayout.findViewById(R.id.btnGo);
         btnOk.setOnClickListener(v -> {
+            // 关闭时清除焦点
+            mWindowParamMap.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+
+            tips.setVisibility(VISIBLE);
+            mSearchView.clearFocus();
+            mSearchView.onActionViewCollapsed();
+
             mCurWin = WINDOW_TYPE_JOYSTICK;
             show();
             mListener.onPositionInfo(mLng, mLat);
@@ -411,10 +492,23 @@ public class JoyStick extends View {
 
         ImageButton btnCancel = mMapLayout.findViewById(R.id.map_close);
         btnCancel.setOnClickListener(v -> {
+            // 关闭时清除焦点
+            mWindowParamMap.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+
+            tips.setVisibility(VISIBLE);
+            mSearchView.clearFocus();
+            mSearchView.onActionViewCollapsed();
+
             mCurWin = WINDOW_TYPE_JOYSTICK;
             show();
         });
 
+        initBaiduMap();
+    }
+
+    private void initBaiduMap() {
         mMapView = mMapLayout.findViewById(R.id.map_joystick);
         mMapView.showZoomControls(false);
         mBaiduMap = mMapView.getMap();
@@ -424,19 +518,20 @@ public class JoyStick extends View {
         mBaiduMap.setOnMapTouchListener(event -> {
 
         });
+
         mBaiduMap.setOnMapClickListener(new BaiduMap.OnMapClickListener() {
             /**
              * 单击地图
              */
             public void onMapClick(LatLng point) {
                 mCurMapLngLat = point;
-                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
-                mBaiduMap.clear();
-                mBaiduMap.addOverlay(ooA);
-                /*  */
                 double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
                 mLng = lngLat[0];
                 mLat = lngLat[1];
+
+                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
+                mBaiduMap.clear();
+                mBaiduMap.addOverlay(ooA);
             }
 
             /**
@@ -444,13 +539,13 @@ public class JoyStick extends View {
              */
             public void onMapPoiClick(MapPoi poi) {
                 mCurMapLngLat = poi.getPosition();
-                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
-                mBaiduMap.clear();
-                mBaiduMap.addOverlay(ooA);
-                /*  */
                 double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
                 mLng = lngLat[0];
                 mLat = lngLat[1];
+
+                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
+                mBaiduMap.clear();
+                mBaiduMap.addOverlay(ooA);
             }
         });
 
@@ -460,13 +555,13 @@ public class JoyStick extends View {
              */
             public void onMapLongClick(LatLng point) {
                 mCurMapLngLat = point;
-                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
-                mBaiduMap.clear();
-                mBaiduMap.addOverlay(ooA);
-                /*  */
                 double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
                 mLng = lngLat[0];
                 mLat = lngLat[1];
+
+                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
+                mBaiduMap.clear();
+                mBaiduMap.addOverlay(ooA);
             }
         });
 
@@ -476,13 +571,13 @@ public class JoyStick extends View {
              */
             public void onMapDoubleClick(LatLng point) {
                 mCurMapLngLat = point;
-                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
-                mBaiduMap.clear();
-                mBaiduMap.addOverlay(ooA);
-                /*  */
                 double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
                 mLng = lngLat[0];
                 mLat = lngLat[1];
+
+                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
+                mBaiduMap.clear();
+                mBaiduMap.addOverlay(ooA);
             }
         });
     }
@@ -492,23 +587,68 @@ public class JoyStick extends View {
         mHistoryLayout = (FrameLayout)inflater.inflate(R.layout.joystick_history, null);
         mHistoryLayout.setOnTouchListener(new JoyStickOnTouchListener());
 
-        ImageButton btnCancel = mHistoryLayout.findViewById(R.id.joystick_his_close);
-        btnCancel.setOnClickListener(v -> {
-            mCurWin = WINDOW_TYPE_JOYSTICK;
-            show();
-        });
-
-        TextView noRecordText = mHistoryLayout.findViewById(R.id.joystick_his_record_no_textview);
-        ListView mRecordListView = mHistoryLayout.findViewById(R.id.joystick_his_record_list_view);
         TextView tips = mHistoryLayout.findViewById(R.id.joystick_his_tips);
         SearchView mSearchView = mHistoryLayout.findViewById(R.id.joystick_his_searchView);
-        mSearchView.setOnSearchClickListener(v -> tips.setVisibility(GONE));
+        mSearchView.setOnSearchClickListener(v -> {
+            tips.setVisibility(GONE);
+
+            // 特殊处理：这里让搜索框获取焦点，以显示输入法
+            mWindowParamHistory.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+            mWindowManager.updateViewLayout(mHistoryLayout, mWindowParamHistory);
+        });
         mSearchView.setOnCloseListener(() -> {
             tips.setVisibility(VISIBLE);
+
+            // 关闭时清除焦点
+            mWindowParamHistory.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+            mWindowManager.updateViewLayout(mHistoryLayout, mWindowParamHistory);
+
             return false;       /* 这里必须返回false，否则需要自行处理搜索框的折叠 */
         });
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {// 当点击搜索按钮时触发该方法
+                return false;
+            }
 
+            @Override
+            public boolean onQueryTextChange(String newText) {// 当搜索内容改变时触发该方法
+                if (TextUtils.isEmpty(newText)) {
+                    showHistory(mAllRecord);
+                } else {
+                    List<Map<String, Object>> searchRet = new ArrayList<>();
+                    for (int i = 0; i < mAllRecord.size(); i++){
+                        if (mAllRecord.get(i).toString().indexOf(newText) > 0){
+                            searchRet.add(mAllRecord.get(i));
+                        }
+                    }
+
+                    if (searchRet.size() > 0) {
+                        showHistory(searchRet);
+                    } else {
+                        GoUtils.DisplayToast(mContext,"没有找到检索结果");
+                        showHistory(mAllRecord);
+                    }
+                }
+
+                return false;
+            }
+        });
+
+        noRecordText = mHistoryLayout.findViewById(R.id.joystick_his_record_no_textview);
+        mRecordListView = mHistoryLayout.findViewById(R.id.joystick_his_record_list_view);
         mRecordListView.setOnItemClickListener((adapterView, view, i, l) -> {
+            // 关闭时清除焦点
+            mWindowParamHistory.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+
+            mSearchView.clearFocus();
+            mSearchView.onActionViewCollapsed();
+            tips.setVisibility(VISIBLE);
+
             String wgs84Longitude;
             String wgs84Latitude;
             //wgs84坐标
@@ -523,8 +663,28 @@ public class JoyStick extends View {
             mListener.onPositionInfo(Double.parseDouble(wgs84Longitude), Double.parseDouble(wgs84Latitude));
         });
 
+        fetchAllRecord();
+
+        showHistory(mAllRecord);
+
+        ImageButton btnCancel = mHistoryLayout.findViewById(R.id.joystick_his_close);
+        btnCancel.setOnClickListener(v -> {
+            // 关闭时清除焦点
+            mWindowParamHistory.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+
+            mSearchView.clearFocus();
+            mSearchView.onActionViewCollapsed();
+            tips.setVisibility(VISIBLE);
+
+            mCurWin = WINDOW_TYPE_JOYSTICK;
+            show();
+        });
+    }
+
+    private void fetchAllRecord() {
         SQLiteDatabase mHistoryLocationDB;
-        List<Map<String, Object>> mAllRecord = new ArrayList<> ();
 
         try {
             DataBaseHistoryLocation hisLocDBHelper = new DataBaseHistoryLocation(mContext.getApplicationContext());
@@ -561,33 +721,33 @@ public class JoyStick extends View {
             }
             cursor.close();
             mHistoryLocationDB.close();
-
-            if (mAllRecord.size() == 0) {
-                mRecordListView.setVisibility(View.GONE);
-                noRecordText.setVisibility(View.VISIBLE);
-            } else {
-                noRecordText.setVisibility(View.GONE);
-                mRecordListView.setVisibility(View.VISIBLE);
-
-                try {
-                    SimpleAdapter simAdapt = new SimpleAdapter(
-                            mContext,
-                            mAllRecord,
-                            R.layout.history_item,
-                            new String[]{HistoryActivity.KEY_ID, HistoryActivity.KEY_LOCATION, HistoryActivity.KEY_TIME, HistoryActivity.KEY_LNG_LAT_WGS, HistoryActivity.KEY_LNG_LAT_CUSTOM}, // 与下面数组元素要一一对应
-                            new int[]{R.id.LocationID, R.id.LocationText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
-                    mRecordListView.setAdapter(simAdapt);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
         } catch (Exception e) {
             Log.e("HistoryActivity", "SQLiteDatabase init error");
             e.printStackTrace();
         }
     }
 
+    private void showHistory(List<Map<String, Object>> list) {
+        if (list.size() == 0) {
+            mRecordListView.setVisibility(View.GONE);
+            noRecordText.setVisibility(View.VISIBLE);
+        } else {
+            noRecordText.setVisibility(View.GONE);
+            mRecordListView.setVisibility(View.VISIBLE);
+
+            try {
+                SimpleAdapter simAdapt = new SimpleAdapter(
+                        mContext,
+                        list,
+                        R.layout.history_item,
+                        new String[]{HistoryActivity.KEY_ID, HistoryActivity.KEY_LOCATION, HistoryActivity.KEY_TIME, HistoryActivity.KEY_LNG_LAT_WGS, HistoryActivity.KEY_LNG_LAT_CUSTOM}, // 与下面数组元素要一一对应
+                        new int[]{R.id.LocationID, R.id.LocationText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
+                mRecordListView.setAdapter(simAdapt);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     private void processDirection(boolean auto, double angle, double r) {
         if (r <= 0) {

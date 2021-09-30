@@ -11,7 +11,6 @@ import androidx.preference.PreferenceManager;
 
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,7 +19,6 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -95,7 +93,7 @@ public class HistoryActivity extends BaseActivity {
                     .setPositiveButton("确定",
                             (dialog, which) -> {
                                 if (deleteRecord(-1)) {
-                                    DisplayToast("删除成功!");
+                                    GoUtils.DisplayToast(this,"删除成功!");
                                     updateRecordList();
                                 }
                             })
@@ -234,7 +232,7 @@ public class HistoryActivity extends BaseActivity {
                                 new int[]{R.id.LocationID, R.id.LocationText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
                         mRecordListView.setAdapter(simAdapt);
                     } else {
-                        DisplayToast("未搜索到指定内容");
+                        GoUtils.DisplayToast(HistoryActivity.this,"未搜索到指定内容");
                         SimpleAdapter simAdapt = new SimpleAdapter(
                                 HistoryActivity.this.getBaseContext(),
                                 mAllRecord,
@@ -273,7 +271,7 @@ public class HistoryActivity extends BaseActivity {
             wgs84Latitude = latLngStr2[1].substring(latLngStr2[1].indexOf(":") + 1);
 
             if (!MainActivity.showHistoryLocation(bd09Longitude, bd09Latitude, wgs84Longitude, wgs84Latitude)) {
-                DisplayToast("定位失败,请手动选取定位点");
+                GoUtils.DisplayToast(this, "定位失败,请手动选取定位点");
             }
             this.finish();
         });
@@ -288,7 +286,7 @@ public class HistoryActivity extends BaseActivity {
                                 boolean deleteRet = deleteRecord(Integer.parseInt(locID));
 
                                 if (deleteRet) {
-                                    DisplayToast("删除成功!");
+                                    GoUtils.DisplayToast(this,"删除成功!");
                                     updateRecordList();
                                 }
                             })
@@ -326,11 +324,5 @@ public class HistoryActivity extends BaseActivity {
                 e.printStackTrace();
             }
         }
-    }
-
-    public void DisplayToast(String str) {
-        Toast toast = Toast.makeText(this, str, Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.TOP, 0, 220);
-        toast.show();
     }
 }
