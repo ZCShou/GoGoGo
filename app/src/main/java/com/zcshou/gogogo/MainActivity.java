@@ -702,7 +702,7 @@ public class MainActivity extends BaseActivity
                         mCurLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
                     } else {
                         double[] latLon = MapUtils.wgs2bd09(dialog_lat_double, dialog_lng_double);
-                        mCurLatLngMap = new LatLng(latLon[0], latLon[0]);
+                        mCurLatLngMap = new LatLng(latLon[1], latLon[0]);
                     }
 
                     MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mCurLatLngMap);
