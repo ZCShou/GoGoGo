@@ -27,7 +27,6 @@ import androidx.preference.PreferenceManager;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatus;
-import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
@@ -88,9 +87,8 @@ public class JoyStick extends View {
     private FrameLayout mMapLayout;
     private MapView mMapView;
     private BaiduMap mBaiduMap;
-    private double mLng;
-    private double mLat;
     private LatLng mCurMapLngLat;
+    private LatLng mMarkMapLngLat;
     private SuggestionSearch mSuggestionSearch;
     private ListView mSearchList;
     private LinearLayout mSearchLayout;
@@ -153,21 +151,10 @@ public class JoyStick extends View {
     }
 
     public void setCurrentPosition(double lng, double lat) {
-
         double[] lngLat = MapUtils.wgs2bd09(lng, lat);
-        mLng = lngLat[0];
-        mLat = lngLat[1];
+        mCurMapLngLat = new LatLng(lngLat[1], lngLat[0]);
 
-        MyLocationData locData = new MyLocationData.Builder()
-                .latitude(mLat)
-                .longitude(mLng)
-                .build();
-        mBaiduMap.setMyLocationData(locData);
-
-        LatLng pos = new LatLng(mLat, mLng);
-        MapStatus.Builder builder = new MapStatus.Builder();
-        builder.target(pos).zoom(18.0f);
-        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+        resetBaiduMap();
     }
 
     public void show() {
@@ -294,9 +281,6 @@ public class JoyStick extends View {
             if (mMapLayout.getParent() == null) {
                 mCurWin = WINDOW_TYPE_MAP;
                 show();
-                MapStatus.Builder builder = new MapStatus.Builder();
-                builder.target(mCurMapLngLat).zoom(18.0f);
-                mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
             }
         });
 
@@ -412,20 +396,11 @@ public class JoyStick extends View {
         mSearchList.setOnItemClickListener((parent, view, position, id) -> {
             String lng = ((TextView) view.findViewById(R.id.poi_longitude)).getText().toString();
             String lat = ((TextView) view.findViewById(R.id.poi_latitude)).getText().toString();
-            mCurMapLngLat = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
-            double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
-            mLng = lngLat[0];
-            mLat = lngLat[1];
-
-            MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mCurMapLngLat);
-            //对地图的中心点进行更新，
-            mBaiduMap.setMapStatus(mapstatusupdate);
-
-            MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
-            mBaiduMap.clear();
-            mBaiduMap.addOverlay(ooA);
+            LatLng latLng = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
 
             mSearchLayout.setVisibility(View.GONE);
+
+            markBaiduMap(latLng);
         });
 
         TextView tips = mMapLayout.findViewById(R.id.joystick_map_tips);
@@ -461,7 +436,7 @@ public class JoyStick extends View {
                     try {
                         mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
                                 .keyword(newText)
-                                .city("济南")
+                                .city(MainActivity.mCurrentCity)
                         );
                     } catch (Exception e) {
                         GoUtils.DisplayToast(mContext,"搜索失败，请检查网络连接");
@@ -479,19 +454,24 @@ public class JoyStick extends View {
             mWindowParamMap.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+            mWindowManager.updateViewLayout(mMapLayout, mWindowParamMap);
 
             tips.setVisibility(VISIBLE);
             mSearchView.clearFocus();
             mSearchView.onActionViewCollapsed();
 
-            mCurWin = WINDOW_TYPE_JOYSTICK;
-            show();
-            mListener.onPositionInfo(mLng, mLat);
+            mCurMapLngLat = mMarkMapLngLat;
+            double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
+            mListener.onPositionInfo(lngLat[0], lngLat[1]);
+
+            resetBaiduMap();
+
+            GoUtils.DisplayToast(mContext, "位置已传送");
         });
         btnOk.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 
-        ImageButton btnCancel = mMapLayout.findViewById(R.id.map_close);
-        btnCancel.setOnClickListener(v -> {
+        ImageButton btnClose = mMapLayout.findViewById(R.id.map_close);
+        btnClose.setOnClickListener(v -> {
             // 关闭时清除焦点
             mWindowParamMap.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -504,6 +484,12 @@ public class JoyStick extends View {
             mCurWin = WINDOW_TYPE_JOYSTICK;
             show();
         });
+
+        ImageButton btnBack = mMapLayout.findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
+            resetBaiduMap();
+        });
+        btnBack.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 
         initBaiduMap();
     }
@@ -524,28 +510,14 @@ public class JoyStick extends View {
              * 单击地图
              */
             public void onMapClick(LatLng point) {
-                mCurMapLngLat = point;
-                double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
-                mLng = lngLat[0];
-                mLat = lngLat[1];
-
-                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
-                mBaiduMap.clear();
-                mBaiduMap.addOverlay(ooA);
+                markBaiduMap(point);
             }
 
             /**
              * 单击地图中的POI点
              */
             public void onMapPoiClick(MapPoi poi) {
-                mCurMapLngLat = poi.getPosition();
-                double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
-                mLng = lngLat[0];
-                mLat = lngLat[1];
-
-                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
-                mBaiduMap.clear();
-                mBaiduMap.addOverlay(ooA);
+                markBaiduMap(poi.getPosition());
             }
         });
 
@@ -554,14 +526,7 @@ public class JoyStick extends View {
              * 长按地图
              */
             public void onMapLongClick(LatLng point) {
-                mCurMapLngLat = point;
-                double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
-                mLng = lngLat[0];
-                mLat = lngLat[1];
-
-                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
-                mBaiduMap.clear();
-                mBaiduMap.addOverlay(ooA);
+                markBaiduMap(point);
             }
         });
 
@@ -570,16 +535,35 @@ public class JoyStick extends View {
              * 双击地图
              */
             public void onMapDoubleClick(LatLng point) {
-                mCurMapLngLat = point;
-                double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
-                mLng = lngLat[0];
-                mLat = lngLat[1];
-
-                MarkerOptions ooA = new MarkerOptions().position(mCurMapLngLat).icon(MainActivity.mMapIndicator);
-                mBaiduMap.clear();
-                mBaiduMap.addOverlay(ooA);
+                markBaiduMap(point);
             }
         });
+    }
+
+    private void resetBaiduMap() {
+        mBaiduMap.clear();
+
+        MyLocationData locData = new MyLocationData.Builder()
+                .latitude(mCurMapLngLat.latitude)
+                .longitude(mCurMapLngLat.longitude)
+                .build();
+        mBaiduMap.setMyLocationData(locData);
+
+        MapStatus.Builder builder = new MapStatus.Builder();
+        builder.target(mCurMapLngLat).zoom(18.0f);
+        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+    }
+
+    private void markBaiduMap(LatLng latLng) {
+        mMarkMapLngLat = latLng;
+
+        MarkerOptions ooA = new MarkerOptions().position(latLng).icon(MainActivity.mMapIndicator);
+        mBaiduMap.clear();
+        mBaiduMap.addOverlay(ooA);
+
+        MapStatus.Builder builder = new MapStatus.Builder();
+        builder.target(latLng).zoom(18.0f);
+        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
     }
 
     @SuppressLint({"InflateParams", "ClickableViewAccessibility"})
@@ -644,6 +628,7 @@ public class JoyStick extends View {
             mWindowParamHistory.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+            mWindowManager.updateViewLayout(mHistoryLayout, mWindowParamHistory);
 
             mSearchView.clearFocus();
             mSearchView.onActionViewCollapsed();
@@ -658,17 +643,17 @@ public class JoyStick extends View {
             wgs84Longitude = latLngStr2[0].substring(latLngStr2[0].indexOf(":") + 1);
             wgs84Latitude = latLngStr2[1].substring(latLngStr2[1].indexOf(":") + 1);
 
-            mCurWin = WINDOW_TYPE_JOYSTICK;
-            show();
             mListener.onPositionInfo(Double.parseDouble(wgs84Longitude), Double.parseDouble(wgs84Latitude));
+
+            GoUtils.DisplayToast(mContext, "位置已传送");
         });
 
         fetchAllRecord();
 
         showHistory(mAllRecord);
 
-        ImageButton btnCancel = mHistoryLayout.findViewById(R.id.joystick_his_close);
-        btnCancel.setOnClickListener(v -> {
+        ImageButton btnClose = mHistoryLayout.findViewById(R.id.joystick_his_close);
+        btnClose.setOnClickListener(v -> {
             // 关闭时清除焦点
             mWindowParamHistory.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL

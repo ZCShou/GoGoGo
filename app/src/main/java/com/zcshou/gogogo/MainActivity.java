@@ -126,13 +126,13 @@ public class MainActivity extends BaseActivity
 
     // 百度地图相关
     public final static BitmapDescriptor mMapIndicator = BitmapDescriptorFactory.fromResource(R.drawable.icon_gcoding);
-    private static BaiduMap mBaiduMap = null;
+    public static String mCurrentCity = null;
     private static LatLng mCurLatLngMap = new LatLng(36.547743718042415, 117.07018449827267);
+    private static BaiduMap mBaiduMap = null;
     private static double mCurLat = ServiceGo.DEFAULT_LAT;  /* WGS84 坐标系的纬度 */
     private static double mCurLng = ServiceGo.DEFAULT_LNG;  /* WGS84 坐标系的经度 */
     private MapView mMapView;
     private LocationClient mLocClient = null;
-    private String mCurrentCity = null;
     private double mCurrentLat = 0.0;
     private double mCurrentLon = 0.0;
     private float mCurrentDirection = 0.0f;

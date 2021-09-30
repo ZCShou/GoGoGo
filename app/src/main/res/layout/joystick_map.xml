@@ -49,6 +49,17 @@
         </com.baidu.mapapi.map.MapView>
 
         <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="240dp"
+            android:layout_marginStart="280dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@null"
+            android:theme="@style/RippleWhite"
+            android:src="@drawable/ic_home_position"/>
+
+        <ImageButton
             android:id="@+id/btnGo"
             android:layout_width="48dp"
             android:layout_height="48dp"
