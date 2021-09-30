@@ -127,14 +127,14 @@ public class MainActivity extends BaseActivity
     // 百度地图相关
     public final static BitmapDescriptor mMapIndicator = BitmapDescriptorFactory.fromResource(R.drawable.icon_gcoding);
     public static String mCurrentCity = null;
-    private static LatLng mCurLatLngMap = new LatLng(36.547743718042415, 117.07018449827267);
-    private static BaiduMap mBaiduMap = null;
+    private static LatLng mMarkLatLngMap = new LatLng(36.547743718042415, 117.07018449827267); // 当前标记的地图点
+    private double mCurrentLat = 0.0;       // 当前位置的百度纬度
+    private double mCurrentLon = 0.0;       // 当前位置的百度经度
     private static double mCurLat = ServiceGo.DEFAULT_LAT;  /* WGS84 坐标系的纬度 */
     private static double mCurLng = ServiceGo.DEFAULT_LNG;  /* WGS84 坐标系的经度 */
+    private static BaiduMap mBaiduMap = null;
     private MapView mMapView;
     private LocationClient mLocClient = null;
-    private double mCurrentLat = 0.0;
-    private double mCurrentLon = 0.0;
     private float mCurrentDirection = 0.0f;
     private boolean isFirstLoc = true; // 是否首次定位
     private SensorManager mSensorManager;
@@ -449,7 +449,7 @@ public class MainActivity extends BaseActivity
             //获取剪贴板管理器：
             ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
             // 创建普通字符型ClipData
-            ClipData mClipData = ClipData.newPlainText("Label", mCurLatLngMap.toString());
+            ClipData mClipData = ClipData.newPlainText("Label", mMarkLatLngMap.toString());
             // 将 ClipData内容放到系统剪贴板里。
             cm.setPrimaryClip(mClipData);
 
@@ -491,20 +491,20 @@ public class MainActivity extends BaseActivity
              * 单击地图
              */
             public void onMapClick(LatLng point) {
-                mCurLatLngMap = point;
+                mMarkLatLngMap = point;
+                markMap();
 
                 //百度坐标系转wgs坐标系
                 transformCoordinate(String.valueOf(point.longitude), String.valueOf(point.latitude));
-                markSelectedPosition();
             }
             /**
              * 单击地图中的POI点
              */
             public void onMapPoiClick(MapPoi poi) {
-                mCurLatLngMap = poi.getPosition();
+                mMarkLatLngMap = poi.getPosition();
+                markMap();
                 //百度坐标系转wgs坐标系
                 transformCoordinate(String.valueOf(poi.getPosition().longitude), String.valueOf(poi.getPosition().latitude));
-                markSelectedPosition();
             }
         });
 
@@ -513,11 +513,11 @@ public class MainActivity extends BaseActivity
              * 长按地图
              */
             public void onMapLongClick(LatLng point) {
-                mCurLatLngMap = point;
+                mMarkLatLngMap = point;
+                markMap();
                 mGeoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(point));
                 //百度坐标系转wgs坐标系
                 transformCoordinate(String.valueOf(point.longitude), String.valueOf(point.latitude));
-                markSelectedPosition();
             }
         });
 
@@ -557,7 +557,6 @@ public class MainActivity extends BaseActivity
                 mCurrentCity = bdLocation.getCity();
                 mCurrentLat = bdLocation.getLatitude();
                 mCurrentLon = bdLocation.getLongitude();
-//                mCurrentAccuracy = bdLocation.getRadius();
                 MyLocationData locData = new MyLocationData.Builder()
                         .accuracy(bdLocation.getRadius())
                         .direction(mCurrentDirection)// 此处设置开发者获取到的方向信息，顺时针0-360
@@ -570,7 +569,7 @@ public class MainActivity extends BaseActivity
                 if (isMove) {
                     isMove = false;
                     mBaiduMap.clear();
-                    mCurLatLngMap = null;
+                    mMarkLatLngMap = null;
 
                     if (GoUtils.isWifiEnabled(MainActivity.this)) {
                         GoUtils.showDisableWifiDialog(MainActivity.this);
@@ -585,15 +584,15 @@ public class MainActivity extends BaseActivity
                     if (isFirstLoc) {
                         isFirstLoc = false;
                         // 这里记录百度地图返回的位置
-                        mCurLatLngMap = new LatLng(bdLocation.getLatitude(), bdLocation.getLongitude());
+                        mMarkLatLngMap = new LatLng(bdLocation.getLatitude(), bdLocation.getLongitude());
                         MapStatus.Builder builder = new MapStatus.Builder();
-                        builder.target(mCurLatLngMap).zoom(18.0f);
+                        builder.target(mMarkLatLngMap).zoom(18.0f);
                         mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
 
-                        XLog.i("First Baidu LatLng: " + mCurLatLngMap);
+                        XLog.i("First Baidu LatLng: " + mMarkLatLngMap);
 
                         // 这里将百度地图位置转换为 GPS 坐标
-                        double[] latLng = MapUtils.bd2wgs(mCurLatLngMap.longitude, mCurLatLngMap.latitude);
+                        double[] latLng = MapUtils.bd2wgs(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
                         mCurLng = latLng[0];
                         mCurLat = latLng[1];
                     }
@@ -672,6 +671,31 @@ public class MainActivity extends BaseActivity
         mBaiduMap.animateMapStatus(MapStatusUpdateFactory.zoomOut());
     }
 
+    //标定选择的位置
+    private void markMap() {
+        if (mMarkLatLngMap != null) {
+            MarkerOptions ooA = new MarkerOptions().position(mMarkLatLngMap).icon(mMapIndicator);
+            mBaiduMap.clear();
+            mBaiduMap.addOverlay(ooA);
+        }
+    }
+
+    private void resetMap() {
+        mBaiduMap.clear();
+        mMarkLatLngMap = null;
+
+        MyLocationData locData = new MyLocationData.Builder()
+                .latitude(mCurrentLat)
+                .longitude(mCurrentLon)
+                .direction(mCurrentDirection)
+                .build();
+        mBaiduMap.setMyLocationData(locData);
+
+        MapStatus.Builder builder = new MapStatus.Builder();
+        builder.target(new LatLng(mCurrentLat, mCurrentLon)).zoom(18.0f);
+        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+    }
+
     public void goInputPosition(View view1) {
         AlertDialog dialog;
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -699,15 +723,17 @@ public class MainActivity extends BaseActivity
                     GoUtils.DisplayToast(this, "经纬度超出限制!\n-180.0<经度<180.0\n-90.0<纬度<90.0");
                 } else {
                     if (rbBD.isChecked()) {
-                        mCurLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
+                        mMarkLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
                     } else {
                         double[] bdLonLat = MapUtils.wgs2bd09(dialog_lat_double, dialog_lng_double);
-                        mCurLatLngMap = new LatLng(bdLonLat[1], bdLonLat[0]);
+                        mMarkLatLngMap = new LatLng(bdLonLat[1], bdLonLat[0]);
                     }
 
-                    MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mCurLatLngMap);
+                    markMap();
+
+                    MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
                     mBaiduMap.setMapStatus(mapstatusupdate);
-                    markSelectedPosition();
+
                     dialog.dismiss();
                 }
             }
@@ -723,11 +749,11 @@ public class MainActivity extends BaseActivity
 
         try {
             if (!bd09Longitude.isEmpty() && !bd09Latitude.isEmpty()) {
-                mCurLatLngMap = new LatLng(Double.parseDouble(bd09Latitude), Double.parseDouble(bd09Longitude));
-                MarkerOptions ooA = new MarkerOptions().position(mCurLatLngMap).icon(mMapIndicator);
+                mMarkLatLngMap = new LatLng(Double.parseDouble(bd09Latitude), Double.parseDouble(bd09Longitude));
+                MarkerOptions ooA = new MarkerOptions().position(mMarkLatLngMap).icon(mMapIndicator);
                 mBaiduMap.clear();
                 mBaiduMap.addOverlay(ooA);
-                MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mCurLatLngMap);
+                MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
                 mBaiduMap.setMapStatus(mapstatusupdate);
                 mCurLng = Double.parseDouble(wgs84Longitude);
                 mCurLat = Double.parseDouble(wgs84Latitude);
@@ -739,27 +765,6 @@ public class MainActivity extends BaseActivity
         }
 
         return ret;
-    }
-
-    //标定选择的位置
-    private void markSelectedPosition() {
-        if (mCurLatLngMap != null) {
-            MarkerOptions ooA = new MarkerOptions().position(mCurLatLngMap).icon(mMapIndicator);
-            mBaiduMap.clear();
-            mBaiduMap.addOverlay(ooA);
-        }
-    }
-
-    //重置地图
-    private void resetMap() {
-        mBaiduMap.clear();
-        mCurLatLngMap = null;
-
-        mLocClient.requestLocation();   /* 请求位置 */
-
-        //对地图的中心点进行更新
-        MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(new LatLng(mCurrentLat, mCurrentLon));
-        mBaiduMap.setMapStatus(mapstatusupdate);
     }
 
     //坐标转换
@@ -1041,12 +1046,12 @@ public class MainActivity extends BaseActivity
         mSearchList.setOnItemClickListener((parent, view, position, id) -> {
             String lng = ((TextView) view.findViewById(R.id.poi_longitude)).getText().toString();
             String lat = ((TextView) view.findViewById(R.id.poi_latitude)).getText().toString();
-            mCurLatLngMap = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
-            MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mCurLatLngMap);
+            mMarkLatLngMap = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+            MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
             //对地图的中心点进行更新，
             mBaiduMap.setMapStatus(mapstatusupdate);
 
-            markSelectedPosition();
+            markMap();
 
             transformCoordinate(lng, lat);
 
@@ -1080,11 +1085,11 @@ public class MainActivity extends BaseActivity
                 String lng = ((TextView) view.findViewById(R.id.search_longitude)).getText().toString();
                 String lat = ((TextView) view.findViewById(R.id.search_latitude)).getText().toString();
                 //对地图的中心点进行更新
-                mCurLatLngMap = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
-                MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mCurLatLngMap);
+                mMarkLatLngMap = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+                MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
                 mBaiduMap.setMapStatus(mapstatusupdate);
 
-                markSelectedPosition();
+                markMap();
 
                 transformCoordinate(lng, lat);
 
@@ -1242,8 +1247,8 @@ public class MainActivity extends BaseActivity
         final String safeCode = getResources().getString(R.string.safecode);
         final String ak = getResources().getString(R.string.ak);
         final String mapType = "bd09ll";
-        final double latitude = mCurLatLngMap.latitude;
-        final double longitude = mCurLatLngMap.longitude;
+        final double latitude = mMarkLatLngMap.latitude;
+        final double longitude = mMarkLatLngMap.longitude;
         //bd09坐标的位置信息
         String mapApiUrl = "https://api.map.baidu.com/reverse_geocoding/v3/?ak=" + ak + "&output=json&coordtype=" + mapType + "&location=" + latitude + "," + longitude + "&mcode=" + safeCode;
 
@@ -1348,7 +1353,7 @@ public class MainActivity extends BaseActivity
                     GoUtils.showEnableGpsDialog(this);
                 } else {
                     if (isMockServStart) {
-                        if (mCurLatLngMap == null) {
+                        if (mMarkLatLngMap == null) {
                             stopGoLocation();
                             Snackbar.make(v, "模拟位置已终止", Snackbar.LENGTH_LONG)
                                     .setAction("Action", null).show();
@@ -1364,7 +1369,7 @@ public class MainActivity extends BaseActivity
                             GoUtils.showEnableMockLocationDialog(this);
                             XLog.e("无模拟位置权限!");
                         } else {
-                            if (mCurLatLngMap == null) {
+                            if (mMarkLatLngMap == null) {
                                 Snackbar.make(v, "请先点击地图位置或者搜索位置", Snackbar.LENGTH_LONG)
                                         .setAction("Action", null).show();
                             } else {
