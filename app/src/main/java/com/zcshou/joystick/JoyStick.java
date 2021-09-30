@@ -167,6 +167,7 @@ public class JoyStick extends View {
                     mWindowManager.removeView(mHistoryLayout);
                 }
                 if (mMapLayout.getParent() == null) {
+                    resetBaiduMap();
                     mWindowManager.addView(mMapLayout, mWindowParamMap);
                 }
                 break;
@@ -394,13 +395,11 @@ public class JoyStick extends View {
             }
         });
         mSearchList.setOnItemClickListener((parent, view, position, id) -> {
-            String lng = ((TextView) view.findViewById(R.id.poi_longitude)).getText().toString();
-            String lat = ((TextView) view.findViewById(R.id.poi_latitude)).getText().toString();
-            LatLng latLng = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
-
             mSearchLayout.setVisibility(View.GONE);
 
-            markBaiduMap(latLng);
+            String lng = ((TextView) view.findViewById(R.id.poi_longitude)).getText().toString();
+            String lat = ((TextView) view.findViewById(R.id.poi_latitude)).getText().toString();
+            markBaiduMap(new LatLng(Double.parseDouble(lat), Double.parseDouble(lng)));
         });
 
         TextView tips = mMapLayout.findViewById(R.id.joystick_map_tips);
@@ -448,8 +447,8 @@ public class JoyStick extends View {
             }
         });
 
-        ImageButton btnOk = mMapLayout.findViewById(R.id.btnGo);
-        btnOk.setOnClickListener(v -> {
+        ImageButton btnGo = mMapLayout.findViewById(R.id.btnGo);
+        btnGo.setOnClickListener(v -> {
             // 关闭时清除焦点
             mWindowParamMap.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -468,7 +467,7 @@ public class JoyStick extends View {
 
             GoUtils.DisplayToast(mContext, "位置已传送");
         });
-        btnOk.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
+        btnGo.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 
         ImageButton btnClose = mMapLayout.findViewById(R.id.map_close);
         btnClose.setOnClickListener(v -> {
@@ -634,16 +633,22 @@ public class JoyStick extends View {
             mSearchView.onActionViewCollapsed();
             tips.setVisibility(VISIBLE);
 
-            String wgs84Longitude;
-            String wgs84Latitude;
-            //wgs84坐标
+            // wgs84坐标
             String wgs84LatLng = (String) ((TextView) view.findViewById(R.id.WGSLatLngText)).getText();
             wgs84LatLng = wgs84LatLng.substring(wgs84LatLng.indexOf("[") + 1, wgs84LatLng.indexOf("]"));
-            String[] latLngStr2 = wgs84LatLng.split(" ");
-            wgs84Longitude = latLngStr2[0].substring(latLngStr2[0].indexOf(":") + 1);
-            wgs84Latitude = latLngStr2[1].substring(latLngStr2[1].indexOf(":") + 1);
+            String[] wgs84latLngStr = wgs84LatLng.split(" ");
+            String wgs84Longitude = wgs84latLngStr[0].substring(wgs84latLngStr[0].indexOf(":") + 1);
+            String wgs84Latitude = wgs84latLngStr[1].substring(wgs84latLngStr[1].indexOf(":") + 1);
 
             mListener.onPositionInfo(Double.parseDouble(wgs84Longitude), Double.parseDouble(wgs84Latitude));
+
+            // 注意这里在选择位置之后需要刷新地图
+            String bdLatLng = (String) ((TextView) view.findViewById(R.id.BDLatLngText)).getText();
+            bdLatLng = bdLatLng.substring(bdLatLng.indexOf("[") + 1, bdLatLng.indexOf("]"));
+            String[] bdLatLngStr = bdLatLng.split(" ");
+            String bdLongitude = bdLatLngStr[0].substring(bdLatLngStr[0].indexOf(":") + 1);
+            String bdLatitude = bdLatLngStr[1].substring(bdLatLngStr[1].indexOf(":") + 1);
+            mCurMapLngLat = new LatLng(Double.parseDouble(bdLatitude), Double.parseDouble(bdLongitude));
 
             GoUtils.DisplayToast(mContext, "位置已传送");
         });

@@ -290,6 +290,7 @@ public class ServiceGo extends Service {
             mCurLng = lng;
             mCurLat = lat;
             mLocHandler.sendEmptyMessage(HANDLER_MSG_ID);
+            mJoyStick.setCurrentPosition(mCurLng, mCurLat);
         }
     }
 }
