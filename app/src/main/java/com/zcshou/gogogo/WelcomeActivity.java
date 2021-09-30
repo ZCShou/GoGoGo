@@ -41,12 +41,6 @@ public class WelcomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // 从登录界面进入主页，按home键回桌面再进入app，重新弹出登录界面的问题
-        if (!isTaskRoot()) {
-            finish();
-            return;
-        }
-
         setContentView(R.layout.welcome);
 
         // 生成默认参数的值（一定要尽可能早的调用，因为后续有些界面可能需要使用参数）
@@ -69,11 +63,9 @@ public class WelcomeActivity extends AppCompatActivity {
 
         startBtn = findViewById(R.id.startButton);
         startBtn.setOnClickListener(v -> startMainActivity());
-        startBtn.setClickable(false);        // 放在 setOnClickListener 之后才能生效
 
         if (!GoUtils.isNetworkAvailable(this)) {
             startBtn.setText(getResources().getString(R.string.welcome_network_error));
-            startBtn.setClickable(true);
         } else {
             isNetwork = true;
             preferences = getSharedPreferences(KEY_IS_FIRST_USAGE, MODE_PRIVATE);
