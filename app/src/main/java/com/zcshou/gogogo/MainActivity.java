@@ -701,8 +701,8 @@ public class MainActivity extends BaseActivity
                     if (rbBD.isChecked()) {
                         mCurLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
                     } else {
-                        double[] latLon = MapUtils.wgs2bd09(dialog_lat_double, dialog_lng_double);
-                        mCurLatLngMap = new LatLng(latLon[1], latLon[0]);
+                        double[] bdLonLat = MapUtils.wgs2bd09(dialog_lat_double, dialog_lng_double);
+                        mCurLatLngMap = new LatLng(bdLonLat[1], bdLonLat[0]);
                     }
 
                     MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mCurLatLngMap);
