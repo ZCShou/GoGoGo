@@ -1,14 +1,6 @@
 apply plugin: 'com.android.application'
 
 android {
-    signingConfigs {
-        debug {
-            storeFile file('C:\\Users\\ZCShou\\ZCShouKeyGoGo.jks')
-            storePassword 'zcs220807'
-            keyAlias 'GoGoKey'
-            keyPassword 'zcs220807'
-        }
-    }
     compileSdkVersion 30
     defaultConfig {
         applicationId "com.zcshou.gogogo"
