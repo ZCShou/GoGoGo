@@ -1,6 +1,20 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file('..\\GoGoGo.jks')
+            storePassword 'GoGoGo'
+            keyAlias 'GoGoGo'
+            keyPassword 'GoGoGo'
+        }
+        release {
+            storeFile file('..\\GoGoGo.jks')
+            storePassword 'GoGoGo'
+            keyAlias 'GoGoGo'
+            keyPassword 'GoGoGo'
+        }
+    }
     compileSdkVersion 30
     defaultConfig {
         applicationId "com.zcshou.gogogo"
@@ -13,10 +27,13 @@ android {
         ndk {
             abiFilters "arm64-v8a"
         }
+        signingConfig signingConfigs.release
     }
     ndkVersion '23.0.7599858'
     buildTypes {
         release {
+            zipAlignEnabled true
+
             // Enables code shrinking, obfuscation, and optimization for only
             // your project's release build type.
             minifyEnabled true
@@ -29,6 +46,10 @@ android {
             // the Android Gradle plugin. To learn more, go to the section about
             // R8 configuration files.
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.debug
         }
     }
     buildToolsVersion '31.0.0'
@@ -45,12 +66,17 @@ android {
             jniLibs.srcDirs = ['libs']
         }
     }
+    dependenciesInfo {
+        includeInApk false
+        includeInBundle false
+    }
 //    lintOptions {
 //        checkReleaseBuilds false
 //        // Or, if you prefer, you can continue to check for errors in release builds,
 //        // but continue the build even when errors are found:
 //        abortOnError false
 //    }
+
     // 指定输出的可执行程序的名字
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
@@ -58,7 +84,7 @@ android {
             if (outputFile != null && outputFile.name.endsWith('.apk')) {
                 def fileName
                 if (variant.buildType.name == 'release') {
-                    fileName = "影梭_${defaultConfig.versionName}.apk"
+                    fileName = "APP_${defaultConfig.versionName}_release.apk"
                 } else {
                     fileName = "APP_${defaultConfig.versionName}_debug.apk"
                 }
