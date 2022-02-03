@@ -5,13 +5,13 @@ android {
         debug {
             storeFile file('..\\GoGoGo.jks')
             storePassword 'GoGoGo'
-            keyAlias 'GoGoGo'
+            keyAlias 'GoGoKey'
             keyPassword 'GoGoGo'
         }
         release {
             storeFile file('..\\GoGoGo.jks')
             storePassword 'GoGoGo'
-            keyAlias 'GoGoGo'
+            keyAlias 'GoGoKey'
             keyPassword 'GoGoGo'
         }
     }
@@ -23,13 +23,13 @@ android {
         versionCode 190
         versionName '1.9.0' // 语义化版本 https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        resConfigs "zh", "zh-rCN", "en", "en-rUS" // 仅保留中文和英文
+        resConfigs 'zh', 'zh-rCN', 'en', 'en-rUS' // 仅保留中文和英文
         ndk {
             abiFilters "arm64-v8a"
         }
         signingConfig signingConfigs.release
     }
-    ndkVersion '23.0.7599858'
+    ndkVersion '23.1.7779620'
     buildTypes {
         release {
             zipAlignEnabled true
@@ -58,8 +58,12 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     packagingOptions {
-        // exclude ARMEABI native so file, ARMEABI has been removed in NDK r17.
-        exclude "lib/armeabi/**"
+        jniLibs {
+            excludes += ['lib/armeabi/**']
+        }
+        resources {
+            excludes += ['lib/armeabi/**']
+        }
     }
     sourceSets {
         main {
