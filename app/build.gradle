@@ -29,7 +29,7 @@ android {
         }
         signingConfig signingConfigs.release
     }
-    ndkVersion '23.1.7779620'
+    ndkVersion '24.0.8215888'
     buildTypes {
         release {
             zipAlignEnabled true
