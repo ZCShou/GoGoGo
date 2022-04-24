@@ -20,8 +20,8 @@ android {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 27
         targetSdkVersion 30
-        versionCode 190
-        versionName '1.9.0' // 语义化版本 https://semver.org/lang/zh-CN/
+        versionCode 191
+        versionName '1.9.1' // 语义化版本 https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         resConfigs 'zh', 'zh-rCN', 'en', 'en-rUS' // 仅保留中文和英文
         ndk {
