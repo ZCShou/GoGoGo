@@ -14,7 +14,7 @@
         android:id="@+id/user_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="32dp"
         android:contentDescription="@null"
         app:srcCompat="@mipmap/ic_launcher_round" />
 
@@ -24,6 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/nav_header_vertical_spacing"
         android:text="@string/user_name"
+        android:textSize="18sp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     <TextView

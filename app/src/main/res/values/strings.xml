@@ -49,8 +49,8 @@
     <!-- 导航页 -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="user_name">UserName</string>
-    <string name="user_limit_info">如果喜欢影梭，去 Gitee 上点个赞吧!</string>
+    <string name="user_name">影梭</string>
+    <string name="user_limit_info">仅供学习使用，否则后果自负!</string>
     <string name="nav_menu_history">历史记录</string>
     <string name="nav_menu_settings">设置</string>
     <string name="nav_menu_dev">开发人员选项</string>

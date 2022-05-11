@@ -896,7 +896,6 @@ public class MainActivity extends BaseActivity
                 Uri uri = Uri.parse("https://gitee.com/zcshou/gogogo");
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
-//                showRegisterDialog();
             });
 
             mUserName.setOnClickListener(v -> {
@@ -905,9 +904,6 @@ public class MainActivity extends BaseActivity
                 if (drawer.isDrawerOpen(GravityCompat.START)) {
                     drawer.closeDrawer(GravityCompat.START);
                 }
-                Uri uri = Uri.parse("https://gitee.com/zcshou/gogogo");
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
                 showRegisterDialog();
             });
         }
