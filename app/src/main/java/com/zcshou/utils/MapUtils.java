@@ -87,7 +87,7 @@ public class MapUtils {
         return ret;
     }
     
-    private static boolean out_of_china(double lng, double lat) {
-        return (lng < 72.004 || lng > 137.8347) || ((lat < 0.8293 || lat > 55.8271));
-    }
+//    private static boolean out_of_china(double lng, double lat) {
+//        return (lng < 72.004 || lng > 137.8347) || ((lat < 0.8293 || lat > 55.8271));
+//    }
 }

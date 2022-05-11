@@ -7,11 +7,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-//import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.CountDownTimer;
@@ -23,10 +21,11 @@ import androidx.appcompat.app.AlertDialog;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class GoUtils {
-    //WIFI是否可用
+    // WIFI是否可用
     public static boolean isWifiConnected(Context context) {
         // 从 API 29 开始，NetworkInfo 被标记为过时，这里更换新方法
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -76,57 +75,38 @@ public class GoUtils {
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
-    //模拟位置权限是否开启
+    // 判断是否已在开发者选项中开启模拟位置权限
     public static boolean isAllowMockLocation(Context context) {
         boolean canMockPosition = false;
+        int index;
 
         try {
             LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);//获得LocationManager引用
-            LocationProvider provider = locationManager.getProvider(LocationManager.GPS_PROVIDER);
 
-            // 为防止在已有testProvider的情况下导致addTestProvider抛出异常，先移除testProvider
-            try {
-                locationManager.removeTestProvider(LocationManager.GPS_PROVIDER);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            if (provider != null) {
-                try {
-                    locationManager.addTestProvider(
-                            provider.getName()
-                            , provider.requiresNetwork()
-                            , provider.requiresSatellite()
-                            , provider.requiresCell()
-                            , provider.hasMonetaryCost()
-                            , provider.supportsAltitude()
-                            , provider.supportsSpeed()
-                            , provider.supportsBearing()
-                            , provider.getPowerRequirement()
-                            , provider.getAccuracy());
-                    canMockPosition = true;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                try {
-                    locationManager.addTestProvider(
-                            LocationManager.GPS_PROVIDER
-                            , true, true, false, false, true, true, true
-                            , Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
-                    canMockPosition = true;
-                } catch (Exception e) {
-                    e.printStackTrace();
+            List<String> list = locationManager.getAllProviders();
+            for (index = 0; index < list.size(); index++) {
+                if (list.get(index).equals(LocationManager.GPS_PROVIDER)) {
+                    break;
                 }
             }
+
+            if (index < list.size()) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    locationManager.addTestProvider(LocationManager.GPS_PROVIDER,locationManager.getProviderProperties(LocationManager.GPS_PROVIDER));
+                } else {
+                    // 注意，由于 android api 问题，下面的参数会提示错误
+                    locationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, true,
+                            false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
+                }
+                canMockPosition = true;
+            }
+
             // 模拟位置可用
             if (canMockPosition) {
-                locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
-                //remove test provider
+                // remove test provider
                 locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, false);
                 locationManager.removeTestProvider(LocationManager.GPS_PROVIDER);
             }
-
         } catch (SecurityException e) {
             e.printStackTrace();
         }
@@ -157,9 +137,7 @@ public class GoUtils {
 
     /**
      * 获取App的名称
-     *
      * @param context 上下文
-     *
      * @return 名称
      */
     public static String getAppName(Context context) {

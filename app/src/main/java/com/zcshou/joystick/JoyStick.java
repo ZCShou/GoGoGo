@@ -42,6 +42,7 @@ import com.zcshou.utils.GoUtils;
 import com.zcshou.utils.MapUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -485,9 +486,7 @@ public class JoyStick extends View {
         });
 
         ImageButton btnBack = mMapLayout.findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> {
-            resetBaiduMap();
-        });
+        btnBack.setOnClickListener(v -> resetBaiduMap());
         btnBack.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 
         initBaiduMap();
@@ -698,10 +697,10 @@ public class JoyStick extends View {
                 BigDecimal bigDecimalLatitude = BigDecimal.valueOf(Double.parseDouble(Latitude));
                 BigDecimal bigDecimalBDLongitude = BigDecimal.valueOf(Double.parseDouble(BD09Longitude));
                 BigDecimal bigDecimalBDLatitude = BigDecimal.valueOf(Double.parseDouble(BD09Latitude));
-                double doubleLongitude = bigDecimalLongitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
-                double doubleLatitude = bigDecimalLatitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
-                double doubleBDLongitude = bigDecimalBDLongitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
-                double doubleBDLatitude = bigDecimalBDLatitude.setScale(11, BigDecimal.ROUND_HALF_UP).doubleValue();
+                double doubleLongitude = bigDecimalLongitude.setScale(11, RoundingMode.HALF_UP).doubleValue();
+                double doubleLatitude = bigDecimalLatitude.setScale(11, RoundingMode.HALF_UP).doubleValue();
+                double doubleBDLongitude = bigDecimalBDLongitude.setScale(11, RoundingMode.HALF_UP).doubleValue();
+                double doubleBDLatitude = bigDecimalBDLatitude.setScale(11, RoundingMode.HALF_UP).doubleValue();
                 item.put(HistoryActivity.KEY_ID, Integer.toString(ID));
                 item.put(HistoryActivity.KEY_LOCATION, Location);
                 item.put(HistoryActivity.KEY_TIME, GoUtils.timeStamp2Date(Long.toString(TimeStamp)));

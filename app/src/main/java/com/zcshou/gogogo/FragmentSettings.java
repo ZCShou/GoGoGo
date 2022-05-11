@@ -13,7 +13,6 @@ import androidx.preference.SwitchPreferenceCompat;
 import com.elvishew.xlog.XLog;
 import com.zcshou.utils.GoUtils;
 
-/* */
 public class FragmentSettings extends PreferenceFragmentCompat {
 
     @Override
@@ -34,6 +33,7 @@ public class FragmentSettings extends PreferenceFragmentCompat {
             // 使用自定义 SummaryProvider
             pfJoystick.setSummaryProvider((Preference.SummaryProvider<ListPreference>) preference -> {
                 CharSequence cs = preference.getEntry();
+                assert cs != null;
                 String text = cs.toString();
                 if (TextUtils.isEmpty(text)) {
                     return "未设置";

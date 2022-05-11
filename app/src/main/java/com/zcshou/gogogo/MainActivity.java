@@ -91,6 +91,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -803,10 +804,10 @@ public class MainActivity extends BaseActivity
                             BigDecimal bigDecimalGcj02Latitude = BigDecimal.valueOf(Double.parseDouble(gcj02Latitude));
                             BigDecimal bigDecimalBd09Longitude = BigDecimal.valueOf(Double.parseDouble(longitude));
                             BigDecimal bigDecimalBd09Latitude = BigDecimal.valueOf(Double.parseDouble(latitude));
-                            double gcj02LongitudeDouble = bigDecimalGcj02Longitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
-                            double gcj02LatitudeDouble = bigDecimalGcj02Latitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
-                            double bd09LongitudeDouble = bigDecimalBd09Longitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
-                            double bd09LatitudeDouble = bigDecimalBd09Latitude.setScale(9, BigDecimal.ROUND_HALF_UP).doubleValue();
+                            double gcj02LongitudeDouble = bigDecimalGcj02Longitude.setScale(9, RoundingMode.HALF_UP).doubleValue();
+                            double gcj02LatitudeDouble = bigDecimalGcj02Latitude.setScale(9, RoundingMode.HALF_UP).doubleValue();
+                            double bd09LongitudeDouble = bigDecimalBd09Longitude.setScale(9, RoundingMode.HALF_UP).doubleValue();
+                            double bd09LatitudeDouble = bigDecimalBd09Latitude.setScale(9, RoundingMode.HALF_UP).doubleValue();
 
                             //如果bd09转gcj02 结果误差很小  认为该坐标在国外
                             if ((Math.abs(gcj02LongitudeDouble - bd09LongitudeDouble)) <= error && (Math.abs(gcj02LatitudeDouble - bd09LatitudeDouble)) <= error) {

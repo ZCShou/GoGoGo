@@ -15,13 +15,15 @@ android {
             keyPassword 'GoGoGo'
         }
     }
-    compileSdkVersion 30
+    ndkVersion '24.0.8215888'
+    buildToolsVersion '32.0.0'
+    compileSdkVersion 32
     defaultConfig {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 27
-        targetSdkVersion 30
-        versionCode 191
-        versionName '1.9.1' // 语义化版本 https://semver.org/lang/zh-CN/
+        targetSdkVersion 32
+        versionCode 192
+        versionName '1.9.2' // 语义化版本 https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         resConfigs 'zh', 'zh-rCN', 'en', 'en-rUS' // 仅保留中文和英文
         ndk {
@@ -29,7 +31,6 @@ android {
         }
         signingConfig signingConfigs.release
     }
-    ndkVersion '24.0.8215888'
     buildTypes {
         release {
             zipAlignEnabled true
@@ -52,7 +53,6 @@ android {
             signingConfig signingConfigs.debug
         }
     }
-    buildToolsVersion '31.0.0'
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -88,9 +88,9 @@ android {
             if (outputFile != null && outputFile.name.endsWith('.apk')) {
                 def fileName
                 if (variant.buildType.name == 'release') {
-                    fileName = "Go_${defaultConfig.versionName}_arm64-v8a.apk"
+                    fileName = "Go_${defaultConfig.versionName}_arm64-v8a_release.apk"
                 } else {
-                    fileName = "Go_${defaultConfig.versionName}_arm64-v8a.apk"
+                    fileName = "Go_${defaultConfig.versionName}_arm64-v8a_debug.apk"
                 }
                 outputFileName=fileName
             }
@@ -100,10 +100,10 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
-    implementation 'androidx.preference:preference:1.1.1'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    implementation 'androidx.preference:preference:1.2.0'
+    implementation 'com.google.android.material:material:1.6.0'
     implementation 'com.squareup.okhttp3:okhttp:3.14.9'
     implementation 'com.elvishew:xlog:1.11.0'            // xLog 日志库
     implementation files('libs/BaiduLBS_Android.jar')

@@ -219,8 +219,9 @@ public class ServiceGo extends Service {
 
     private void addTestProviderGPS() {
         try {
+            // 注意，由于 android api 问题，下面的参数会提示错误
             mLocManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, true,
-                    false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_MEDIUM);
+                    false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
             if (!mLocManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 mLocManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
             }
@@ -249,6 +250,7 @@ public class ServiceGo extends Service {
 
     private void addTestProviderNetwork() {
         try {
+            // 注意，由于 android api 问题，下面的参数会提示错误
             mLocManager.addTestProvider(LocationManager.NETWORK_PROVIDER, true, false,
                     false, false, true, false,
                     true, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
