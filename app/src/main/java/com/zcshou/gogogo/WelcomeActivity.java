@@ -36,7 +36,6 @@ public class WelcomeActivity extends AppCompatActivity {
     private static final int SDK_PERMISSION_REQUEST = 127;
     private static final ArrayList<String> ReqPermissions = new ArrayList<>();
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
