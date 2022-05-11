@@ -1530,6 +1530,7 @@ public class MainActivity extends BaseActivity
             install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             // 在Broadcast中启动活动需要添加Intent.FLAG_ACTIVITY_NEW_TASK
             install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);    //添加这一句表示对目标应用临时授权该Uri所代表的文件
             install.addCategory("android.intent.category.DEFAULT");
             install.setDataAndType(ShareUtils.getUriFromFile(MainActivity.this, file), "application/vnd.android.package-archive");
             startActivity(install);
