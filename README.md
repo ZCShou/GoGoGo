@@ -75,6 +75,14 @@ Q：是否支持鸿蒙系统？
 
 A：经过部分网友测试，影梭可以在鸿蒙系统上正常运行。
 
+Q：push 到 github 报错
+
+A：git config --global  --unset https.https://github.com.proxy 和 git config --global  --unset http.https://github.com.proxy
+
+Q：编译时 java 报错
+
+A：Gradle 使用的 java 版本与 Android Studio 使用的不一致。Gradle 默认会在环境变量中收缩 JAVA_HOME 来确定 Java 位置。
+
 ## 如何贡献
 1. FORK -> PR
 2. 加入影梭开发，共同完善
