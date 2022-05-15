@@ -91,13 +91,9 @@ public class GoUtils {
             }
 
             if (index < list.size()) {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                    locationManager.addTestProvider(LocationManager.GPS_PROVIDER,locationManager.getProviderProperties(LocationManager.GPS_PROVIDER));
-                } else {
-                    // 注意，由于 android api 问题，下面的参数会提示错误
-                    locationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, true,
-                            false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
-                }
+                // 注意，由于 android api 问题，下面的参数会提示错误(以下参数是通过相关API获取的真实GPS参数，不是随便写的)
+                locationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, false,
+                        false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
                 canMockPosition = true;
             }
 

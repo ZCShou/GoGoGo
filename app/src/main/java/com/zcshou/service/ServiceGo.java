@@ -65,9 +65,9 @@ public class ServiceGo extends Service {
         mLocManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         removeTestProviderNetwork();
-        removeTestProviderGPS();
-
         addTestProviderNetwork();
+
+        removeTestProviderGPS();
         addTestProviderGPS();
 
         initGoLocation();
@@ -190,26 +190,10 @@ public class ServiceGo extends Service {
         mLocHandler.sendEmptyMessage(HANDLER_MSG_ID);
     }
 
-    private Location makeLocation() {
-        Location loc = new Location(LocationManager.GPS_PROVIDER);  // 这里只能填写 GPS，否则导致位置不生效
-        loc.setAccuracy(Criteria.ACCURACY_FINE);                    // 设定此位置的估计水平精度，以米为单位。
-        loc.setAltitude(55.0D);                 // 设置高度，在 WGS 84 参考坐标系中的米
-        loc.setBearing(1.0F);                   // 方向（度）
-        loc.setLatitude(mCurLat);                // 纬度（度）
-        loc.setLongitude(mCurLng);               // 经度（度）
-        loc.setTime(System.currentTimeMillis());    // 本地时间
-        loc.setSpeed((float) mSpeed);
-        loc.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
-        Bundle bundle = new Bundle();
-        bundle.putInt("satellites", 7);
-        loc.setExtras(bundle);
-
-        return loc;
-    }
-
     private void removeTestProviderGPS() {
         try {
             if (mLocManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                mLocManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, false);
                 mLocManager.removeTestProvider(LocationManager.GPS_PROVIDER);
             }
         } catch (Exception e) {
@@ -219,8 +203,8 @@ public class ServiceGo extends Service {
 
     private void addTestProviderGPS() {
         try {
-            // 注意，由于 android api 问题，下面的参数会提示错误
-            mLocManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, true,
+            // 注意，由于 android api 问题，下面的参数会提示错误(以下参数是通过相关API获取的真实GPS参数，不是随便写的)
+            mLocManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, false,
                     false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
             if (!mLocManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 mLocManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
@@ -232,7 +216,21 @@ public class ServiceGo extends Service {
 
     private void setLocationGPS() {
         try {
-            mLocManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, makeLocation());
+            // 尽可能模拟真实的 GPS 数据
+            Location loc = new Location(LocationManager.GPS_PROVIDER);
+            loc.setAccuracy(Criteria.ACCURACY_FINE);    // 设定此位置的估计水平精度，以米为单位。
+            loc.setAltitude(55.0D);                     // 设置高度，在 WGS 84 参考坐标系中的米
+            loc.setBearing(1.0F);                       // 方向（度）
+            loc.setLatitude(mCurLat);                   // 纬度（度）
+            loc.setLongitude(mCurLng);                  // 经度（度）
+            loc.setTime(System.currentTimeMillis());    // 本地时间
+            loc.setSpeed((float) mSpeed);
+            loc.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
+            Bundle bundle = new Bundle();
+            bundle.putInt("satellites", 7);
+            loc.setExtras(bundle);
+
+            mLocManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, loc);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -241,6 +239,7 @@ public class ServiceGo extends Service {
     private void removeTestProviderNetwork() {
         try {
             if (mLocManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                mLocManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, false);
                 mLocManager.removeTestProvider(LocationManager.NETWORK_PROVIDER);
             }
         } catch (Exception e) {
@@ -250,10 +249,10 @@ public class ServiceGo extends Service {
 
     private void addTestProviderNetwork() {
         try {
-            // 注意，由于 android api 问题，下面的参数会提示错误
+            // 注意，由于 android api 问题，下面的参数会提示错误(以下参数是通过相关API获取的真实NETWORK参数，不是随便写的)
             mLocManager.addTestProvider(LocationManager.NETWORK_PROVIDER, true, false,
-                    false, false, true, false,
-                    true, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
+                    true, true, true, true,
+                    true, Criteria.POWER_LOW, Criteria.ACCURACY_COARSE);
             if (!mLocManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                 mLocManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
             }
@@ -264,7 +263,18 @@ public class ServiceGo extends Service {
 
     private void setLocationNetwork() {
         try {
-            mLocManager.setTestProviderLocation(LocationManager.NETWORK_PROVIDER, makeLocation());
+            // 尽可能模拟真实的 NETWORK 数据
+            Location loc = new Location(LocationManager.NETWORK_PROVIDER);
+            loc.setAccuracy(Criteria.ACCURACY_COARSE);  // 设定此位置的估计水平精度，以米为单位。
+            loc.setAltitude(55.0D);                     // 设置高度，在 WGS 84 参考坐标系中的米
+            loc.setBearing(1.0F);                       // 方向（度）
+            loc.setLatitude(mCurLat);                   // 纬度（度）
+            loc.setLongitude(mCurLng);                  // 经度（度）
+            loc.setTime(System.currentTimeMillis());    // 本地时间
+            loc.setSpeed((float) mSpeed);
+            loc.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
+
+            mLocManager.setTestProviderLocation(LocationManager.NETWORK_PROVIDER, loc);
         } catch (Exception e) {
             e.printStackTrace();
         }
