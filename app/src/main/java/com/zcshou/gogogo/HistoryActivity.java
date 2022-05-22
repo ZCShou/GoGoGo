@@ -271,7 +271,7 @@ public class HistoryActivity extends BaseActivity {
             wgs84Longitude = latLngStr2[0].substring(latLngStr2[0].indexOf(":") + 1);
             wgs84Latitude = latLngStr2[1].substring(latLngStr2[1].indexOf(":") + 1);
 
-            if (!MainActivity.showHistoryLocation(bd09Longitude, bd09Latitude, wgs84Longitude, wgs84Latitude)) {
+            if (!MainActivity.showLocation(bd09Longitude, bd09Latitude, wgs84Longitude, wgs84Latitude)) {
                 GoUtils.DisplayToast(this, "定位失败,请手动选取定位点");
             }
             this.finish();

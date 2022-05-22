@@ -17,7 +17,7 @@
 ##
 &emsp;&emsp;影梭是一个基于 Android 调试 API + 百度地图实现的定位修改工具，并且同时实现了一个可以自由控制移动的摇杆。使用影梭，不需要 ROOT 权限就可以随意修改自己的当前位置以及模拟移动。
 
-> 由于 Gitee 不再适合开源，已经删除了 Gitee 上的源代码
+> 由于 [Gitee 不再适合开源](https://www.zhihu.com/question/533388365/answer/2491172345)，已经删除了 Gitee 上的源代码
 
 &emsp;&emsp;下载地址：[发行版](https://github.com/ZCShou/GoGoGo/releases)
 
@@ -46,7 +46,7 @@
 
 ## 用法
 1. 下载 APK 直接安装
-2. 启动软件，赋予相关权限
+2. 启动影梭，赋予相关权限
 3. 单击地图位置，然后点击启动按钮
 
 ## 文档
