@@ -15,11 +15,11 @@
 </div>
 
 ##
-&emsp;&emsp;影梭是一个基于 Android 调试 API + 百度地图实现的虚拟定位工具，不需要 ROOT 权限，并且同时实现了一个可以自由移动的摇杆。
+&emsp;&emsp;影梭是一个基于 Android 调试 API + 百度地图实现的定位修改工具，并且同时实现了一个可以自由控制移动的摇杆。使用影梭，不需要 ROOT 权限就可以随意修改自己的当前位置以及模拟移动。
 
-&emsp;&emsp;项目源码同时上传了 [Gitee](https://gitee.com/zcshou/gogogo) 和 [Github](https://github.com/ZCShou/GoGoGo)，传送门： https://gitee.com/zcshou/gogogo 或 https://github.com/ZCShou/GoGoGo ，鉴于 Github 访问缓慢，大家可以去 Gitee。
+> 由于 Gitee 不再适合开源，已经删除了 Gitee 上的源代码
 
-下载地址：[发行版](https://gitee.com/zcshou/gogogo/releases/)
+&emsp;&emsp;下载地址：[发行版](https://github.com/ZCShou/GoGoGo/releases)
 
 ## 背景
 &emsp;&emsp;之前在玩一款 VR 游戏：一起来捉妖。为了省事，就想有没有可以更改位置的 APP。经过一番摸索发现确实有不少可以修改位置的 APP。但是，绝大多数这种 APP 都是收费的！我比较感兴趣的是这样的技术是如何实现的，因此决定研究研究自己写一个！
@@ -75,11 +75,15 @@ Q：是否支持鸿蒙系统？
 
 A：经过部分网友测试，影梭可以在鸿蒙系统上正常运行。
 
-Q：push 到 github 报错
+Q：为何在微信等腾讯系应用上定位不起作用？
+
+A：建议去问一下它腾讯。
+
+Q：push 到 github 报错？
 
 A：git config --global  --unset https.https://github.com.proxy 和 git config --global  --unset http.https://github.com.proxy
 
-Q：编译时 java 报错
+Q：编译时 java 报错？
 
 A：Gradle 使用的 java 版本与 Android Studio 使用的不一致。Gradle 默认会在环境变量中收缩 JAVA_HOME 来确定 Java 位置。
 
