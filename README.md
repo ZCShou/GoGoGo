@@ -67,13 +67,13 @@ Q：为何不支持 Android 8.0 以下版本？
 
 A：因为手里没有机器无法进行适配。。。
 
-Q：为何定位不稳定，总是会飘回真实位置？
+Q：为何定位不是很稳定，偶尔会飘回真实位置？
 
-A：这是是由于实现原理导致的，Android 调试 API 固有的问题。确切的说，应该是手机开启了其他定位方式，例如，基站定位、wifi定位等
+A：这是是由于实现原理导致的，Android 调试 API 固有的问题。确切的说，应该是手机本身还开启了其他定位方式，例如，基站定位、wifi定位等导致的
 
 Q：是否支持鸿蒙系统？
 
-A：经过部分网友测试，影梭可以在鸿蒙系统上正常运行。
+A：经过测试，影梭可以在鸿蒙系统上正常运行。
 
 Q：为何在微信等腾讯系应用上定位不起作用？
 
@@ -81,7 +81,7 @@ A：建议去问一下它腾讯。
 
 Q：push 到 github 报错？
 
-A：git config --global  --unset https.https://github.com.proxy 和 git config --global  --unset http.https://github.com.proxy
+A：请设置代理
 
 Q：编译时 java 报错？
 
