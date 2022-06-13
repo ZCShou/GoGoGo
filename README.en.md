@@ -11,11 +11,9 @@
 </div>
 
 <div align="center">
-影梭 - 用于 Android 8.0+ 的虚拟定位软件。
+GoGoGo - A mock location app without root on android 8.0+.
 </div>
 
 ##
-影梭是一个基于 Android 调试 API + 百度地图实现的虚拟定位工具，并且同时实现了一个可以自由移动的摇杆。
 
-
-
+[Refrence Chinese, please](./README.md)
