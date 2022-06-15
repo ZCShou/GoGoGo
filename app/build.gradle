@@ -22,8 +22,8 @@ android {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 27
         targetSdkVersion 32
-        versionCode 1100
-        versionName '1.10.0' // 语义化版本 https://semver.org/lang/zh-CN/
+        versionCode 1101
+        versionName '1.10.1' // 语义化版本 https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         resConfigs 'zh', 'zh-rCN', 'en', 'en-rUS' // 仅保留中文和英文
         ndk {
@@ -47,6 +47,7 @@ android {
             // the Android Gradle plugin. To learn more, go to the section about
             // R8 configuration files.
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
             signingConfig signingConfigs.release
         }
         debug {
