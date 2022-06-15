@@ -29,7 +29,6 @@ import com.zcshou.gogogo.R;
 import com.zcshou.joystick.JoyStick;
 
 public class ServiceGo extends Service {
-    // 定位相关变量
     public static final double DEFAULT_LAT = 36.667662;
     public static final double DEFAULT_LNG = 117.027707;
     private double mCurLat = DEFAULT_LAT;
