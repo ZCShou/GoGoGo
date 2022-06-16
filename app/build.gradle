@@ -16,7 +16,7 @@ android {
         }
     }
     ndkVersion '24.0.8215888'
-    buildToolsVersion '32.0.0'
+    buildToolsVersion '33.0.0'
     compileSdkVersion 32
     defaultConfig {
         applicationId "com.zcshou.gogogo"
