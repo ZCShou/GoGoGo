@@ -10,7 +10,7 @@ stages:
         name: build_gradle
         displayName: Gradle 构建
         # 支持6、7、8、9、10、11六个版本
-        jdkVersion: 8
+        jdkVersion: 11
         # 支持4.1、4.2、4.3、4.4四个版本
         gradleVersion: 4.4
         # 构建命令
