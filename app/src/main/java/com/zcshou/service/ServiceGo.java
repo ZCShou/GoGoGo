@@ -12,7 +12,9 @@ import android.content.IntentFilter;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.location.provider.ProviderProperties;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -204,8 +206,13 @@ public class ServiceGo extends Service {
     private void addTestProviderGPS() {
         try {
             // 注意，由于 android api 问题，下面的参数会提示错误(以下参数是通过相关API获取的真实GPS参数，不是随便写的)
-            mLocManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, false,
-                    false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                mLocManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, false,
+                        false, true, true, true, ProviderProperties.POWER_USAGE_HIGH, ProviderProperties.ACCURACY_FINE);
+            } else {
+                mLocManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, false,
+                        false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
+            }
             if (!mLocManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 mLocManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
             }
@@ -250,9 +257,15 @@ public class ServiceGo extends Service {
     private void addTestProviderNetwork() {
         try {
             // 注意，由于 android api 问题，下面的参数会提示错误(以下参数是通过相关API获取的真实NETWORK参数，不是随便写的)
-            mLocManager.addTestProvider(LocationManager.NETWORK_PROVIDER, true, false,
-                    true, true, true, true,
-                    true, Criteria.POWER_LOW, Criteria.ACCURACY_COARSE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                mLocManager.addTestProvider(LocationManager.NETWORK_PROVIDER, true, false,
+                        true, true, true, true,
+                        true, ProviderProperties.POWER_USAGE_LOW, ProviderProperties.ACCURACY_COARSE);
+            } else {
+                mLocManager.addTestProvider(LocationManager.NETWORK_PROVIDER, true, false,
+                        true, true, true, true,
+                        true, Criteria.POWER_LOW, Criteria.ACCURACY_COARSE);
+            }
             if (!mLocManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
                 mLocManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
             }
