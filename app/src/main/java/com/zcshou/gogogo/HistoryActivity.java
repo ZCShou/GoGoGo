@@ -260,16 +260,16 @@ public class HistoryActivity extends BaseActivity {
             String wgs84Latitude;
             //bd09坐标
             String bd09LatLng = (String) ((TextView) view.findViewById(R.id.BDLatLngText)).getText();
-            bd09LatLng = bd09LatLng.substring(bd09LatLng.indexOf("[") + 1, bd09LatLng.indexOf("]"));
+            bd09LatLng = bd09LatLng.substring(bd09LatLng.indexOf('[') + 1, bd09LatLng.indexOf(']'));
             String[] latLngStr = bd09LatLng.split(" ");
-            bd09Longitude = latLngStr[0].substring(latLngStr[0].indexOf(":") + 1);
-            bd09Latitude = latLngStr[1].substring(latLngStr[1].indexOf(":") + 1);
+            bd09Longitude = latLngStr[0].substring(latLngStr[0].indexOf(':') + 1);
+            bd09Latitude = latLngStr[1].substring(latLngStr[1].indexOf(':') + 1);
             //wgs84坐标
             String wgs84LatLng = (String) ((TextView) view.findViewById(R.id.WGSLatLngText)).getText();
-            wgs84LatLng = wgs84LatLng.substring(wgs84LatLng.indexOf("[") + 1, wgs84LatLng.indexOf("]"));
+            wgs84LatLng = wgs84LatLng.substring(wgs84LatLng.indexOf('[') + 1, wgs84LatLng.indexOf(']'));
             String[] latLngStr2 = wgs84LatLng.split(" ");
-            wgs84Longitude = latLngStr2[0].substring(latLngStr2[0].indexOf(":") + 1);
-            wgs84Latitude = latLngStr2[1].substring(latLngStr2[1].indexOf(":") + 1);
+            wgs84Longitude = latLngStr2[0].substring(latLngStr2[0].indexOf(':') + 1);
+            wgs84Latitude = latLngStr2[1].substring(latLngStr2[1].indexOf(':') + 1);
 
             if (!MainActivity.showLocation(bd09Longitude, bd09Latitude, wgs84Longitude, wgs84Latitude)) {
                 GoUtils.DisplayToast(this, "定位失败,请手动选取定位点");

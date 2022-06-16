@@ -634,19 +634,19 @@ public class JoyStick extends View {
 
             // wgs84坐标
             String wgs84LatLng = (String) ((TextView) view.findViewById(R.id.WGSLatLngText)).getText();
-            wgs84LatLng = wgs84LatLng.substring(wgs84LatLng.indexOf("[") + 1, wgs84LatLng.indexOf("]"));
+            wgs84LatLng = wgs84LatLng.substring(wgs84LatLng.indexOf('[') + 1, wgs84LatLng.indexOf(']'));
             String[] wgs84latLngStr = wgs84LatLng.split(" ");
-            String wgs84Longitude = wgs84latLngStr[0].substring(wgs84latLngStr[0].indexOf(":") + 1);
-            String wgs84Latitude = wgs84latLngStr[1].substring(wgs84latLngStr[1].indexOf(":") + 1);
+            String wgs84Longitude = wgs84latLngStr[0].substring(wgs84latLngStr[0].indexOf(':') + 1);
+            String wgs84Latitude = wgs84latLngStr[1].substring(wgs84latLngStr[1].indexOf(':') + 1);
 
             mListener.onPositionInfo(Double.parseDouble(wgs84Longitude), Double.parseDouble(wgs84Latitude));
 
             // 注意这里在选择位置之后需要刷新地图
             String bdLatLng = (String) ((TextView) view.findViewById(R.id.BDLatLngText)).getText();
-            bdLatLng = bdLatLng.substring(bdLatLng.indexOf("[") + 1, bdLatLng.indexOf("]"));
+            bdLatLng = bdLatLng.substring(bdLatLng.indexOf('[') + 1, bdLatLng.indexOf(']'));
             String[] bdLatLngStr = bdLatLng.split(" ");
-            String bdLongitude = bdLatLngStr[0].substring(bdLatLngStr[0].indexOf(":") + 1);
-            String bdLatitude = bdLatLngStr[1].substring(bdLatLngStr[1].indexOf(":") + 1);
+            String bdLongitude = bdLatLngStr[0].substring(bdLatLngStr[0].indexOf(':') + 1);
+            String bdLatitude = bdLatLngStr[1].substring(bdLatLngStr[1].indexOf(':') + 1);
             mCurMapLngLat = new LatLng(Double.parseDouble(bdLatitude), Double.parseDouble(bdLongitude));
 
             GoUtils.DisplayToast(mContext, "位置已传送");
