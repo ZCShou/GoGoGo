@@ -23,9 +23,9 @@ android {
         minSdkVersion 27
         targetSdkVersion 32
         versionCode 1101
-        versionName '1.10.1' // 语义化版本 https://semver.org/lang/zh-CN/
+        versionName '1.10.1' // https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        resConfigs 'zh', 'zh-rCN', 'en', 'en-rUS' // 仅保留中文和英文
+        resConfigs 'zh', 'zh-rCN', 'en', 'en-rUS'
         ndk {
             abiFilters "arm64-v8a"
         }
@@ -106,7 +106,7 @@ dependencies {
     implementation 'androidx.preference:preference:1.2.0'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'com.squareup.okhttp3:okhttp:3.14.9'
-    implementation 'com.elvishew:xlog:1.11.0'            // xLog 日志库
+    implementation 'com.elvishew:xlog:1.11.0'
     implementation files('libs/BaiduLBS_Android.jar')
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
