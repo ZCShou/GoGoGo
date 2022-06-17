@@ -114,8 +114,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-public class MainActivity extends BaseActivity
-        implements SensorEventListener {
+public class MainActivity extends BaseActivity implements SensorEventListener {
     /* 对外 */
     public static final String LAT_MSG_ID = "LAT_VALUE";
     public static final String LNG_MSG_ID = "LNG_VALUE";
