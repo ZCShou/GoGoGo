@@ -1,5 +1,6 @@
 package com.zcshou.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -77,7 +78,8 @@ public class GoUtils {
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
-    // 判断是否已在开发者选项中开启模拟位置权限
+    // 判断是否已在开发者选项中开启模拟位置权限（注意下面临时添加 @SuppressLint("wrongconstant") 以处理 addTestProvider 参数值的 lint 错误）
+    @SuppressLint("wrongconstant")
     public static boolean isAllowMockLocation(Context context) {
         boolean canMockPosition = false;
         int index;

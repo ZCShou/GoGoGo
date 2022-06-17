@@ -1,5 +1,6 @@
 package com.zcshou.service;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -203,6 +204,8 @@ public class ServiceGo extends Service {
         }
     }
 
+    // 注意下面临时添加 @SuppressLint("wrongconstant") 以处理 addTestProvider 参数值的 lint 错误
+    @SuppressLint("wrongconstant")
     private void addTestProviderGPS() {
         try {
             // 注意，由于 android api 问题，下面的参数会提示错误(以下参数是通过相关API获取的真实GPS参数，不是随便写的)
@@ -254,6 +257,8 @@ public class ServiceGo extends Service {
         }
     }
 
+    // 注意下面临时添加 @SuppressLint("wrongconstant") 以处理 addTestProvider 参数值的 lint 错误
+    @SuppressLint("wrongconstant")
     private void addTestProviderNetwork() {
         try {
             // 注意，由于 android api 问题，下面的参数会提示错误(以下参数是通过相关API获取的真实NETWORK参数，不是随便写的)
