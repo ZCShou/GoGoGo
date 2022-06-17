@@ -5,11 +5,6 @@
 
 version: 2
 updates:
-  - package-ecosystem: "Gradle" # See documentation for possible values
-    directory: "/" # Location of package manifests
-    schedule:
-      interval: "daily"
-updates:
   # Updates for Github Actions used in the repo
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -24,6 +19,5 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    open-pull-requests-limit: 200
     reviewers:
       - "ZCShou"
