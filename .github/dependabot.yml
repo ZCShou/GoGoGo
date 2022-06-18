@@ -21,3 +21,6 @@ updates:
       interval: "daily"
     reviewers:
       - "ZCShou"
+    ignore:
+      - dependency-name: "com.squareup.okhttp3:okhttp"
+        versions: ["4.x"]
