@@ -3,13 +3,13 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         debug {
-            storeFile file('..\\GoGoGo.jks')
+            storeFile file('..\\keystore\\GoGoGo.jks')
             storePassword 'GoGoGo'
             keyAlias 'GoGoKey'
             keyPassword 'GoGoGo'
         }
         release {
-            storeFile file('..\\GoGoGo.jks')
+            storeFile file('..\\keystore\\GoGoGo.jks')
             storePassword 'GoGoGo'
             keyAlias 'GoGoKey'
             keyPassword 'GoGoGo'
@@ -22,8 +22,8 @@ android {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 27
         targetSdkVersion 32
-        versionCode 1101
-        versionName '1.10.1' // https://semver.org/lang/zh-CN/
+        versionCode 1102
+        versionName '1.10.2' // https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         resConfigs 'zh', 'zh-rCN', 'en', 'en-rUS'
         ndk {
