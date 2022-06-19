@@ -27,3 +27,11 @@
 
 <!-- 请在上面添加相关 ISSUE 的链接. -->
 <!-- Add the links of related issue. -->
+
+### 合并 Merge
+
+<!-- 合并 PR 时，检查下面的工作是否完成. -->
+<!-- Check blow items, when merge this PR. -->
+
+- [ ] 文档是否更新 If document is updated or not
+- [ ] 变更记录是否记录 If changelog is updated or not
