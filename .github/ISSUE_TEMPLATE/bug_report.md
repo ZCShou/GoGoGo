@@ -1,9 +1,10 @@
 ---
 name: 报告问题
-about: Bug Report.
-title: '[BUG] Report bug'
-labels: 'bug'
-assignees:
+about: Bug Report
+title: "[BUG] Report bug"
+labels: bug
+assignees: ''
+
 ---
 
 <!-- ⚠️⚠️ 不要删除这些注释 ⚠️⚠️ -->
