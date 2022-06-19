@@ -1,5 +1,5 @@
 # name 字段用于指定 Workflow 的名字
-name: Build GoGoGo
+name: Build
 
 # 在 on 字段下列举触发条件（事件），可以有多种
 on:
