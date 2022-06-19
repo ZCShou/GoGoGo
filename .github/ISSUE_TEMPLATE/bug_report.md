@@ -1,10 +1,9 @@
 ---
-name: 报告问题
-about: Bug Report
+name: 报告问题 / Bug Report
+about: If you find some bugs, please use this template.
 title: "[BUG] Report bug"
 labels: bug
 assignees: ''
-
 ---
 
 <!-- ⚠️⚠️ 不要删除这些注释 ⚠️⚠️ -->

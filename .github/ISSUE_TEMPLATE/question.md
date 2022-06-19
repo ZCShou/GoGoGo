@@ -1,6 +1,6 @@
 ---
-name: '疑问或帮助'
-about: Question or need help
+name: '疑问或帮助 / Question or Help'
+about: If you have any question or need help, please use this template.
 title: '[Question] Help'
 labels: 'question'
 assignees: ''

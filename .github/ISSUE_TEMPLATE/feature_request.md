@@ -1,10 +1,9 @@
 ---
-name: 需求、功能、建议
-about: demands, functions, suggestions
+name: 需求、功能、建议 / Demands, functions, suggestions
+about: If you have please use this template.demands, functions or suggestions, please use this template.
 title: "[Feature] New function"
-labels: enhancement
+labels: feature
 assignees: ''
-
 ---
 
 <!-- ⚠️⚠️ 不要删除这些注释 ⚠️⚠️ -->
