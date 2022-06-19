@@ -1,0 +1,33 @@
+name: Issue Close Check
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  issue-close-require:
+    permissions:
+      issues: write  # for actions-cool/issues-helper to update issues
+      pull-requests: write  # for actions-cool/issues-helper to update PRs
+    runs-on: ubuntu-latest
+    steps:
+      - name: need reproduce
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issues'
+          labels: '🤔 Need Reproduce'
+          inactive-day: 3
+
+      - name: needs more info
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issues'
+          labels: 'needs-more-info'
+          inactive-day: 3
+          body: |
+            Since the issue do not response in 3 days. This issue will be closed. If you have any questions, you can comment and reply.
+
+            由于该 issue 在 3 天未收到回应。现关闭 issue，若有任何问题，可评论回复。
