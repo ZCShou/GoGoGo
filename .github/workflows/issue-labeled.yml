@@ -26,8 +26,6 @@ jobs:
 
             你好 @${{ github.event.issue.user.login }}，感谢您提交反馈。欢迎直接在此仓库 [创建一个 Pull Request](https://help.github.com/en/articles/creating-a-pull-request) 来解决这个问题。请务必填写 Pull Request 内的[预设模板](https://github.com/ZCShou/GoGoGo/blob/master/.github/PULL_REQUEST_TEMPLATE.md)，并确保 CI 通过，我们会尽快进行 Review，提前感谢和期待您的贡献。
 
-            ![giphy](https://user-images.githubusercontent.com/507615/62342668-4735dc00-b51a-11e9-92a7-d46fbb1cc0c7.gif)
-
       - name: need reproduce
         if: github.event.label.name == 'need reproduce'
         uses: actions-cool/issues-helper@v3

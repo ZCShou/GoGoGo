@@ -1,4 +1,4 @@
-name: Issue Open Check
+name: Issue Open
 
 on:
   issues:
