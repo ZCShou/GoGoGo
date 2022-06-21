@@ -1,0 +1,71 @@
+name: Release Build
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'Release*'
+permissions:
+  contents: write
+jobs:
+  Build:
+    name: Build/Sign APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get Tag
+        id: var
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+
+      - name: Build APK
+        run: bash ./gradlew assembleRelease
+
+      - name: Sign APK
+        id: sign_apk
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Build Changelog
+        id: changelog
+        uses: ardalanamini/auto-changelog@v3.2.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          prerelease: false
+          files: ${{steps.sign_apk.outputs.signedReleaseFile}}
+        env:
+          GITHUB_REPOSITORY: my_gh_org/my_gh_repo
+
+      # - name: Create release
+      #   uses: actions/create-release@v1
+      #   id: create_release
+      #   with:
+      #     draft: false
+      #     prerelease: false
+      #     release_name: Release ${{ github.ref }}
+      #     tag_name: ${{ github.ref }}
+      #     body: |
+      #       ${{ steps.changelog.outputs.changelog }}
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+
+      # - name: Upload APK
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ${{steps.sign_apk.outputs.signedReleaseFile}}
+      #     asset_name: GoGoGo-${{ steps.var.outputs.tag }}.apk
+      #     asset_content_type: application/zip

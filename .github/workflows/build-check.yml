@@ -1,5 +1,5 @@
 # name 字段用于指定 Workflow 的名字
-name: Build
+name: Build Check
 
 # 在 on 字段下列举触发条件（事件），可以有多种
 on:
@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
   # 仓库收到 Push 时触发
   push:
-    tags:
-      - 'Release*'
+    branches:
+      - master
   # 仓库收到 pull_request 时触发
   pull_request:
     branches:
