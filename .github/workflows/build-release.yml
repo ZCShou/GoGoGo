@@ -34,18 +34,16 @@ jobs:
         id: changelog
         uses: ardalanamini/auto-changelog@v3.2.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
 
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          token: ${{ github.token }}
           body: ${{ steps.changelog.outputs.changelog }}
           prerelease: false
           files: ${{steps.sign_apk.outputs.signedReleaseFile}}
-        env:
-          GITHUB_REPOSITORY: my_gh_org/my_gh_repo
 
       # - name: Create release
       #   uses: actions/create-release@v1
