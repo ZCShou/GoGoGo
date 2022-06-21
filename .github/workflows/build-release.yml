@@ -1,14 +1,17 @@
-name: Release Build
+name: Build Release
+
 on:
   workflow_dispatch:
   push:
     tags:
       - 'Release*'
+
 permissions:
   contents: write
+
 jobs:
   Build:
-    name: Build/Sign APK
+    name: Belease APK
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -20,6 +23,7 @@ jobs:
       - name: Build APK
         run: bash ./gradlew assembleRelease
 
+      # https://github.com/marketplace/actions/sign-android-release
       - name: Sign APK
         id: sign_apk
         uses: r0adkll/sign-android-release@v1
@@ -30,13 +34,16 @@ jobs:
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
 
+      # https://github.com/marketplace/actions/auto-changelog
+      # require commit format are "type(category): description [flag]"
       - name: Build Changelog
         id: changelog
         uses: ardalanamini/auto-changelog@v3.2.1
         with:
           token: ${{ github.token }}
 
-      - name: Release
+      # https://github.com/marketplace/actions/gh-release
+      - name: Release APK
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
