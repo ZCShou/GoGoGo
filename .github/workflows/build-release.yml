@@ -36,11 +36,32 @@ jobs:
 
       # https://github.com/marketplace/actions/auto-changelog
       # require commit format are "type(category): description [flag]"
-      - name: Build Changelog
+      - name: Changelog
+        uses: ardalanamini/auto-changelog@v3
         id: changelog
-        uses: ardalanamini/auto-changelog@v3.2.1
         with:
-          token: ${{ github.token }}
+          github-token: ${{ github.token }}
+          commit-types: |
+            breaking: Breaking Changes
+            feat: New Features
+            fix: Bug Fixes
+            revert: Reverts
+            perf: Performance Improvements
+            refactor: Refactors
+            deps: Dependencies
+            docs: Documentation Changes
+            style: Code Style Changes
+            build: Build System
+            ci: Continuous Integration
+            test: Tests
+            chore: Chores
+            other: Other Changes
+          default-commit-type: Other Changes
+          release-name: v1.0.0
+          mention-authors: true
+          mention-new-contributors: true
+          include-compare: true
+          semver: true
 
       # https://github.com/marketplace/actions/gh-release
       - name: Release APK
