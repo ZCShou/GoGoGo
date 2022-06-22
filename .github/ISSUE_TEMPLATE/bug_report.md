@@ -32,7 +32,12 @@ assignees: ''
 1. 
 2. 
 
-
-
 <!-- 请在上方描述如何复现该问题。-->
 <!-- Please describe how to reproduce the bug. -->
+
+### 如何修复 / How to fix
+
+
+
+<!-- 如果您有对应的修复方法，请在上方描述你的方法。欢迎直接提交一个 PR。 -->
+<!-- If you know how to fix, please describe your method above. Welcome to submit a PR directly. -->
