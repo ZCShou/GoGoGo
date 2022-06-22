@@ -12,7 +12,7 @@
 </div>
 <div align="center">
 
-[![Build](https://github.com/ZCShou/GoGoGo/actions/workflows/android.yml/badge.svg)](https://github.com/ZCShou/GoGoGo/actions/workflows/android.yml)
+[![Build Check](https://github.com/ZCShou/GoGoGo/actions/workflows/build-check.yml/badge.svg)](https://github.com/ZCShou/GoGoGo/actions/workflows/build-check.yml)
 [![CodeQL](https://github.com/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml)
 </div>
 
