@@ -61,7 +61,7 @@ jobs:
           mention-authors: false
           mention-new-contributors: true
           include-compare: false
-          semver: true
+          semver: false
 
       # https://github.com/marketplace/actions/gh-release
       - name: Release APK
