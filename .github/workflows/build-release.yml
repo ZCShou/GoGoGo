@@ -11,9 +11,10 @@ permissions:
 
 jobs:
   Build:
-    name: Belease APK
+    name: Release APK
     runs-on: ubuntu-latest
     steps:
+      # https://github.com/marketplace/actions/checkout
       - uses: actions/checkout@v3
 
       - name: Get Tag
@@ -36,7 +37,7 @@ jobs:
 
       # https://github.com/marketplace/actions/auto-changelog
       # require commit format are "type(category): description [flag]"
-      - name: Changelog
+      - name: Make Changelog
         uses: ardalanamini/auto-changelog@v3
         id: changelog
         with:
@@ -57,10 +58,9 @@ jobs:
             chore: Chores
             other: Other Changes
           default-commit-type: Other Changes
-          release-name: v1.0.0
-          mention-authors: true
+          mention-authors: false
           mention-new-contributors: true
-          include-compare: true
+          include-compare: false
           semver: true
 
       # https://github.com/marketplace/actions/gh-release
@@ -72,26 +72,3 @@ jobs:
           body: ${{ steps.changelog.outputs.changelog }}
           prerelease: false
           files: ${{steps.sign_apk.outputs.signedReleaseFile}}
-
-      # - name: Create release
-      #   uses: actions/create-release@v1
-      #   id: create_release
-      #   with:
-      #     draft: false
-      #     prerelease: false
-      #     release_name: Release ${{ github.ref }}
-      #     tag_name: ${{ github.ref }}
-      #     body: |
-      #       ${{ steps.changelog.outputs.changelog }}
-      #   env:
-      #     GITHUB_TOKEN: ${{ github.token }}
-
-      # - name: Upload APK
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ github.token }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: ${{steps.sign_apk.outputs.signedReleaseFile}}
-      #     asset_name: GoGoGo-${{ steps.var.outputs.tag }}.apk
-      #     asset_content_type: application/zip

@@ -5,10 +5,10 @@ name: Build Check
 on:
   # 手动使用 Github WebUI 触发
   workflow_dispatch:
-  # # 仓库收到 Push 时触发
-  # push:
-  #   branches:
-  #     - master
+  # 仓库收到 Push 时触发
+  push:
+    branches:
+      - master
   # 仓库收到 pull_request 时触发
   pull_request:
     branches:
