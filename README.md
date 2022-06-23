@@ -1,5 +1,5 @@
 <p align="center">
-<img src="./docs/LOGO.png" height="80"/>
+<img src="./docs/images/LOGO.png" height="80"/>
 </p>
 
 <div align="center">
@@ -16,16 +16,15 @@
 [![CodeQL](https://github.com/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml)
 </div>
 
-
 <div align="center">
-影梭 - 用于 Android 8.0+ 的无需 ROOT 权限的虚拟定位软件。
+影梭 - 用于 Android 8.0+ 的无需 ROOT 权限的虚拟定位软件
 </div>
 
 ##
 &emsp;&emsp;影梭是一个基于 Android 调试 API + 百度地图实现的定位修改工具，并且同时实现了一个可以自由控制移动的摇杆。使用影梭，不需要 ROOT 权限就可以随意修改自己的当前位置以及模拟移动。
 
-1. 源码仓库：[Github](https://github.com/ZCShou/GoGoGo)（推荐）、[Gitee](https://gitee.com/zcshou/gogogo)
-2. 下载地址：[Github](https://github.com/ZCShou/GoGoGo/releases)（推荐）、[Gitee](https://gitee.com/zcshou/gogogo/releases)
+1. 源码仓库：[Github](https://github.com/ZCShou/GoGoGo)（推荐）、[Gitee](https://gitee.com/zcshou/gogogo)（镜像）
+2. 下载地址：[Github](https://github.com/ZCShou/GoGoGo/releases)（推荐）、[Gitee](https://gitee.com/zcshou/gogogo/releases)（镜像）
 
 ## 背景
 &emsp;&emsp;之前在玩一款 VR 游戏：一起来捉妖。为了省事，就想有没有可以更改位置的 APP。经过一番摸索发现确实有不少可以修改位置的 APP。但是，绝大多数这种 APP 都是收费的！我比较感兴趣的是这样的技术是如何实现的，因此决定研究研究自己写一个！
@@ -46,9 +45,9 @@
 5. 直接输入坐标
 
 ## 截图
-![摇杆类型.jpg](./docs/摇杆类型.jpg)
-![位置搜索与记录.jpg](./docs/位置搜索与记录.jpg)
-![悬浮窗地图_坐标输入.jpg](./docs/悬浮窗地图_坐标输入.jpg)
+![摇杆类型.jpg](./docs/images/摇杆类型.jpg)
+![位置搜索与记录.jpg](./docs/images/位置搜索与记录.jpg)
+![悬浮窗地图_坐标输入.jpg](./docs/images/悬浮窗地图_坐标输入.jpg)
 
 ## 用法
 1. 下载 APK 直接安装
