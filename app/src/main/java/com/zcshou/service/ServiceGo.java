@@ -173,6 +173,7 @@ public class ServiceGo extends Service {
         // Handler 对象与 HandlerThread 的 Looper 对象的绑定
         mLocHandler = new Handler(mLocHandlerThread.getLooper()) {
             // 这里的Handler对象可以看作是绑定在HandlerThread子线程中，所以handlerMessage里的操作是在子线程中运行的
+            @Override
             public void handleMessage(@NonNull Message msg) {
                 try {
                     Thread.sleep(100);

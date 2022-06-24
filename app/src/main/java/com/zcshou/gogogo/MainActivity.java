@@ -856,6 +856,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             /**
              * 单击地图
              */
+            @Override
             public void onMapClick(LatLng point) {
                 mMarkLatLngMap = point;
                 markMap();
@@ -866,6 +867,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             /**
              * 单击地图中的POI点
              */
+            @Override
             public void onMapPoiClick(MapPoi poi) {
                 mMarkLatLngMap = poi.getPosition();
                 markMap();
@@ -878,6 +880,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             /**
              * 长按地图
              */
+            @Override
             public void onMapLongClick(LatLng point) {
                 mMarkLatLngMap = point;
                 markMap();
@@ -891,6 +894,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             /**
              * 双击地图
              */
+            @Override
             public void onMapDoubleClick(LatLng point) {
                 mBaiduMap.animateMapStatus(MapStatusUpdateFactory.zoomIn());
             }
@@ -975,6 +979,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                  * @param diagnosticType  诊断类型（1~9）
                  * @param diagnosticMessage 具体的诊断信息释义
                  */
+                @Override
                 public void onLocDiagnosticMessage(int locType, int diagnosticType, String diagnosticMessage) {
                     XLog.i("Baidu ERROR: " + locType + "-" + diagnosticType + "-" + diagnosticMessage);
                 }

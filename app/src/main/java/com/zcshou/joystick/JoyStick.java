@@ -507,6 +507,7 @@ public class JoyStick extends View {
             /**
              * 单击地图
              */
+            @Override
             public void onMapClick(LatLng point) {
                 markBaiduMap(point);
             }
@@ -514,6 +515,7 @@ public class JoyStick extends View {
             /**
              * 单击地图中的POI点
              */
+            @Override
             public void onMapPoiClick(MapPoi poi) {
                 markBaiduMap(poi.getPosition());
             }
@@ -523,6 +525,7 @@ public class JoyStick extends View {
             /**
              * 长按地图
              */
+            @Override
             public void onMapLongClick(LatLng point) {
                 markBaiduMap(point);
             }
@@ -532,6 +535,7 @@ public class JoyStick extends View {
             /**
              * 双击地图
              */
+            @Override
             public void onMapDoubleClick(LatLng point) {
                 markBaiduMap(point);
             }
