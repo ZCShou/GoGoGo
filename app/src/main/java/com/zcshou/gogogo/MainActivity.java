@@ -1030,6 +1030,63 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 mBaiduMap.setMapType(BaiduMap.MAP_TYPE_SATELLITE);
             }
         });
+
+        ImageButton curPosBtn = this.findViewById(R.id.cur_position);
+        curPosBtn.setOnClickListener(v -> resetMap());
+
+        ImageButton zoomInBtn = this.findViewById(R.id.zoom_in);
+        zoomInBtn.setOnClickListener(v -> mBaiduMap.animateMapStatus(MapStatusUpdateFactory.zoomIn()));
+
+        ImageButton zoomOutBtn = this.findViewById(R.id.zoom_out);
+        zoomOutBtn.setOnClickListener(v -> mBaiduMap.animateMapStatus(MapStatusUpdateFactory.zoomOut()));
+
+        ImageButton inputPosBtn = this.findViewById(R.id.input_pos);
+        inputPosBtn.setOnClickListener(v -> {
+            AlertDialog dialog;
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("请输入经度和纬度");
+            View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.input_position, null);
+            builder.setView(view);
+            dialog = builder.show();
+
+            EditText dialog_lng = view.findViewById(R.id.joystick_longitude);
+            EditText dialog_lat = view.findViewById(R.id.joystick_latitude);
+            RadioButton rbBD = view.findViewById(R.id.pos_type_bd);
+
+            Button btnGo = view.findViewById(R.id.input_position_ok);
+            btnGo.setOnClickListener(v2 -> {
+                String dialog_lng_str = dialog_lng.getText().toString();
+                String dialog_lat_str = dialog_lat.getText().toString();
+
+                if (TextUtils.isEmpty(dialog_lng_str) || TextUtils.isEmpty(dialog_lat_str)) {
+                    GoUtils.DisplayToast(MainActivity.this,"输入不能为空");
+                } else {
+                    double dialog_lng_double = Double.parseDouble(dialog_lng_str);
+                    double dialog_lat_double = Double.parseDouble(dialog_lat_str);
+
+                    if (dialog_lng_double > 180.0 || dialog_lng_double < -180.0 || dialog_lat_double > 90.0 || dialog_lat_double < -90.0) {
+                        GoUtils.DisplayToast(MainActivity.this, "经纬度超出限制!\n-180.0<经度<180.0\n-90.0<纬度<90.0");
+                    } else {
+                        if (rbBD.isChecked()) {
+                            mMarkLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
+                        } else {
+                            double[] bdLonLat = MapUtils.wgs2bd09(dialog_lat_double, dialog_lng_double);
+                            mMarkLatLngMap = new LatLng(bdLonLat[1], bdLonLat[0]);
+                        }
+
+                        markMap();
+
+                        MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
+                        mBaiduMap.setMapStatus(mapstatusupdate);
+
+                        dialog.dismiss();
+                    }
+                }
+            });
+
+            Button btnCancel = view.findViewById(R.id.input_position_cancel);
+            btnCancel.setOnClickListener(v1 -> dialog.dismiss());
+        });
     }
 
     //标定选择的位置
@@ -1148,70 +1205,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
         return ret;
     }
-
-    //返回当前位置
-    public void goCurrentPosition(View view) {
-        resetMap();
-    }
-
-    //放大地图
-    public void zoomInMap(View view) {
-        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.zoomIn());
-    }
-
-    //缩小地图
-    public void zoomOutMap(View view) {
-        mBaiduMap.animateMapStatus(MapStatusUpdateFactory.zoomOut());
-    }
-
-    //输入坐标
-    public void goInputPosition(View view1) {
-        AlertDialog dialog;
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle("请输入经度和纬度");
-        View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.input_position, null);
-        builder.setView(view);
-        dialog = builder.show();
-
-        EditText dialog_lng = view.findViewById(R.id.joystick_longitude);
-        EditText dialog_lat = view.findViewById(R.id.joystick_latitude);
-        RadioButton rbBD = view.findViewById(R.id.pos_type_bd);
-
-        Button btnGo = view.findViewById(R.id.input_position_ok);
-        btnGo.setOnClickListener(v -> {
-            String dialog_lng_str = dialog_lng.getText().toString();
-            String dialog_lat_str = dialog_lat.getText().toString();
-
-            if (TextUtils.isEmpty(dialog_lng_str) || TextUtils.isEmpty(dialog_lat_str)) {
-                GoUtils.DisplayToast(this,"输入不能为空");
-            } else {
-                double dialog_lng_double = Double.parseDouble(dialog_lng_str);
-                double dialog_lat_double = Double.parseDouble(dialog_lat_str);
-
-                if (dialog_lng_double > 180.0 || dialog_lng_double < -180.0 || dialog_lat_double > 90.0 || dialog_lat_double < -90.0) {
-                    GoUtils.DisplayToast(this, "经纬度超出限制!\n-180.0<经度<180.0\n-90.0<纬度<90.0");
-                } else {
-                    if (rbBD.isChecked()) {
-                        mMarkLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
-                    } else {
-                        double[] bdLonLat = MapUtils.wgs2bd09(dialog_lat_double, dialog_lng_double);
-                        mMarkLatLngMap = new LatLng(bdLonLat[1], bdLonLat[0]);
-                    }
-
-                    markMap();
-
-                    MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
-                    mBaiduMap.setMapStatus(mapstatusupdate);
-
-                    dialog.dismiss();
-                }
-            }
-        });
-
-        Button btnCancel = view.findViewById(R.id.input_position_cancel);
-        btnCancel.setOnClickListener(v -> dialog.dismiss());
-    }
-
 
     private void initStoreHistory() {
         try {

@@ -17,7 +17,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:clickable="true"
-            android:focusable="true"/>
+            android:focusable="true" />
 
         <RadioGroup
             android:id="@+id/RadioGroupMapType"
@@ -46,6 +46,7 @@
         </RadioGroup>
 
         <ImageButton
+            android:id="@+id/cur_position"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_alignParentEnd="true"
@@ -53,25 +54,25 @@
             android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"
-            android:onClick="goCurrentPosition"
             android:theme="@style/AppTheme"
             app:srcCompat="@drawable/ic_home_position"
             app:tint="@color/colorAccent" />
 
         <ImageButton
+            android:id="@+id/zoom_in"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_alignParentEnd="true"
-            android:layout_marginEnd="10dp"
             android:layout_marginTop="383dp"
-            android:onClick="zoomInMap"
+            android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@null"
             android:theme="@style/AppTheme"
             app:srcCompat="@drawable/ic_zoom_in"
-            android:contentDescription="@null"
-            app:tint="@color/colorAccent"/>
+            app:tint="@color/colorAccent" />
 
         <ImageButton
+            android:id="@+id/zoom_out"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_alignParentEnd="true"
@@ -79,12 +80,12 @@
             android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"
-            android:onClick="zoomOutMap"
             android:theme="@style/AppTheme"
             app:srcCompat="@drawable/ic_zoom_out"
             app:tint="@color/colorAccent" />
 
         <ImageButton
+            android:id="@+id/input_pos"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_alignParentEnd="true"
@@ -92,7 +93,6 @@
             android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"
-            android:onClick="goInputPosition"
             android:theme="@style/AppTheme"
             app:srcCompat="@drawable/ic_input"
             app:tint="@color/colorAccent" />
