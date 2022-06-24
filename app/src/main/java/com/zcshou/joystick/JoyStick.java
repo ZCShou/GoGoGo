@@ -432,7 +432,7 @@ public class JoyStick extends View {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (!newText.equals("")) {
+                if (newText != null && newText.length() > 0) {
                     try {
                         mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
                                 .keyword(newText)
