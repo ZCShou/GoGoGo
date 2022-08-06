@@ -17,25 +17,23 @@
 </div>
 
 <div align="center">
-影梭 - 用于 Android 8.0+ 的无需 ROOT 权限的虚拟定位软件
+影梭 - 用于 Android 8.0+ 的无需 ROOT 权限的虚拟定位 APP
 </div>
 
-##
+## 简介
 &emsp;&emsp;影梭是一个基于 Android 调试 API + 百度地图实现的定位修改工具，并且同时实现了一个可以自由控制移动的摇杆。使用影梭，不需要 ROOT 权限就可以随意修改自己的当前位置以及模拟移动。
 
-1. 源码仓库：[Github](https://github.com/ZCShou/GoGoGo)（推荐）、[Gitee](https://gitee.com/zcshou/gogogo)（镜像）
-2. 下载地址：[Github](https://github.com/ZCShou/GoGoGo/releases)（推荐）、[Gitee](https://gitee.com/zcshou/gogogo/releases)（镜像）
+1. 源码仓库：[Github](https://github.com/ZCShou/GoGoGo)（推荐）、[Gitee](https://gitee.com/itexp/gogogo)（镜像）
+2. 下载地址：[Github](https://github.com/ZCShou/GoGoGo/releases)（推荐）、[Gitee](https://gitee.com/itexp/gogogo/releases)（镜像）
 
 ## 背景
-&emsp;&emsp;之前在玩一款 VR 游戏：一起来捉妖。为了省事，就想有没有可以更改位置的 APP。经过一番摸索发现确实有不少可以修改位置的 APP。但是，绝大多数这种 APP 都是收费的！我比较感兴趣的是这样的技术是如何实现的，因此决定研究研究自己写一个！
+&emsp;&emsp;之前在玩一款 VR 游戏：一起来捉妖。为了省事，就想有没有可以更改位置的 APP。经过一番摸索发现确实有不少可以修改位置的 APP。但是，绝大多数这种 APP 都是收费的，而且贼贵！
 
-现在游戏已经弃坑了，但是技术不能丢，因此开源出来大家一起学习！但是请注意：
+&emsp;&emsp;我比较感兴趣的是这样的技术是如何实现的，因此，决定研究研究自己写一个！现在游戏已经弃坑了，但是技术不能丢。因此，将研究结果开源出来方便大家一起学习！但是请注意（重要的事情说三遍！否则后果自负）：
 
 1. 该 APP 仅仅是为了学习 Android + 百度地图的实现方法，请勿用于游戏作弊！
 2. 该 APP 仅仅是为了学习 Android + 百度地图的实现方法，请勿用于游戏作弊！
 3. 该 APP 仅仅是为了学习 Android + 百度地图的实现方法，请勿用于游戏作弊！
-
-重要的事情说三遍！否则后果自负！
 
 ## 功能
 1. 定位修改
@@ -74,7 +72,7 @@ A：因为手里没有机器无法进行适配。。。
 
 Q：为何定位不是很稳定，偶尔会飘回真实位置？
 
-A：这是是由于实现原理导致的，Android 调试 API 固有的问题。确切的说，应该是手机本身还开启了其他定位方式，例如，基站定位、wifi定位等导致的
+A：这是是由于实现原理导致的，Android 调试 API 固有的问题。确切的说，应该是由于手机本身还开启了其他定位方式（例如，基站定位、wifi定位等）导致的
 
 Q：是否支持鸿蒙系统？
 
@@ -82,7 +80,7 @@ A：经过测试，影梭可以在鸿蒙系统上正常运行。
 
 Q：为何在微信等腾讯系应用上定位不起作用？
 
-A：建议去问一下它腾讯。
+A：建议去问一下腾讯。
 
 Q：push 到 github 报错？
 
@@ -98,5 +96,3 @@ A：Gradle 使用的 java 版本与 Android Studio 使用的不一致。Gradle �
 
 ## 许可证
 GPL-3.0 © ZCShou
-
-
