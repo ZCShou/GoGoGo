@@ -14,6 +14,8 @@ import androidx.preference.SwitchPreferenceCompat;
 import com.elvishew.xlog.XLog;
 import com.zcshou.utils.GoUtils;
 
+import java.util.Objects;
+
 public class FragmentSettings extends PreferenceFragmentCompat {
 
     @Override
@@ -32,60 +34,38 @@ public class FragmentSettings extends PreferenceFragmentCompat {
         ListPreference pfJoystick = findPreference("setting_joystick_type");
         if (pfJoystick != null) {
             // 使用自定义 SummaryProvider
-            pfJoystick.setSummaryProvider((Preference.SummaryProvider<ListPreference>) preference -> {
-                CharSequence cs = preference.getEntry();
-                assert cs != null;
-                String text = cs.toString();
-                if (TextUtils.isEmpty(text)) {
-                    return "未设置";
-                }
-                return "当前类型: " + text;
-            });
+            pfJoystick.setSummaryProvider((Preference.SummaryProvider<ListPreference>) preference -> "当前类型: " + Objects.requireNonNull(preference.getEntry()));
+            pfJoystick.setOnPreferenceChangeListener((preference, newValue) -> !newValue.toString().trim().equals(""));
         }
 
         EditTextPreference pfWalk = findPreference("setting_walk");
         if (pfWalk != null) {
             // 使用自定义 SummaryProvider
-            pfWalk.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> {
-                String text = preference.getText();
-                if (TextUtils.isEmpty(text)) {
-                    return "未设置";
-                }
-                return "当前值: " + text;
-            });
+            pfWalk.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> "当前值: " + preference.getText());
             pfWalk.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 Selection.setSelection(editText.getText(), editText.length());
             });
+            pfWalk.setOnPreferenceChangeListener((preference, newValue) -> !newValue.toString().trim().equals(""));
         }
 
         EditTextPreference pfRun = findPreference("setting_run");
         if (pfRun != null) {
-            pfRun.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> {
-                String text = preference.getText();
-                if (TextUtils.isEmpty(text)) {
-                    return "未设置";
-                }
-                return "当前值: " + text;
-            });
+            pfRun.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> "当前值: " + preference.getText());
             pfRun.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 Selection.setSelection(editText.getText(), editText.length());
             });
+            pfRun.setOnPreferenceChangeListener((preference, newValue) -> !newValue.toString().trim().equals(""));
         }
         EditTextPreference pfBike = findPreference("setting_bike");
         if (pfBike != null) {
-            pfBike.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> {
-                String text = preference.getText();
-                if (TextUtils.isEmpty(text)) {
-                    return "未设置";
-                }
-                return "当前值: " + text;
-            });
+            pfBike.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> "当前值: " + preference.getText());
             pfBike.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 Selection.setSelection(editText.getText(), editText.length());
             });
+            pfBike.setOnPreferenceChangeListener((preference, newValue) -> !newValue.toString().trim().equals(""));
         }
 
         SwitchPreferenceCompat pLog = findPreference("setting_log_off");
@@ -109,14 +89,12 @@ public class FragmentSettings extends PreferenceFragmentCompat {
         EditTextPreference pfPosHisValid = findPreference("setting_pos_history");
         if (pfPosHisValid != null) {
             // 使用自定义 SummaryProvider
-            pfPosHisValid.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> {
-                String text = preference.getText();
-                if (TextUtils.isEmpty(text)) {
-                    return "未设置";
-                }
-                return "当前值: " + text;
+            pfPosHisValid.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> "当前值: " + preference.getText());
+            pfPosHisValid.setOnBindEditTextListener(editText -> {
+                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
+                Selection.setSelection(editText.getText(), editText.length());
             });
-            pfPosHisValid.setOnBindEditTextListener(editText -> editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER));
+            pfPosHisValid.setOnPreferenceChangeListener((preference, newValue) -> !newValue.toString().trim().equals(""));
         }
     }
 }
