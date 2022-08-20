@@ -453,7 +453,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 File file = new File(getExternalFilesDir("Logs"), GoApplication.LOG_FILE_NAME);
                 ShareUtils.shareFile(this, file, item.getTitle().toString());
             } else if (id == R.id.nav_contact) {
-                Uri uri = Uri.parse("https://gitee.com/zcshou/gogogo/issues");
+                Uri uri = Uri.parse("https://gitee.com/itexp/gogogo/issues");
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
             }
@@ -482,7 +482,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 if (drawer.isDrawerOpen(GravityCompat.START)) {
                     drawer.closeDrawer(GravityCompat.START);
                 }
-                Uri uri = Uri.parse("https://gitee.com/zcshou/gogogo");
+                Uri uri = Uri.parse("https://gitee.com/itexp/gogogo");
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
             });
