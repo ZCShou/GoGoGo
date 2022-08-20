@@ -2,6 +2,7 @@ package com.zcshou.gogogo;
 
 import android.os.Bundle;
 import android.text.InputType;
+import android.text.Selection;
 import android.text.TextUtils;
 
 import androidx.preference.EditTextPreference;
@@ -52,7 +53,10 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                 }
                 return "当前值: " + text;
             });
-            pfWalk.setOnBindEditTextListener(editText -> editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER));
+            pfWalk.setOnBindEditTextListener(editText -> {
+                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
+                Selection.setSelection(editText.getText(), editText.length());
+            });
         }
 
         EditTextPreference pfRun = findPreference("setting_run");
@@ -64,7 +68,10 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                 }
                 return "当前值: " + text;
             });
-            pfRun.setOnBindEditTextListener(editText -> editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER));
+            pfRun.setOnBindEditTextListener(editText -> {
+                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
+                Selection.setSelection(editText.getText(), editText.length());
+            });
         }
         EditTextPreference pfBike = findPreference("setting_bike");
         if (pfBike != null) {
@@ -75,7 +82,10 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                 }
                 return "当前值: " + text;
             });
-            pfBike.setOnBindEditTextListener(editText -> editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER));
+            pfBike.setOnBindEditTextListener(editText -> {
+                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
+                Selection.setSelection(editText.getText(), editText.length());
+            });
         }
 
         SwitchPreferenceCompat pLog = findPreference("setting_log_off");
