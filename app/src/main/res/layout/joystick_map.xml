@@ -65,7 +65,7 @@
             android:layout_height="40dp"
             android:layout_gravity="center_horizontal|center_vertical|bottom"
             android:layout_marginBottom="40dp"
-            android:background="@drawable/circle_shape"
+            android:background="@drawable/circle_shape_bg"
             android:contentDescription="@null"
             android:src="@drawable/ic_position"
             android:theme="@style/RippleWhite" />

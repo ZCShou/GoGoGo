@@ -15,7 +15,7 @@
             android:layout_height="@dimen/joystick_ctrl_btn_height"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
-            android:background="@drawable/circle_shape"
+            android:background="@drawable/circle_shape_bg"
             android:orientation="horizontal">
 
             <ImageButton
@@ -37,7 +37,7 @@
             android:layout_height="@dimen/joystick_ctrl_btn_height"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
-            android:background="@drawable/circle_shape"
+            android:background="@drawable/circle_shape_bg"
             android:orientation="horizontal">
             <ImageButton
                 android:id="@+id/joystick_history"
@@ -58,7 +58,7 @@
             android:layout_height="@dimen/joystick_ctrl_btn_height"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
-            android:background="@drawable/circle_shape"
+            android:background="@drawable/circle_shape_bg"
             android:orientation="horizontal">
             <ImageButton
                 android:id="@+id/joystick_position"
@@ -90,7 +90,7 @@
             android:layout_height="@dimen/joystick_ctrl_btn_height"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
-            android:background="@drawable/circle_shape"
+            android:background="@drawable/circle_shape_bg"
             android:orientation="horizontal">
             <ImageButton
                 android:id="@+id/joystick_walk"
@@ -111,7 +111,7 @@
             android:layout_height="@dimen/joystick_ctrl_btn_height"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
-            android:background="@drawable/circle_shape"
+            android:background="@drawable/circle_shape_bg"
             android:orientation="horizontal">
             <ImageButton
                 android:id="@+id/joystick_run"
@@ -132,7 +132,7 @@
             android:layout_height="@dimen/joystick_ctrl_btn_height"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
-            android:background="@drawable/circle_shape"
+            android:background="@drawable/circle_shape_bg"
             android:orientation="horizontal">
             <ImageButton
                 android:id="@+id/joystick_bike"
