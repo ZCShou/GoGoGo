@@ -3,7 +3,6 @@ package com.zcshou.gogogo;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.Selection;
-import android.text.TextUtils;
 
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;

@@ -61,13 +61,13 @@
 
         <ImageButton
             android:id="@+id/btnGo"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_gravity="center_horizontal|center_vertical|bottom"
             android:layout_marginBottom="40dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/circle_shape"
             android:contentDescription="@null"
-            android:src="@drawable/ic_fly"
+            android:src="@drawable/ic_position"
             android:theme="@style/RippleWhite" />
 
         <LinearLayout
