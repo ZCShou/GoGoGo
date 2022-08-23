@@ -34,7 +34,7 @@ public class FragmentSettings extends PreferenceFragmentCompat {
         if (pfJoystick != null) {
             // 使用自定义 SummaryProvider
             pfJoystick.setSummaryProvider((Preference.SummaryProvider<ListPreference>) preference -> "当前类型: " + Objects.requireNonNull(preference.getEntry()));
-            pfJoystick.setOnPreferenceChangeListener((preference, newValue) -> !newValue.toString().trim().equals(""));
+            pfJoystick.setOnPreferenceChangeListener((preference, newValue) -> newValue.toString().trim().length() != 0);
         }
 
         EditTextPreference pfWalk = findPreference("setting_walk");
@@ -45,7 +45,14 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                 editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 Selection.setSelection(editText.getText(), editText.length());
             });
-            pfWalk.setOnPreferenceChangeListener((preference, newValue) -> !newValue.toString().trim().equals(""));
+            pfWalk.setOnPreferenceChangeListener((preference, newValue) -> {
+                if (newValue.toString().trim().length() == 0)
+                {
+                    GoUtils.DisplayToast(this.getContext(),"输入无效");
+                    return false;
+                }
+                return true;
+            });
         }
 
         EditTextPreference pfRun = findPreference("setting_run");
@@ -55,7 +62,14 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                 editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 Selection.setSelection(editText.getText(), editText.length());
             });
-            pfRun.setOnPreferenceChangeListener((preference, newValue) -> !newValue.toString().trim().equals(""));
+            pfRun.setOnPreferenceChangeListener((preference, newValue) -> {
+                if (newValue.toString().trim().length() == 0)
+                {
+                    GoUtils.DisplayToast(this.getContext(),"输入无效");
+                    return false;
+                }
+                return true;
+            });
         }
         EditTextPreference pfBike = findPreference("setting_bike");
         if (pfBike != null) {
@@ -64,7 +78,14 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                 editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 Selection.setSelection(editText.getText(), editText.length());
             });
-            pfBike.setOnPreferenceChangeListener((preference, newValue) -> !newValue.toString().trim().equals(""));
+            pfBike.setOnPreferenceChangeListener((preference, newValue) -> {
+                if (newValue.toString().trim().length() == 0)
+                {
+                    GoUtils.DisplayToast(this.getContext(),"输入无效");
+                    return false;
+                }
+                return true;
+            });
         }
 
         SwitchPreferenceCompat pLog = findPreference("setting_log_off");
@@ -93,7 +114,14 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                 editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 Selection.setSelection(editText.getText(), editText.length());
             });
-            pfPosHisValid.setOnPreferenceChangeListener((preference, newValue) -> !newValue.toString().trim().equals(""));
+            pfPosHisValid.setOnPreferenceChangeListener((preference, newValue) -> {
+                if (newValue.toString().trim().length() == 0)
+                {
+                    GoUtils.DisplayToast(this.getContext(),"输入无效");
+                    return false;
+                }
+                return true;
+            });
         }
     }
 }
