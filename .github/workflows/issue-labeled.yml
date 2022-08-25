@@ -14,7 +14,31 @@ jobs:
       pull-requests: write  # for actions-cool/issues-helper to update PRs
     runs-on: ubuntu-latest
     steps:
-      - name: help wanted
+      - name: Comment Feature
+        if: github.event.label.name == 'feature'
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Hello @${{ github.event.issue.user.login }}, thanks for your suggestions. We will have someone to follow up your suggestions. 
+
+            你好 @${{ github.event.issue.user.login }}，感谢提交建议！我们会有专人来跟踪该建议。
+
+      - name: Comment Bug
+        if: github.event.label.name == 'bug'
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Hello @${{ github.event.issue.user.login }}, thanks for your feedback. We will have someone to follow up your feedback. 
+
+            你好 @${{ github.event.issue.user.login }}，感谢提交反馈！我们会有专人来跟踪该反馈。
+
+      - name: Comment Help Wanted
         if: github.event.label.name == 'help wanted'
         uses: actions-cool/issues-helper@v3
         with:
@@ -22,47 +46,35 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
-            Hello @${{ github.event.issue.user.login }}, Thanks for your feedback. welcome to [send us a Pull Request](https://help.github.com/en/articles/creating-a-pull-request) for it. Please fill the [Pull Request Template](https://github.com/ZCShou/GoGoGo/blob/master/.github/PULL_REQUEST_TEMPLATE.md) here, and make sure CI passed, we will review it soon. We appreciate your effort in advance and looking forward to your contribution!
+            Sorry @${{ github.event.issue.user.login }}, we do not have a good solution now. welcome to [send us a Pull Request](https://help.github.com/en/articles/creating-a-pull-request) for it. Make sure CI passed, we will review it soon. We appreciate your effort in advance and looking forward to your contribution!
 
-            你好 @${{ github.event.issue.user.login }}，感谢您提交反馈。欢迎直接在此仓库 [创建一个 Pull Request](https://help.github.com/en/articles/creating-a-pull-request) 来解决这个问题。请务必填写 Pull Request 内的[预设模板](https://github.com/ZCShou/GoGoGo/blob/master/.github/PULL_REQUEST_TEMPLATE.md)，并确保 CI 通过，我们会尽快进行 Review，提前感谢和期待您的贡献。
+            抱歉 @${{ github.event.issue.user.login }}，目前，我们并没有很好地解决方法！欢迎直接在此仓库 [创建一个 Pull Request](https://help.github.com/en/articles/creating-a-pull-request) 来帮助我们解决这个问题。确保 CI 通过，我们会尽快进行 Review，提前感谢和期待您的贡献。
 
-      - name: need reproduce
-        if: github.event.label.name == 'need reproduce'
+      - name: Comment Reproduce
+        if: github.event.label.name == 'reproduce'
         uses: actions-cool/issues-helper@v3
         with:
           actions: 'create-comment'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
-            Hello @${{ github.event.issue.user.login }}. Please provide a reproduction in order to address the issue. Issues labeled by `need reproduce` will be closed if no activities in 3 days.
+            Hello @${{ github.event.issue.user.login }}， we can not reproduce you feedback.Please provide a reproduction in order to address the issue.
 
-            你好 @${{ github.event.issue.user.login }}, 我们需要你提供一个复现步骤以便于我们排查问题。3 天内未跟进此 issue 将会被自动关闭。
+            你好 @${{ github.event.issue.user.login }}, 我们未能复现你的反馈。请提供一个复现步骤以便于我们排查问题。
 
-      - name: Usage
+      - name: Comment Usage
         if: github.event.label.name == 'usage' || github.event.label.name == 'question'
         uses: actions-cool/issues-helper@v3
         with:
-          actions: 'create-comment,close-issue'
+          actions: 'create-comment'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
-            Hello @${{ github.event.issue.user.login }}, Thanks for your using GoGoGo. It is recommended that you first check whether the corresponding document can solve your feedback. For a while, there is someone to reply.
+            Hello @${{ github.event.issue.user.login }}, Thanks for your using GoGoGo. It is recommended that you first check whether the corresponding document can solve your feedback.
 
-            你好 @${{ github.event.issue.user.login }}，感谢您使用影梭，建议您首先查看对应的文档是否可以解决您的反馈。稍后我们会有专人对该问题进行回复。
+            你好 @${{ github.event.issue.user.login }}，感谢您使用影梭，建议您首先查看对应的文档是否可以解决您的反馈。
 
-      # - name: 1.x
-      #   if: github.event.label.name == '1.x'
-      #   uses: actions-cool/issues-helper@v3
-      #   with:
-      #     actions: 'create-comment,close-issue'
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      #     issue-number: ${{ github.event.issue.number }}
-      #     body: |
-      #       Hi @${{ github.event.issue.user.login }}. Current version (1.10) is off the maintenance period. We may not accept pull request or fix bug with it anymore. This topic will be auto closed.
-
-      #       你好 @${{ github.event.issue.user.login }}，当前版本（1.10）已经过了维护期。我们不会再接受对其的相关 PR 与 issue。当前 topic 会被自动关闭。
-
-      - name: invalid
+      - name: Comment Invalid
         if: github.event.label.name == 'invalid'
         uses: actions-cool/issues-helper@v3
         with:
@@ -70,13 +82,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
           body: |
-            Hello @${{ github.event.issue.user.login }}, your issue has been closed because it does not conform to our issue requirements. Please use the [Issue Helper](http://new-issue.ant.design) to create an issue, thank you!
+            Hello @${{ github.event.issue.user.login }}, your issue has been closed because it does not conform to our issue requirements. Please use the issue template to create an issue, thank you!
 
-            你好 @${{ github.event.issue.user.login }}，为了能够进行高效沟通，我们对 issue 有一定的格式要求，你的 issue 因为不符合要求而被自动关闭。你可以通过 [issue 助手](http://new-issue.ant.design) 来创建 issue 以方便我们定位错误。谢谢配合！
-
-      # - name: rtl
-      #   if: github.event.label.name == 'rtl'
-      #   uses: actions-cool/issues-helper@v3
-      #   with:
-      #     actions: 'add-assignees'
-      #     assignees: 'ZCShou'
+            你好 @${{ github.event.issue.user.login }}，为了能够进行高效沟通，我们对 issue 有一定的格式要求，你的 issue 因为不符合要求而被自动关闭。请务必根据 issue 模板来创建 issue，以方便我们定位问题，谢谢！
