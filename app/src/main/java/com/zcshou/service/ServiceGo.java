@@ -102,7 +102,7 @@ public class ServiceGo extends Service {
         removeTestProviderGPS();
 
         unregisterReceiver(mActReceiver);
-        stopForeground(true);
+        stopForeground(STOP_FOREGROUND_REMOVE);
 
         super.onDestroy();
     }
