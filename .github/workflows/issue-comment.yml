@@ -1,4 +1,4 @@
-name: Issue Labeled
+name: Issue Comment
 
 on:
   issues:
