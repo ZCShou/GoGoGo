@@ -9,7 +9,7 @@ assignees: ''
 ---
 
 <!-- ⚠️⚠️ 不要删除这些注释 ⚠️⚠️ -->
-<!-- ⚠️⚠️ Do Not Delete This! feature_request_template ⚠️⚠️ -->
+<!-- ⚠️⚠️ DO NOT Delete those comments! ⚠️⚠️ -->
 <!-- 请先搜索有无同类需求，避免提交重复需求 -->
 <!-- Please search existing demands to avoid creating duplicates. -->
 
@@ -24,12 +24,6 @@ assignees: ''
 
 
 
-<!-- 请在上方详细地描述你的需求、功能、建议 的必要性。 -->
+<!-- 请在上方详细地描述该需求、功能、建议 的必要性。 -->
 <!-- Please describe why you need the demands, functions, suggestions. -->
 
-### 实现方法 / How to accomplish
-
-
-
-<!-- 请在上方详细地描述如何实现你的需求、功能、建议。 -->
-<!-- Please describe  How to accomplish your demands, functions, suggestions. -->

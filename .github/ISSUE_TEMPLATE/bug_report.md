@@ -1,22 +1,22 @@
 ---
-name: 报告问题 / Bug Report
+name: 报告缺陷 / Bug Report
 about: If you find some bugs, please use this template.
-title: "[BUG] Report bug"
+title: "[BUG] New BUG"
 labels: bug
 assignees: ''
 
 ---
 
 <!-- ⚠️⚠️ 不要删除这些注释 ⚠️⚠️ -->
-<!-- ⚠️⚠️ Do Not Delete This! bug_report_template ⚠️⚠️ -->
-<!-- 请先搜索有无同类问题，避免报告重复问题 -->
+<!-- ⚠️⚠️ DO NOT Delete those comments! ⚠️⚠️ -->
+<!-- 请先搜索有无同类缺陷，避免报告重复缺陷 -->
 <!-- Please search existing issues to avoid creating duplicates. -->
 
-### 问题描述 / Bug description
+### 缺陷描述 / Bug description
 
 
 
-<!-- 请在上方详细地描述问题。 -->
+<!-- 请在上方详细地描述缺陷。 -->
 <!-- Please describe the bug in detail above. -->
 
 ### 版本信息 / Version Info
@@ -24,7 +24,7 @@ assignees: ''
 - 影梭版本 / GoGoGo Version : 
 - 系统版本 / OS Version : 
 
-<!-- 请在上方描述出问题的影梭版本及使用的系统版本。 -->
+<!-- 请在上方描述有缺陷的影梭版本及使用的系统版本。 -->
 <!-- Please describe version of GoGoGo and used OS above. -->
 
 ### 复现步骤 / Steps to Reproduce
@@ -32,12 +32,5 @@ assignees: ''
 1. 
 2. 
 
-<!-- 请在上方描述如何复现该问题。-->
+<!-- 请在上方描述如何复现该缺陷。-->
 <!-- Please describe how to reproduce the bug. -->
-
-### 如何修复 / How to fix
-
-
-
-<!-- 如果您有对应的修复方法，请在上方描述你的方法。欢迎直接提交一个 PR。 -->
-<!-- If you know how to fix, please describe your method above. Welcome to submit a PR directly. -->

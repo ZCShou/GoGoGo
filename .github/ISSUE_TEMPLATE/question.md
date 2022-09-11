@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 <!-- ⚠️⚠️ 不要删除这些注释 ⚠️⚠️ -->
-<!-- ⚠️⚠️ Do Not Delete This! bug_report_template ⚠️⚠️ -->
+<!-- ⚠️⚠️ DO NOT Delete those comments! ⚠️⚠️ -->
 <!-- 请先搜索有无同类问题，避免报告重复问题 -->
 <!-- Please search existing issues to avoid creating duplicates. -->
 
