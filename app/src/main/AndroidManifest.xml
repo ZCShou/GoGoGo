@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.zcshou.gogogo">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Android Q 新增的权限。允许用户授予对两个不同范围的位置访问权限：在使用中（仅限前景）或始终（前景和后台） -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
