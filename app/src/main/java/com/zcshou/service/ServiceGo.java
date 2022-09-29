@@ -74,8 +74,10 @@ public class ServiceGo extends Service {
         addTestProviderGPS();
 
         initGoLocation();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            initNotification();
+        }
 
-        initNotification();
 
         initJoyStick();
     }
@@ -102,7 +104,7 @@ public class ServiceGo extends Service {
         removeTestProviderGPS();
 
         unregisterReceiver(mActReceiver);
-        stopForeground(STOP_FOREGROUND_REMOVE);
+        stopForeground(true);
 
         super.onDestroy();
     }

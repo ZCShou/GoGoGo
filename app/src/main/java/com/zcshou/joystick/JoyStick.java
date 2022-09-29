@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -235,7 +236,11 @@ public class JoyStick extends View {
     private void initWindowManager() {
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mWindowParamJoyStick = new WindowManager.LayoutParams();
-        mWindowParamJoyStick.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mWindowParamJoyStick.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            mWindowParamJoyStick.type  = WindowManager.LayoutParams.TYPE_TOAST;//兼容 Android 8 以下
+        }
         mWindowParamJoyStick.format = PixelFormat.RGBA_8888;
         mWindowParamJoyStick.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE      // 不添加这个将导致游戏无法启动（MIUI12）,添加之后导致键盘无法显示
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL

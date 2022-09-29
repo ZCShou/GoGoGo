@@ -18,6 +18,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -220,7 +221,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                mServiceBinder = (ServiceGo.ServiceGoBinder)service;
+                mServiceBinder = (ServiceGo.ServiceGoBinder) service;
             }
 
             @Override
@@ -299,13 +300,14 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         //找到searchView
         searchItem = menu.findItem(R.id.action_search);
-        searchItem.setOnActionExpandListener(new  MenuItem.OnActionExpandListener() {
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 mSearchLayout.setVisibility(View.INVISIBLE);
                 mHistoryLayout.setVisibility(View.INVISIBLE);
                 return true;  // Return true to collapse action view
             }
+
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 mSearchLayout.setVisibility(View.INVISIBLE);
@@ -317,13 +319,13 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                             MainActivity.this,
                             data,
                             R.layout.search_record_item,
-                            new String[] {DataBaseHistorySearch.DB_COLUMN_KEY,
+                            new String[]{DataBaseHistorySearch.DB_COLUMN_KEY,
                                     DataBaseHistorySearch.DB_COLUMN_DESCRIPTION,
                                     DataBaseHistorySearch.DB_COLUMN_TIMESTAMP,
                                     DataBaseHistorySearch.DB_COLUMN_IS_LOCATION,
                                     DataBaseHistorySearch.DB_COLUMN_LONGITUDE_CUSTOM,
                                     DataBaseHistorySearch.DB_COLUMN_LATITUDE_CUSTOM},
-                            new int[] {R.id.search_key,
+                            new int[]{R.id.search_key,
                                     R.id.search_description,
                                     R.id.search_timestamp,
                                     R.id.search_isLoc,
@@ -361,7 +363,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     mBaiduMap.clear();
                     mSearchLayout.setVisibility(View.INVISIBLE);
                 } catch (Exception e) {
-                    GoUtils.DisplayToast(MainActivity.this,"搜索失败，请检查网络连接");
+                    GoUtils.DisplayToast(MainActivity.this, "搜索失败，请检查网络连接");
                     XLog.d("HTTP: 搜索失败，请检查网络连接");
                     e.printStackTrace();
                 }
@@ -382,7 +384,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                                 .city(mCurrentCity)
                         );
                     } catch (Exception e) {
-                        GoUtils.DisplayToast(MainActivity.this,"搜索失败，请检查网络连接");
+                        GoUtils.DisplayToast(MainActivity.this, "搜索失败，请检查网络连接");
                         XLog.d("HTTP: 搜索失败，请检查网络连接");
                         e.printStackTrace();
                     }
@@ -407,10 +409,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        if(sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             mAccValues = sensorEvent.values;
-        }
-        else if(sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
+        } else if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             mMagValues = sensorEvent.values;
         }
 
@@ -444,7 +445,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
                     startActivity(intent);
                 } catch (Exception e) {
-                    GoUtils.DisplayToast(this,"无法跳转到开发者选项,请先确保您的设备已处于开发者模式");
+                    GoUtils.DisplayToast(this, "无法跳转到开发者选项,请先确保您的设备已处于开发者模式");
                     e.printStackTrace();
                 }
             } else if (id == R.id.nav_update) {
@@ -453,7 +454,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 File file = new File(getExternalFilesDir("Logs"), GoApplication.LOG_FILE_NAME);
                 ShareUtils.shareFile(this, file, item.getTitle().toString());
             } else if (id == R.id.nav_contact) {
-                Uri uri = Uri.parse("https://gitee.com/itexp/gogogo/issues");
+                Uri uri = Uri.parse("https://gitee.com/zcshou/gogogo/issues");
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
             }
@@ -482,7 +483,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 if (drawer.isDrawerOpen(GravityCompat.START)) {
                     drawer.closeDrawer(GravityCompat.START);
                 }
-                Uri uri = Uri.parse("https://gitee.com/itexp/gogogo");
+                Uri uri = Uri.parse("https://gitee.com/zcshou/gogogo");
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
             });
@@ -585,7 +586,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 try {
                     searchView.setQuery(searchKey, true);
                 } catch (Exception e) {
-                    GoUtils.DisplayToast(this,"搜索失败，请检查网络连接");
+                    GoUtils.DisplayToast(this, "搜索失败，请检查网络连接");
                     XLog.e("ERROR: 搜索失败，请检查网络连接");
                     e.printStackTrace();
                 }
@@ -597,11 +598,11 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             new AlertDialog.Builder(MainActivity.this)
                     .setTitle("警告")//这里是表头的内容
                     .setMessage("确定要删除该项搜索记录吗?")//这里是中间显示的具体信息
-                    .setPositiveButton("确定",(dialog, which) -> {
+                    .setPositiveButton("确定", (dialog, which) -> {
                         String searchKey = ((TextView) view.findViewById(R.id.search_key)).getText().toString();
 
                         try {
-                            mSearchHistoryDB.delete(DataBaseHistorySearch.TABLE_NAME, DataBaseHistorySearch.DB_COLUMN_KEY + " = ?", new String[] {searchKey});
+                            mSearchHistoryDB.delete(DataBaseHistorySearch.TABLE_NAME, DataBaseHistorySearch.DB_COLUMN_KEY + " = ?", new String[]{searchKey});
                             //删除成功
                             //展示搜索历史
                             List<Map<String, Object>> data = getSearchHistory();
@@ -611,19 +612,19 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                                         MainActivity.this,
                                         data,
                                         R.layout.search_record_item,
-                                        new String[] {DataBaseHistorySearch.DB_COLUMN_KEY,
+                                        new String[]{DataBaseHistorySearch.DB_COLUMN_KEY,
                                                 DataBaseHistorySearch.DB_COLUMN_DESCRIPTION,
                                                 DataBaseHistorySearch.DB_COLUMN_TIMESTAMP,
                                                 DataBaseHistorySearch.DB_COLUMN_IS_LOCATION,
                                                 DataBaseHistorySearch.DB_COLUMN_LONGITUDE_CUSTOM,
                                                 DataBaseHistorySearch.DB_COLUMN_LATITUDE_CUSTOM}, // 与下面数组元素要一一对应
-                                        new int[] {R.id.search_key, R.id.search_description, R.id.search_timestamp, R.id.search_isLoc, R.id.search_longitude, R.id.search_latitude});
+                                        new int[]{R.id.search_key, R.id.search_description, R.id.search_timestamp, R.id.search_isLoc, R.id.search_longitude, R.id.search_latitude});
                                 mSearchHistoryList.setAdapter(simAdapt);
                                 mHistoryLayout.setVisibility(View.VISIBLE);
                             }
                         } catch (Exception e) {
                             XLog.e("ERROR: delete database error");
-                            GoUtils.DisplayToast(MainActivity.this,"删除记录出错");
+                            GoUtils.DisplayToast(MainActivity.this, "删除记录出错");
                             e.printStackTrace();
                         }
                     })
@@ -640,7 +641,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mSuggestionSearch = SuggestionSearch.newInstance();
         mSuggestionSearch.setOnGetSuggestionResultListener(suggestionResult -> {
             if (suggestionResult == null || suggestionResult.getAllSuggestions() == null) {
-                GoUtils.DisplayToast(this,"没有找到检索结果");
+                GoUtils.DisplayToast(this, "没有找到检索结果");
             } else { //获取在线建议检索结果
                 List<Map<String, Object>> data = new ArrayList<>();
                 int retCnt = suggestionResult.getAllSuggestions().size();
@@ -662,8 +663,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                         MainActivity.this,
                         data,
                         R.layout.poi_search_item,
-                        new String[] {POI_NAME, POI_ADDRESS, POI_LONGITUDE, POI_LATITUDE}, // 与下面数组元素要一一对应
-                        new int[] {R.id.poi_name, R.id.poi_address, R.id.poi_longitude, R.id.poi_latitude});
+                        new String[]{POI_NAME, POI_ADDRESS, POI_LONGITUDE, POI_LATITUDE}, // 与下面数组元素要一一对应
+                        new int[]{R.id.poi_name, R.id.poi_address, R.id.poi_longitude, R.id.poi_latitude});
                 mSearchList.setAdapter(simAdapt);
                 // mSearchList.setVisibility(View.VISIBLE);
                 mSearchLayout.setVisibility(View.VISIBLE);
@@ -734,7 +735,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             TextView regAgree = window.findViewById(R.id.reg_agree);
             regAgree.setOnClickListener(v -> {
                 if (!mPtlCheckBox.isChecked()) {
-                    GoUtils.DisplayToast(this,"您必须先阅读并同意免责声明");
+                    GoUtils.DisplayToast(this, "您必须先阅读并同意免责声明");
                     return;
                 }
                 if (TextUtils.isEmpty(regUserName.getText())) {
@@ -742,7 +743,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     return;
                 }
                 if (TextUtils.isEmpty(regResp.getText())) {
-                    GoUtils.DisplayToast(this,"注册码不能为空");
+                    GoUtils.DisplayToast(this, "注册码不能为空");
                     return;
                 }
                 try {
@@ -822,7 +823,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             GoUtils.DisplayToast(this, "已复制到剪切板");
         });
         ImageButton ibShare = poiView.findViewById(R.id.poi_share);
-        ibShare.setOnClickListener(v -> ShareUtils.shareText(MainActivity.this, "分享位置", poiLongitude.getText()+","+poiLatitude.getText()));
+        ibShare.setOnClickListener(v -> ShareUtils.shareText(MainActivity.this, "分享位置", poiLongitude.getText() + "," + poiLatitude.getText()));
         ImageButton ibFly = poiView.findViewById(R.id.poi_fly);
         ibFly.setOnClickListener(this::startGoLocation);
 
@@ -864,6 +865,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 //百度坐标系转wgs坐标系
                 transformCoordinate(String.valueOf(point.longitude), String.valueOf(point.latitude));
             }
+
             /**
              * 单击地图中的POI点
              */
@@ -969,6 +971,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                         }
                     }
                 }
+
                 /**
                  * 错误的状态码
                  * <a>http://lbsyun.baidu.com/index.php?title=android-locsdk/guide/addition-func/error-code</a>
@@ -1059,7 +1062,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 String dialog_lat_str = dialog_lat.getText().toString();
 
                 if (TextUtils.isEmpty(dialog_lng_str) || TextUtils.isEmpty(dialog_lat_str)) {
-                    GoUtils.DisplayToast(MainActivity.this,"输入不能为空");
+                    GoUtils.DisplayToast(MainActivity.this, "输入不能为空");
                 } else {
                     double dialog_lng_double = Double.parseDouble(dialog_lng_str);
                     double dialog_lat_double = Double.parseDouble(dialog_lat_str);
@@ -1226,7 +1229,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
         try {
             Cursor cursor = mSearchHistoryDB.query(DataBaseHistorySearch.TABLE_NAME, null,
-                    DataBaseHistorySearch.DB_COLUMN_ID + " > ?", new String[] {"0"},
+                    DataBaseHistorySearch.DB_COLUMN_ID + " > ?", new String[]{"0"},
                     null, null, DataBaseHistorySearch.DB_COLUMN_TIMESTAMP + " DESC", null);
 
             while (cursor.moveToNext()) {
@@ -1344,7 +1347,12 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             //save record
             recordGetPositionInfo();
 
-            startForegroundService(serviceGoIntent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceGoIntent);
+            } else {
+                startService(serviceGoIntent);
+            }
+
             XLog.d("startForegroundService: ServiceGo");
 
             isMockServStart = true;
@@ -1409,9 +1417,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mButtonStart.setOnClickListener(this::startGoLocation);
     }
 
-    
+
     private void initUpdateVersion() {
-        mDownloadManager =(DownloadManager) MainActivity.this.getSystemService(DOWNLOAD_SERVICE);
+        mDownloadManager = (DownloadManager) MainActivity.this.getSystemService(DOWNLOAD_SERVICE);
 
         // 用于监听下载完成后，转到安装界面
         mDownloadBdRcv = new BroadcastReceiver() {
@@ -1483,13 +1491,13 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                                     Button updateAgree = window.findViewById(R.id.update_agree);
                                     updateAgree.setOnClickListener(v -> {
                                         alertDialog.cancel();
-                                        GoUtils.DisplayToast(MainActivity.this,"升级文件下载中");
+                                        GoUtils.DisplayToast(MainActivity.this, "升级文件下载中");
                                         downloadNewVersion(download_url);
                                     });
                                 }
                             } else {
                                 if (result) {
-                                    GoUtils.DisplayToast(MainActivity.this,"恭喜，当前版本的影梭已经是最新版！");
+                                    GoUtils.DisplayToast(MainActivity.this, "恭喜，当前版本的影梭已经是最新版！");
                                 }
                             }
                         } catch (JSONException e) {
@@ -1517,7 +1525,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         // DownloadManager不会覆盖已有的同名文件，需要自己来删除已存在的文件
         File file = new File(getExternalFilesDir("Updates"), mUpdateFilename);
         if (file.exists()) {
-            if(!file.delete()) {
+            if (!file.delete()) {
                 return;
             }
         }

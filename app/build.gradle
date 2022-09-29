@@ -15,12 +15,12 @@ android {
             keyPassword 'GoGoGo'
         }
     }
-    ndkVersion '25.1.8937393'
+    ndkVersion '24.0.8215888'
     buildToolsVersion '33.0.0'
     compileSdkVersion 32
     defaultConfig {
         applicationId "com.zcshou.gogogo"
-        minSdkVersion 27
+        minSdkVersion 23
         targetSdkVersion 32
         versionCode 1103
         versionName '1.10.3' // https://semver.org/lang/zh-CN/
@@ -75,7 +75,6 @@ android {
         includeInApk false
         includeInBundle false
     }
-    namespace 'com.zcshou.gogogo'
 //    lintOptions {
 //        checkReleaseBuilds false
 //        // Or, if you prefer, you can continue to check for errors in release builds,
