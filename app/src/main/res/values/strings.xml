@@ -30,7 +30,7 @@
     <string name="app_error_protocol">请先阅读并接收用户协议</string>
     <string name="app_error_username">用户名不合法</string>
     <string name="app_error_code">注册码不能为空</string>
-    <string name="app_error_longitude">纬度超出限制!\n取值：-180.0 ~ 180.0</string>
+    <string name="app_error_longitude">经度超出限制!\n取值：-180.0 ~ 180.0</string>
     <string name="app_error_latitude">纬度超出限制!\n取值：-90.0 ~ 90.0</string>
     <string name="app_search_null">没有匹配结果，请重新搜索</string>
     <string name="app_location_ok">位置已传送</string>

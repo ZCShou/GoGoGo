@@ -186,6 +186,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mOkHttpClient = new OkHttpClient();
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -195,11 +198,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        initNavigationView();
+
         XLog.i("MainActivity: onCreate");
-
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        mOkHttpClient = new OkHttpClient();
 
         //sqlite相关
         initStoreHistory();
@@ -210,8 +211,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
         // 地图上按键的监听
         initListenerMapBtn();
-
-        initNavigationView();
 
         initSearchView();
 
