@@ -51,9 +51,9 @@ public class WelcomeActivity extends AppCompatActivity {
         startBtn = findViewById(R.id.startButton);
         startBtn.setOnClickListener(v -> startMainActivity());
 
-        checkFirstStartup();
-
         initTimer();
+
+        checkFirstStartup();
     }
 
     @Override
