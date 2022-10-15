@@ -367,7 +367,7 @@ public class JoyStick extends View {
         mSuggestionSearch = SuggestionSearch.newInstance();
         mSuggestionSearch.setOnGetSuggestionResultListener(suggestionResult -> {
             if (suggestionResult == null || suggestionResult.getAllSuggestions() == null) {
-                GoUtils.DisplayToast(mContext,"没有找到检索结果");
+                GoUtils.DisplayToast(mContext,getResources().getString(R.string.app_search_null));
             } else {
                 List<Map<String, Object>> data = new ArrayList<>();
                 int retCnt = suggestionResult.getAllSuggestions().size();
@@ -439,7 +439,7 @@ public class JoyStick extends View {
                                 .city(MainActivity.mCurrentCity)
                         );
                     } catch (Exception e) {
-                        GoUtils.DisplayToast(mContext,"搜索失败，请检查网络连接");
+                        GoUtils.DisplayToast(mContext,getResources().getString(R.string.app_error_search));
                         e.printStackTrace();
                     }
                 }
@@ -466,7 +466,7 @@ public class JoyStick extends View {
 
             resetBaiduMap();
 
-            GoUtils.DisplayToast(mContext, "位置已传送");
+            GoUtils.DisplayToast(mContext, getResources().getString(R.string.app_location_ok));
         });
         btnGo.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 
@@ -614,7 +614,7 @@ public class JoyStick extends View {
                     if (searchRet.size() > 0) {
                         showHistory(searchRet);
                     } else {
-                        GoUtils.DisplayToast(mContext,"没有找到检索结果");
+                        GoUtils.DisplayToast(mContext, getResources().getString(R.string.app_search_null));
                         showHistory(mAllRecord);
                     }
                 }
@@ -653,7 +653,7 @@ public class JoyStick extends View {
             String bdLatitude = bdLatLngStr[1].substring(bdLatLngStr[1].indexOf(':') + 1);
             mCurMapLngLat = new LatLng(Double.parseDouble(bdLatitude), Double.parseDouble(bdLongitude));
 
-            GoUtils.DisplayToast(mContext, "位置已传送");
+            GoUtils.DisplayToast(mContext, getResources().getString(R.string.app_location_ok));
         });
 
         fetchAllRecord();
