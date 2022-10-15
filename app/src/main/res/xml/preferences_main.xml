@@ -48,8 +48,8 @@
         <EditTextPreference
             app:key="setting_pos_history"
             app:title="@string/setting_pos_history"
-            app:defaultValue="@string/setting_pos_history_default"
-            app:summary="@string/setting_pos_history_default"
+            app:defaultValue="@string/history_expiration"
+            app:summary="@string/history_expiration"
             app:iconSpaceReserved="false"/>
     </PreferenceCategory>
 

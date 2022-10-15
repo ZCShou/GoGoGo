@@ -41,11 +41,17 @@
     <string name="setting_group_log">记录</string>
     <string name="setting_log_off">关闭日志</string>
     <string name="setting_pos_history">历史记录有效期(天)</string>
-    <string name="setting_pos_history_default">7</string>
     <string name="setting_group_about">关于</string>
     <string name="setting_version">版本号</string>
     <string name="setting_author">开发者</string>
     <string name="setting_group_sys">系统</string>
+
+    <!-- 历史记录页面 -->
+    <string name="history_idle">暂无历史记录</string>
+    <string name="history_delete_ok">删除成功！</string>
+    <string name="history_expiration">7</string>
+    <string name="history_error_location">定位失败，请手动选取定位点</string>
+    <string name="history_error_search">未搜索到指定内容</string>
 
     <!-- 通知栏 -->
     <string name="note_show">显示摇杆</string>
@@ -60,16 +66,6 @@
     <string name="input_position_gps">GPS 坐标系</string>
     <string name="error_gps">位置检索失败，请检查 GPS 是否开启</string>
     <string name="error_network">搜索失败，请检查网络连接</string>
-
-    <!-- 更新 -->
-    <string name="update_title">新版本可用</string>
-    <string name="update_download">立即下载</string>
-    <string name="update_ignore">忽略一次</string>
-    <string name="update_time">更新时间：</string>
-    <string name="update_commit">提交信息：</string>
-
-    <!-- 历史记录页面 -->
-    <string name="history_idle">暂无历史记录</string>
 
     <!-- 导航页 -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -89,6 +85,13 @@
     <string name="map_pic_normal">普通图</string>
     <string name="safecode">32:2F:E6:05:6C:2F:11:6D:CD:ED:AC:FF:23:02:5A:29:68:FD:45:D2;com.zcshou.gogogo</string>
     <string name="ak">fb7YwlKY3ntx8hBDGMGLqX2FhlPkDMvv</string>
+
+    <!-- 更新 -->
+    <string name="update_title">新版本可用</string>
+    <string name="update_download">立即下载</string>
+    <string name="update_ignore">忽略一次</string>
+    <string name="update_time">更新时间：</string>
+    <string name="update_commit">提交信息：</string>
 
     <!-- 摇杆 -->
     <string name="joystick_map_tips">搜索或点击地图位置</string>
