@@ -191,7 +191,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -361,8 +361,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     mBaiduMap.clear();
                     mSearchLayout.setVisibility(View.INVISIBLE);
                 } catch (Exception e) {
-                    GoUtils.DisplayToast(MainActivity.this, getResources().getString(R.string.error_gps));
-                    XLog.d(getResources().getString(R.string.error_gps));
+                    GoUtils.DisplayToast(MainActivity.this, getResources().getString(R.string.app_error_search));
+                    XLog.d(getResources().getString(R.string.app_error_search));
                     e.printStackTrace();
                 }
 
@@ -382,8 +382,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                                 .city(mCurrentCity)
                         );
                     } catch (Exception e) {
-                        GoUtils.DisplayToast(MainActivity.this,"搜索失败，请检查网络连接");
-                        XLog.d("HTTP: 搜索失败，请检查网络连接");
+                        GoUtils.DisplayToast(MainActivity.this, getResources().getString(R.string.app_error_search));
+                        XLog.d(getResources().getString(R.string.app_error_search));
                         e.printStackTrace();
                     }
                 }
@@ -444,7 +444,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
                     startActivity(intent);
                 } catch (Exception e) {
-                    GoUtils.DisplayToast(this,"无法跳转到开发者选项,请先确保您的设备已处于开发者模式");
+                    GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_dev));
                     e.printStackTrace();
                 }
             } else if (id == R.id.nav_update) {
@@ -585,12 +585,12 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 try {
                     searchView.setQuery(searchKey, true);
                 } catch (Exception e) {
-                    GoUtils.DisplayToast(this,"搜索失败，请检查网络连接");
-                    XLog.e("ERROR: 搜索失败，请检查网络连接");
+                    GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_search));
+                    XLog.e(getResources().getString(R.string.app_error_search));
                     e.printStackTrace();
                 }
             } else {
-                XLog.e("ERROR:搜索失败，参数非法");
+                XLog.e(getResources().getString(R.string.app_error_param));
             }
         });
         mSearchHistoryList.setOnItemLongClickListener((parent, view, position, id) -> {
@@ -623,7 +623,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                             }
                         } catch (Exception e) {
                             XLog.e("ERROR: delete database error");
-                            GoUtils.DisplayToast(MainActivity.this,"删除记录出错");
+                            GoUtils.DisplayToast(MainActivity.this,getResources().getString(R.string.history_delete_error));
                             e.printStackTrace();
                         }
                     })
@@ -640,7 +640,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mSuggestionSearch = SuggestionSearch.newInstance();
         mSuggestionSearch.setOnGetSuggestionResultListener(suggestionResult -> {
             if (suggestionResult == null || suggestionResult.getAllSuggestions() == null) {
-                GoUtils.DisplayToast(this,"没有找到检索结果");
+                GoUtils.DisplayToast(this,getResources().getString(R.string.app_search_null));
             } else { //获取在线建议检索结果
                 List<Map<String, Object>> data = new ArrayList<>();
                 int retCnt = suggestionResult.getAllSuggestions().size();
@@ -734,15 +734,15 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             TextView regAgree = window.findViewById(R.id.reg_agree);
             regAgree.setOnClickListener(v -> {
                 if (!mPtlCheckBox.isChecked()) {
-                    GoUtils.DisplayToast(this,"您必须先阅读并同意免责声明");
+                    GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_protocol));
                     return;
                 }
                 if (TextUtils.isEmpty(regUserName.getText())) {
-                    GoUtils.DisplayToast(this, "用户名不能为空");
+                    GoUtils.DisplayToast(this,  getResources().getString(R.string.app_error_username));
                     return;
                 }
                 if (TextUtils.isEmpty(regResp.getText())) {
-                    GoUtils.DisplayToast(this,"注册码不能为空");
+                    GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_code));
                     return;
                 }
                 try {
@@ -808,7 +808,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         ImageButton ibSave = poiView.findViewById(R.id.poi_save);
         ibSave.setOnClickListener(v -> {
             recordGetPositionInfo();
-            GoUtils.DisplayToast(this, "已保存位置");
+            GoUtils.DisplayToast(this, getResources().getString(R.string.app_location_save));
         });
         ImageButton ibCopy = poiView.findViewById(R.id.poi_copy);
         ibCopy.setOnClickListener(v -> {
@@ -819,7 +819,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             // 将 ClipData内容放到系统剪贴板里。
             cm.setPrimaryClip(mClipData);
 
-            GoUtils.DisplayToast(this, "已复制到剪切板");
+            GoUtils.DisplayToast(this,  getResources().getString(R.string.app_location_copy));
         });
         ImageButton ibShare = poiView.findViewById(R.id.poi_share);
         ibShare.setOnClickListener(v -> ShareUtils.shareText(MainActivity.this, "分享位置", poiLongitude.getText()+","+poiLatitude.getText()));
@@ -1059,27 +1059,31 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 String dialog_lat_str = dialog_lat.getText().toString();
 
                 if (TextUtils.isEmpty(dialog_lng_str) || TextUtils.isEmpty(dialog_lat_str)) {
-                    GoUtils.DisplayToast(MainActivity.this,"输入不能为空");
+                    GoUtils.DisplayToast(MainActivity.this,getResources().getString(R.string.app_error_input));
                 } else {
                     double dialog_lng_double = Double.parseDouble(dialog_lng_str);
                     double dialog_lat_double = Double.parseDouble(dialog_lat_str);
 
-                    if (dialog_lng_double > 180.0 || dialog_lng_double < -180.0 || dialog_lat_double > 90.0 || dialog_lat_double < -90.0) {
-                        GoUtils.DisplayToast(MainActivity.this, "经纬度超出限制!\n-180.0<经度<180.0\n-90.0<纬度<90.0");
+                    if (dialog_lng_double > 180.0 || dialog_lng_double < -180.0) {
+                        GoUtils.DisplayToast(MainActivity.this,  getResources().getString(R.string.app_error_longitude));
                     } else {
-                        if (rbBD.isChecked()) {
-                            mMarkLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
+                        if (dialog_lat_double > 90.0 || dialog_lat_double < -90.0) {
+                            GoUtils.DisplayToast(MainActivity.this,  getResources().getString(R.string.app_error_latitude));
                         } else {
-                            double[] bdLonLat = MapUtils.wgs2bd09(dialog_lat_double, dialog_lng_double);
-                            mMarkLatLngMap = new LatLng(bdLonLat[1], bdLonLat[0]);
+                            if (rbBD.isChecked()) {
+                                mMarkLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
+                            } else {
+                                double[] bdLonLat = MapUtils.wgs2bd09(dialog_lat_double, dialog_lng_double);
+                                mMarkLatLngMap = new LatLng(bdLonLat[1], bdLonLat[0]);
+                            }
+
+                            markMap();
+
+                            MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
+                            mBaiduMap.setMapStatus(mapstatusupdate);
+
+                            dialog.dismiss();
                         }
-
-                        markMap();
-
-                        MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
-                        mBaiduMap.setMapStatus(mapstatusupdate);
-
-                        dialog.dismiss();
                     }
                 }
             });
@@ -1483,13 +1487,13 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                                     Button updateAgree = window.findViewById(R.id.update_agree);
                                     updateAgree.setOnClickListener(v -> {
                                         alertDialog.cancel();
-                                        GoUtils.DisplayToast(MainActivity.this,"升级文件下载中");
+                                        GoUtils.DisplayToast(MainActivity.this, getResources().getString(R.string.update_downloading));
                                         downloadNewVersion(download_url);
                                     });
                                 }
                             } else {
                                 if (result) {
-                                    GoUtils.DisplayToast(MainActivity.this,"恭喜，当前版本的影梭已经是最新版！");
+                                    GoUtils.DisplayToast(MainActivity.this, getResources().getString(R.string.update_last));
                                 }
                             }
                         } catch (JSONException e) {

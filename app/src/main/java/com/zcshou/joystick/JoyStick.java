@@ -475,7 +475,6 @@ public class JoyStick extends View {
                     GoUtils.DisplayToast(mContext, getResources().getString(R.string.app_location_ok));
                 }
             }
-
         });
         btnGo.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 

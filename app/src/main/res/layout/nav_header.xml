@@ -23,7 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/nav_header_vertical_spacing"
-        android:text="@string/user_name"
+        android:text="@string/nav_user_name"
         android:textSize="18sp"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
@@ -33,7 +33,7 @@
         android:layout_marginTop="10dp"
         android:layout_gravity="center_vertical"
         android:gravity="center_vertical"
-        android:text="@string/user_limit_info"
+        android:text="@string/nav_user_limit_info"
         android:drawablePadding="5dip"
         app:drawableStartCompat="@drawable/ic_msg"/>
 
