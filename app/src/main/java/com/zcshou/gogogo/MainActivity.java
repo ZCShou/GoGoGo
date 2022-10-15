@@ -150,17 +150,15 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private final float[] mDirectionValues = new float[3];
     private GeoCoder mGeoCoder;
 
-    // 历史记录数据库
-    private SQLiteDatabase mLocationHistoryDB;
-    private SQLiteDatabase mSearchHistoryDB;
 
-    private OkHttpClient mOkHttpClient;
-
-    // UI相关
+    // Navigation 相关
     private NavigationView mNavigationView;
     private CheckBox mPtlCheckBox;
     private final JSONObject mReg = new JSONObject();
-    private FloatingActionButton mButtonStart;
+    // 历史记录数据库
+    private SQLiteDatabase mLocationHistoryDB;
+    private SQLiteDatabase mSearchHistoryDB;
+    // search 相关
     private SearchView searchView;
     private ListView mSearchList;
     private ListView mSearchHistoryList;
@@ -169,12 +167,14 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private MenuItem searchItem;
     private SuggestionSearch mSuggestionSearch;
 
+    private FloatingActionButton mButtonStart;
     private boolean isMockServStart = false;
     private boolean isMove = false;
     private ServiceGo.ServiceGoBinder mServiceBinder;
     private ServiceConnection mConnection;
-    private SharedPreferences sharedPreferences;
 
+    private OkHttpClient mOkHttpClient;
+    private SharedPreferences sharedPreferences;
 
     private DownloadManager mDownloadManager = null;
     private long mDownloadId;
@@ -214,7 +214,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
         initSearchView();
 
-        setGoBtnListener();
+        initGoBtn();
 
         mConnection = new ServiceConnection() {
             @Override
@@ -426,9 +426,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
     }
 
-    /*
-    * 导航菜单
-    * */
 
     private void initNavigationView() {
         mNavigationView = findViewById(R.id.nav_view);
@@ -501,9 +498,131 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         }
     }
 
-    /*
-     * 导航菜单
-     * */
+
+    private void initStoreHistory() {
+        try {
+            // 定位历史
+            DataBaseHistoryLocation dbLocation = new DataBaseHistoryLocation(getApplicationContext());
+            mLocationHistoryDB = dbLocation.getWritableDatabase();
+            // 搜索历史
+            DataBaseHistorySearch dbHistory = new DataBaseHistorySearch(getApplicationContext());
+            mSearchHistoryDB = dbHistory.getWritableDatabase();
+        } catch (Exception e) {
+            XLog.e("ERROR: sqlite init error");
+        }
+    }
+
+    //获取查询历史
+    private List<Map<String, Object>> getSearchHistory() {
+        List<Map<String, Object>> data = new ArrayList<>();
+
+        try {
+            Cursor cursor = mSearchHistoryDB.query(DataBaseHistorySearch.TABLE_NAME, null,
+                    DataBaseHistorySearch.DB_COLUMN_ID + " > ?", new String[] {"0"},
+                    null, null, DataBaseHistorySearch.DB_COLUMN_TIMESTAMP + " DESC", null);
+
+            while (cursor.moveToNext()) {
+                Map<String, Object> searchHistoryItem = new HashMap<>();
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_KEY, cursor.getString(1));
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_DESCRIPTION, cursor.getString(2));
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_TIMESTAMP, "" + cursor.getInt(3));
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_IS_LOCATION, "" + cursor.getInt(4));
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_LONGITUDE_CUSTOM, "" + cursor.getString(7));
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_LATITUDE_CUSTOM, "" + cursor.getString(8));
+                data.add(searchHistoryItem);
+            }
+            cursor.close();
+        } catch (Exception e) {
+            XLog.e("ERROR: query error");
+            e.printStackTrace();
+        }
+
+        return data;
+    }
+
+    // 记录请求的位置信息
+    private void recordGetPositionInfo() {
+        //参数坐标系：bd09
+        final String safeCode = getResources().getString(R.string.safecode);
+        final String ak = getResources().getString(R.string.ak);
+        final String mapType = "bd09ll";
+        final double latitude = mMarkLatLngMap.latitude;
+        final double longitude = mMarkLatLngMap.longitude;
+        //bd09坐标的位置信息
+        String mapApiUrl = "https://api.map.baidu.com/reverse_geocoding/v3/?ak=" + ak + "&output=json&coordtype=" + mapType + "&location=" + latitude + "," + longitude + "&mcode=" + safeCode;
+
+        okhttp3.Request request = new okhttp3.Request.Builder().url(mapApiUrl).get().build();
+        final Call call = mOkHttpClient.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                //http 请求失败
+                XLog.e("HTTP: HTTP GET FAILED");
+                //插表参数
+                ContentValues contentValues = new ContentValues();
+                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
+                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
+                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
+                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
+                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
+                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
+
+                DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                ResponseBody responseBody = response.body();
+                if (responseBody != null) {
+                    String resp = responseBody.string();
+                    try {
+                        JSONObject getRetJson = new JSONObject(resp);
+
+                        //位置获取成功
+                        if (Integer.parseInt(getRetJson.getString("status")) == 0) {
+                            JSONObject posInfoJson = getRetJson.getJSONObject("result");
+                            String formatted_address = posInfoJson.getString("formatted_address");
+                            //插表参数
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, formatted_address);
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
+
+                            DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
+                        } else { //位置获取失败
+                            //插表参数
+                            ContentValues contentValues = new ContentValues();
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
+
+                            DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
+                        }
+                    } catch (JSONException e) {
+                        XLog.e("JSON: resolve json error");
+                        //插表参数
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
+
+                        DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
 
     private void initSearchView() {
         mSearchList = findViewById(R.id.search_list_view);
@@ -631,7 +750,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                         } catch (Exception e) {
                             XLog.e("ERROR: delete database error");
                             GoUtils.DisplayToast(MainActivity.this,getResources().getString(R.string.history_delete_error));
-                            e.printStackTrace();
                         }
                     })
                     .setNegativeButton("取消",
@@ -831,7 +949,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         ImageButton ibShare = poiView.findViewById(R.id.poi_share);
         ibShare.setOnClickListener(v -> ShareUtils.shareText(MainActivity.this, "分享位置", poiLongitude.getText()+","+poiLatitude.getText()));
         ImageButton ibFly = poiView.findViewById(R.id.poi_fly);
-        ibFly.setOnClickListener(this::startGoLocation);
+        ibFly.setOnClickListener(this::doGoLocation);
 
         mGeoCoder = GeoCoder.newInstance();
         mGeoCoder.setOnGetGeoCodeResultListener(new OnGetGeoCoderResultListener() {
@@ -1217,210 +1335,85 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         return ret;
     }
 
-    private void initStoreHistory() {
-        try {
-            //定位历史
-            DataBaseHistoryLocation dbLocation = new DataBaseHistoryLocation(getApplicationContext());
-            mLocationHistoryDB = dbLocation.getWritableDatabase();
-            // 搜索历史
-            DataBaseHistorySearch dbHistory = new DataBaseHistorySearch(getApplicationContext());
-            mSearchHistoryDB = dbHistory.getWritableDatabase();
-        } catch (Exception e) {
-            XLog.e("ERROR: sqlite init error");
-            e.printStackTrace();
-        }
+
+    private void initGoBtn() {
+        mButtonStart = findViewById(R.id.faBtnStart);
+        mButtonStart.setOnClickListener(this::doGoLocation);
     }
 
-    //获取查询历史
-    private List<Map<String, Object>> getSearchHistory() {
-        List<Map<String, Object>> data = new ArrayList<>();
+    private void startGoLocation() {
+        Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
+        bindService(serviceGoIntent, mConnection, BIND_AUTO_CREATE);    // 绑定服务和活动，之后活动就可以去调服务的方法了
+        serviceGoIntent.putExtra(LNG_MSG_ID, mCurLng);
+        serviceGoIntent.putExtra(LAT_MSG_ID, mCurLat);
 
-        try {
-            Cursor cursor = mSearchHistoryDB.query(DataBaseHistorySearch.TABLE_NAME, null,
-                    DataBaseHistorySearch.DB_COLUMN_ID + " > ?", new String[] {"0"},
-                    null, null, DataBaseHistorySearch.DB_COLUMN_TIMESTAMP + " DESC", null);
+        isMove = true;
 
-            while (cursor.moveToNext()) {
-                Map<String, Object> searchHistoryItem = new HashMap<>();
-                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_KEY, cursor.getString(1));
-                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_DESCRIPTION, cursor.getString(2));
-                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_TIMESTAMP, "" + cursor.getInt(3));
-                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_IS_LOCATION, "" + cursor.getInt(4));
-                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_LONGITUDE_CUSTOM, "" + cursor.getString(7));
-                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_LATITUDE_CUSTOM, "" + cursor.getString(8));
-                data.add(searchHistoryItem);
-            }
-            cursor.close();
-        } catch (Exception e) {
-            XLog.e("ERROR: query error");
-            e.printStackTrace();
-        }
+        //save record
+        recordGetPositionInfo();
 
-        return data;
-    }
+        startForegroundService(serviceGoIntent);
+        XLog.d("startForegroundService: ServiceGo");
 
-    // 记录请求的位置信息
-    private void recordGetPositionInfo() {
-        //参数坐标系：bd09
-        final String safeCode = getResources().getString(R.string.safecode);
-        final String ak = getResources().getString(R.string.ak);
-        final String mapType = "bd09ll";
-        final double latitude = mMarkLatLngMap.latitude;
-        final double longitude = mMarkLatLngMap.longitude;
-        //bd09坐标的位置信息
-        String mapApiUrl = "https://api.map.baidu.com/reverse_geocoding/v3/?ak=" + ak + "&output=json&coordtype=" + mapType + "&location=" + latitude + "," + longitude + "&mcode=" + safeCode;
-
-        okhttp3.Request request = new okhttp3.Request.Builder().url(mapApiUrl).get().build();
-        final Call call = mOkHttpClient.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                //http 请求失败
-                XLog.e("HTTP: HTTP GET FAILED");
-                //插表参数
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
-
-                DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                ResponseBody responseBody = response.body();
-                if (responseBody != null) {
-                    String resp = responseBody.string();
-                    try {
-                        JSONObject getRetJson = new JSONObject(resp);
-
-                        //位置获取成功
-                        if (Integer.parseInt(getRetJson.getString("status")) == 0) {
-                            JSONObject posInfoJson = getRetJson.getJSONObject("result");
-                            String formatted_address = posInfoJson.getString("formatted_address");
-                            //插表参数
-                            ContentValues contentValues = new ContentValues();
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, formatted_address);
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
-
-                            DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
-                        } else { //位置获取失败
-                            //插表参数
-                            ContentValues contentValues = new ContentValues();
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
-
-                            DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
-                        }
-                    } catch (JSONException e) {
-                        XLog.e("JSON: resolve json error");
-                        //插表参数
-                        ContentValues contentValues = new ContentValues();
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(mCurLng));
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(mCurLat));
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(longitude));
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(latitude));
-
-                        DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-    }
-
-
-    private void doGoLocation() {
-        if (!isMockServStart) {
-            Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
-            bindService(serviceGoIntent, mConnection, BIND_AUTO_CREATE);    // 绑定服务和活动，之后活动就可以去调服务的方法了
-            serviceGoIntent.putExtra(LNG_MSG_ID, mCurLng);
-            serviceGoIntent.putExtra(LAT_MSG_ID, mCurLat);
-
-            isMove = true;
-
-            //save record
-            recordGetPositionInfo();
-
-            startForegroundService(serviceGoIntent);
-            XLog.d("startForegroundService: ServiceGo");
-
-            isMockServStart = true;
-        }
-    }
-
-    private void startGoLocation(View v) {
-        if (GoUtils.isNetworkAvailable(this)) {
-            if (!Settings.canDrawOverlays(getApplicationContext())) {//悬浮窗权限判断
-                GoUtils.showEnableFloatWindowDialog(this);
-                XLog.e("无悬浮窗权限!");
-            } else {
-                if (!GoUtils.isGpsOpened(this)) {
-                    GoUtils.showEnableGpsDialog(this);
-                } else {
-                    if (isMockServStart) {
-                        if (mMarkLatLngMap == null) {
-                            stopGoLocation();
-                            Snackbar.make(v, "模拟位置已终止", Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
-                            mButtonStart.setImageResource(R.drawable.ic_position);
-                        } else {
-                            mServiceBinder.setPosition(mCurLng, mCurLat);
-                            isMove = true;
-                            Snackbar.make(v, "已传送到新位置", Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
-                        }
-                    } else {
-                        if (!GoUtils.isAllowMockLocation(this)) {
-                            GoUtils.showEnableMockLocationDialog(this);
-                            XLog.e("无模拟位置权限!");
-                        } else {
-                            if (mMarkLatLngMap == null) {
-                                Snackbar.make(v, "请先点击地图位置或者搜索位置", Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
-                            } else {
-                                doGoLocation();
-                                mButtonStart.setImageResource(R.drawable.ic_fly);
-                                Snackbar.make(v, "模拟位置已启动", Snackbar.LENGTH_LONG)
-                                        .setAction("Action", null).show();
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            XLog.e("内部出现错误，无法继续!");
-        }
+        isMockServStart = true;
     }
 
     private void stopGoLocation() {
+        unbindService(mConnection); // 解绑服务，服务要记得解绑，不要造成内存泄漏
+        Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
+        stopService(serviceGoIntent);
+        isMockServStart = false;
+    }
+
+    private void doGoLocation(View v) {
+        if (!GoUtils.isNetworkAvailable(this)) {
+            GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_network));
+            return;
+        }
+
+        if (!GoUtils.isGpsOpened(this)) {
+            GoUtils.showEnableGpsDialog(this);
+            return;
+        }
+
+        if (!Settings.canDrawOverlays(getApplicationContext())) {//悬浮窗权限判断
+            GoUtils.showEnableFloatWindowDialog(this);
+            XLog.e("无悬浮窗权限!");
+            return;
+        }
+
+        if (!GoUtils.isAllowMockLocation(this)) {
+            GoUtils.showEnableMockLocationDialog(this);
+            XLog.e("无模拟位置权限!");
+            return;
+        }
+
         if (isMockServStart) {
-            unbindService(mConnection); // 解绑服务，服务要记得解绑，不要造成内存泄漏
-            Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
-            stopService(serviceGoIntent);
-            isMockServStart = false;
+            if (mMarkLatLngMap == null) {
+                stopGoLocation();
+                Snackbar.make(v, "模拟位置已终止", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                mButtonStart.setImageResource(R.drawable.ic_position);
+            } else {
+                mServiceBinder.setPosition(mCurLng, mCurLat);
+                isMove = true;
+                Snackbar.make(v, "已传送到新位置", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        } else {
+            if (mMarkLatLngMap == null) {
+                Snackbar.make(v, "请先点击地图位置或者搜索位置", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            } else {
+                startGoLocation();
+                mButtonStart.setImageResource(R.drawable.ic_fly);
+                Snackbar.make(v, "模拟位置已启动", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
         }
     }
 
-    private void setGoBtnListener() {
-        mButtonStart = findViewById(R.id.faBtnStart);
-        mButtonStart.setOnClickListener(this::startGoLocation);
-    }
 
-    
     private void initUpdateVersion() {
         mDownloadManager =(DownloadManager) MainActivity.this.getSystemService(DOWNLOAD_SERVICE);
 
