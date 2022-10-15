@@ -315,7 +315,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     SimpleAdapter simAdapt = new SimpleAdapter(
                             MainActivity.this,
                             data,
-                            R.layout.search_record_item,
+                            R.layout.search_item,
                             new String[] {DataBaseHistorySearch.DB_COLUMN_KEY,
                                     DataBaseHistorySearch.DB_COLUMN_DESCRIPTION,
                                     DataBaseHistorySearch.DB_COLUMN_TIMESTAMP,
@@ -426,6 +426,10 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
     }
 
+    /*
+    * 导航菜单
+    * */
+
     private void initNavigationView() {
         mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(item -> {
@@ -496,6 +500,10 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             });
         }
     }
+
+    /*
+     * 导航菜单
+     * */
 
     private void initSearchView() {
         mSearchList = findViewById(R.id.search_list_view);
@@ -609,7 +617,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                                 SimpleAdapter simAdapt = new SimpleAdapter(
                                         MainActivity.this,
                                         data,
-                                        R.layout.search_record_item,
+                                        R.layout.search_item,
                                         new String[] {DataBaseHistorySearch.DB_COLUMN_KEY,
                                                 DataBaseHistorySearch.DB_COLUMN_DESCRIPTION,
                                                 DataBaseHistorySearch.DB_COLUMN_TIMESTAMP,
@@ -660,7 +668,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 SimpleAdapter simAdapt = new SimpleAdapter(
                         MainActivity.this,
                         data,
-                        R.layout.poi_search_item,
+                        R.layout.search_poi_item,
                         new String[] {POI_NAME, POI_ADDRESS, POI_LONGITUDE, POI_LATITUDE}, // 与下面数组元素要一一对应
                         new int[] {R.id.poi_name, R.id.poi_address, R.id.poi_longitude, R.id.poi_latitude});
                 mSearchList.setAdapter(simAdapt);
@@ -678,7 +686,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         if (window != null) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-            window.setContentView(R.layout.register_dialog);
+            window.setContentView(R.layout.register);
             window.setGravity(Gravity.CENTER);
             window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
 
@@ -800,7 +808,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
         mBaiduMap.setMyLocationEnabled(true);
 
-        View poiView = View.inflate(MainActivity.this, R.layout.poi_info, null);
+        View poiView = View.inflate(MainActivity.this, R.layout.location_poi_info, null);
         TextView poiAddress = poiView.findViewById(R.id.poi_address);
         TextView poiLongitude = poiView.findViewById(R.id.poi_longitude);
         TextView poiLatitude = poiView.findViewById(R.id.poi_latitude);
@@ -1044,7 +1052,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             AlertDialog dialog;
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("请输入经度和纬度");
-            View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.input_position, null);
+            View view = LayoutInflater.from(MainActivity.this).inflate(R.layout.location_input, null);
             builder.setView(view);
             dialog = builder.show();
 

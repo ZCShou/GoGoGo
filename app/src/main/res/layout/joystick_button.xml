@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
@@ -27,7 +28,8 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"
             android:src="@drawable/ic_up"
-            android:theme="@style/RippleWhite" />
+            android:theme="@style/RippleWhite"
+            tools:ignore="TouchTargetSizeCheck" />
 
         <ImageButton
             android:id="@+id/btn_north_east"

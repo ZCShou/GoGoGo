@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:text="@string/register_title"
+        android:textColor="#282828"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/reg_user_name"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:autofillHints="username"
+        android:hint="@string/register_user_name"
+        android:inputType="text"
+        android:layout_marginTop="3dp"
+        android:layout_marginEnd="3dp"
+        android:layout_marginStart="3dp"
+        android:textCursorDrawable="@null"
+        app:drawableStartCompat="@drawable/ic_user"
+        android:background="@drawable/border_gray"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="3dp"
+        android:layout_marginStart="3dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:background="@drawable/border_gray">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_date"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/register_limit"
+            android:clickable="false"
+            android:theme="@style/RippleWhite"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:background="@android:color/transparent"
+            android:textSize="18sp"
+            android:textColor="@color/darkgray"
+            android:text="@string/register_limit"/>
+
+        <DatePicker
+            android:id="@+id/date_picker"
+            style="@android:style/Widget.DatePicker"
+            android:layout_width="match_parent"
+            android:layout_height="100dp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/reg_request"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="3dp"
+        android:layout_marginTop="8dp"
+        android:singleLine="true"
+        android:textIsSelectable="true"
+        android:gravity="center"
+        android:drawablePadding="10dip"
+        app:drawableStartCompat="@drawable/ic_pwd"
+        android:background="@drawable/border_gray"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="3dp"
+        android:layout_marginTop="8dp"
+        android:textStyle="bold"
+        android:text="@string/register_tips"/>
+
+    <EditText
+        android:id="@+id/reg_response"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="3dp"
+        android:hint="@string/register_response"
+        android:autofillHints="name"
+        android:inputType="textMultiLine"
+        android:minLines="3"
+        android:maxLines="5"
+        android:layout_marginTop="8dp"
+        android:scrollbars="vertical"
+        android:drawablePadding="10dip"
+        app:drawableStartCompat="@drawable/ic_key"
+        android:background="@drawable/border_gray"/>
+
+    <CheckBox
+        android:id="@+id/reg_check"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="@string/register_check" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/reg_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="14dp"
+            android:text="@string/register_cancel"
+            android:textColor="#282828"
+            android:textStyle="bold" />
+
+        <Space
+            android:layout_width="1dp"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:id="@+id/reg_agree"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="14dp"
+            android:text="@string/register_ok"
+            android:textColor="#282828"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

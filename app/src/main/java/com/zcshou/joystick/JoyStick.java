@@ -388,7 +388,7 @@ public class JoyStick extends View {
                 SimpleAdapter simAdapt = new SimpleAdapter(
                         mContext,
                         data,
-                        R.layout.poi_search_item,
+                        R.layout.search_poi_item,
                         new String[] {MainActivity.POI_NAME, MainActivity.POI_ADDRESS, MainActivity.POI_LONGITUDE, MainActivity.POI_LATITUDE}, // 与下面数组元素要一一对应
                         new int[] {R.id.poi_name, R.id.poi_address, R.id.poi_longitude, R.id.poi_latitude});
                 mSearchList.setAdapter(simAdapt);
