@@ -460,13 +460,22 @@ public class JoyStick extends View {
             mSearchView.clearFocus();
             mSearchView.onActionViewCollapsed();
 
-            mCurMapLngLat = mMarkMapLngLat;
-            double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
-            mListener.onPositionInfo(lngLat[0], lngLat[1]);
+            if (mMarkMapLngLat == null) {
+                GoUtils.DisplayToast(mContext, getResources().getString(R.string.app_error_location));
+            } else {
+                if (mCurMapLngLat != mMarkMapLngLat) {
+                    mCurMapLngLat = mMarkMapLngLat;
+                    mMarkMapLngLat = null;
 
-            resetBaiduMap();
+                    double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
+                    mListener.onPositionInfo(lngLat[0], lngLat[1]);
 
-            GoUtils.DisplayToast(mContext, getResources().getString(R.string.app_location_ok));
+                    resetBaiduMap();
+
+                    GoUtils.DisplayToast(mContext, getResources().getString(R.string.app_location_ok));
+                }
+            }
+
         });
         btnGo.setColorFilter(getResources().getColor(R.color.colorAccent, mContext.getTheme()));
 

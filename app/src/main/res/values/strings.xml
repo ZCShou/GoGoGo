@@ -24,6 +24,7 @@
     <string name="app_error_permission">权限不足，请授予相关权限</string>
     <string name="app_error_input">输入有误，请检查输入是否合法</string>
     <string name="app_error_search">查找失败，请检查网络或定位</string>
+    <string name="app_error_location">请先选择位置</string>
     <string name="app_search_null">没有匹配结果，请重新搜索</string>
     <string name="app_location_ok">位置已传送</string>
 
