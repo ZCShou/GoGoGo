@@ -22,13 +22,34 @@
     <string name="app_error_gps">定位不可用，请检查 GPS 是否开启</string>
     <string name="app_error_network">网络不可用，请检查网络连接</string>
     <string name="app_error_permission">权限不足，请授予相关权限</string>
+    <string name="app_error_input">输入有误，请检查输入是否合法</string>
+
+    <!-- 欢迎页 -->
+    <string name="welcome_btn_txt">进入应用</string>
+
+    <!-- 设置界面 -->
+    <string name="setting_group_move">移动</string>
+    <string name="setting_current_value">当前值: </string>
+    <string name="setting_joystick">摇杆类型</string>
+    <string name="setting_joystick_tips">重启摇杆后生效</string>
+    <string name="setting_walk">步行速度(米/秒)</string>
+    <string name="setting_walk_default">1.2</string>
+    <string name="setting_run">跑步速度(米/秒)</string>
+    <string name="setting_run_default">3.6</string>
+    <string name="setting_bike">驾驶速度(米/秒)</string>
+    <string name="setting_bike_default">10.0</string>
+    <string name="setting_group_log">记录</string>
+    <string name="setting_log_off">关闭日志</string>
+    <string name="setting_pos_history">历史记录有效期(天)</string>
+    <string name="setting_pos_history_default">7</string>
+    <string name="setting_group_about">关于</string>
+    <string name="setting_version">版本号</string>
+    <string name="setting_author">开发者</string>
+    <string name="setting_group_sys">系统</string>
 
     <!-- 通知栏 -->
     <string name="note_show">显示摇杆</string>
     <string name="note_hide">隐藏摇杆</string>
-
-    <!-- 欢迎页 -->
-    <string name="welcome_btn_txt">进入应用</string>
 
     <!-- 主界面 -->
     <string name="label_longitude">经度</string>
@@ -62,25 +83,6 @@
     <string name="nav_menu_upgrade">检测更新</string>
     <string name="nav_menu_feedback">问题反馈</string>
     <string name="nav_menu_contact">联系作者</string>
-
-    <!-- 设置界面 -->
-    <string name="setting_group_move">移动</string>
-    <string name="setting_joystick">摇杆类型</string>
-    <string name="setting_joystick_tips">重启摇杆后生效</string>
-    <string name="setting_walk">步行速度(米/秒)</string>
-    <string name="setting_walk_default">1.2</string>
-    <string name="setting_run">跑步速度(米/秒)</string>
-    <string name="setting_run_default">3.6</string>
-    <string name="setting_bike">驾驶速度(米/秒)</string>
-    <string name="setting_bike_default">10.0</string>
-    <string name="setting_group_log">记录</string>
-    <string name="setting_log_off">关闭日志</string>
-    <string name="setting_pos_history">历史记录有效期(天)</string>
-    <string name="setting_pos_history_default">7</string>
-    <string name="setting_group_about">关于</string>
-    <string name="setting_version">版本号</string>
-    <string name="setting_author">开发者</string>
-    <string name="setting_group_sys">系统</string>
 
     <!-- 百度地图 -->
     <string name="map_pic_sate">卫星图</string>

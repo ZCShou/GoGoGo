@@ -33,22 +33,21 @@ public class FragmentSettings extends PreferenceFragmentCompat {
         ListPreference pfJoystick = findPreference("setting_joystick_type");
         if (pfJoystick != null) {
             // 使用自定义 SummaryProvider
-            pfJoystick.setSummaryProvider((Preference.SummaryProvider<ListPreference>) preference -> "当前类型: " + Objects.requireNonNull(preference.getEntry()));
+            pfJoystick.setSummaryProvider((Preference.SummaryProvider<ListPreference>) preference -> getResources().getString(R.string.setting_current_value) + Objects.requireNonNull(preference.getEntry()));
             pfJoystick.setOnPreferenceChangeListener((preference, newValue) -> newValue.toString().trim().length() != 0);
         }
 
         EditTextPreference pfWalk = findPreference("setting_walk");
         if (pfWalk != null) {
             // 使用自定义 SummaryProvider
-            pfWalk.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> "当前值: " + preference.getText());
+            pfWalk.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> getResources().getString(R.string.setting_current_value) + preference.getText());
             pfWalk.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 Selection.setSelection(editText.getText(), editText.length());
             });
             pfWalk.setOnPreferenceChangeListener((preference, newValue) -> {
-                if (newValue.toString().trim().length() == 0)
-                {
-                    GoUtils.DisplayToast(this.getContext(),"输入无效");
+                if (newValue.toString().trim().length() == 0) {
+                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input));
                     return false;
                 }
                 return true;
@@ -57,15 +56,14 @@ public class FragmentSettings extends PreferenceFragmentCompat {
 
         EditTextPreference pfRun = findPreference("setting_run");
         if (pfRun != null) {
-            pfRun.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> "当前值: " + preference.getText());
+            pfRun.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> getResources().getString(R.string.setting_current_value) + preference.getText());
             pfRun.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 Selection.setSelection(editText.getText(), editText.length());
             });
             pfRun.setOnPreferenceChangeListener((preference, newValue) -> {
-                if (newValue.toString().trim().length() == 0)
-                {
-                    GoUtils.DisplayToast(this.getContext(),"输入无效");
+                if (newValue.toString().trim().length() == 0) {
+                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input));
                     return false;
                 }
                 return true;
@@ -73,15 +71,14 @@ public class FragmentSettings extends PreferenceFragmentCompat {
         }
         EditTextPreference pfBike = findPreference("setting_bike");
         if (pfBike != null) {
-            pfBike.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> "当前值: " + preference.getText());
+            pfBike.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> getResources().getString(R.string.setting_current_value) + preference.getText());
             pfBike.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 Selection.setSelection(editText.getText(), editText.length());
             });
             pfBike.setOnPreferenceChangeListener((preference, newValue) -> {
-                if (newValue.toString().trim().length() == 0)
-                {
-                    GoUtils.DisplayToast(this.getContext(),"输入无效");
+                if (newValue.toString().trim().length() == 0) {
+                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input));
                     return false;
                 }
                 return true;
@@ -109,15 +106,14 @@ public class FragmentSettings extends PreferenceFragmentCompat {
         EditTextPreference pfPosHisValid = findPreference("setting_pos_history");
         if (pfPosHisValid != null) {
             // 使用自定义 SummaryProvider
-            pfPosHisValid.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> "当前值: " + preference.getText());
+            pfPosHisValid.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> getResources().getString(R.string.setting_current_value) + preference.getText());
             pfPosHisValid.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 Selection.setSelection(editText.getText(), editText.length());
             });
             pfPosHisValid.setOnPreferenceChangeListener((preference, newValue) -> {
-                if (newValue.toString().trim().length() == 0)
-                {
-                    GoUtils.DisplayToast(this.getContext(),"输入无效");
+                if (newValue.toString().trim().length() == 0) {
+                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input));
                     return false;
                 }
                 return true;
