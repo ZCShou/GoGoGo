@@ -22,8 +22,8 @@ android {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 27
         targetSdkVersion 32
-        versionCode 1103
-        versionName '1.10.3' // https://semver.org/lang/zh-CN/
+        versionCode 1100
+        versionName '1.11.0' // https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         resConfigs 'zh', 'zh-rCN', 'en', 'en-rUS'
         ndk {
