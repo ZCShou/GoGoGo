@@ -248,7 +248,7 @@ public class GoUtils {
 
     public static  void DisplayToast(Context context, String str) {
         Toast toast = Toast.makeText(context, str, Toast.LENGTH_LONG);
-        toast.setGravity(Gravity.TOP, 0, -500);
+        toast.setGravity(Gravity.TOP, 0, 100);
         toast.show();
     }
 

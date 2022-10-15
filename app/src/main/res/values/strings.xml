@@ -3,23 +3,10 @@
     <string name="app_settings">设置</string>
     <string name="app_history">历史记录</string>
     <string name="app_author">ZCShou</string>
-    <string name="app_email">Author: zcsexp@gmail.com</string>
+    <string name="app_email">zcsexp@gmail.com</string>
     <string name="app_statement">仅供学习使用，否则后果自负！</string>
     <string name="app_service_tips">影梭服务正在运行中</string>
-    <!-- 通知栏 -->
-    <string name="note_show">显示摇杆</string>
-    <string name="note_hide">隐藏摇杆</string>
-
-    <!-- 欢迎页 -->
-    <string name="welcome_btn_txt">进入应用</string>
-    <string name="welcome_btn_cnt">3000</string>
-    <string name="welcome_protocol_title">免责声明</string>
-    <string name="welcome_protocol_agree">同意并继续</string>
-    <string name="welcome_protocol_disagree">不同意</string>
-    <string name="welcome_protocol_check">不再显示</string>
-    <string name="welcome_permission_error">权限不足</string>
-    <string name="welcome_network_error">网络不可用</string>
-    <string name="protocol">"1. 本软件专为学习 Android 开发使用，不会收集任何用户数据。"
+    <string name="app_protocol">"1. 本软件专为学习 Android 开发使用，不会收集任何用户数据。"
     "严禁利用本软件侵犯他人隐私权或者用于游戏牟利，如软件使用者不能遵守此规定， 请立即删除。"
     "对于因用户使用本软件而造成自身或他人隐私泄露等任何不良后果，均由用户自行承担，软件作者不负任何责任。\n"
     "2. 用户不得对本软件产品进行反向工程（reverse engineer）、反向编译（decompile）或反汇编（disassemble）， 违者属于侵权行为，并自行承担由此产生的不利后果。\n"
@@ -28,6 +15,21 @@
     "5. 由于用户计算机软硬件环境的差异性和复杂性，本软件所提供的各项功能并不能保证在任何情况下都能正常执行或达到用户所期望的结果。 用户使用本软件所产生的一切后果，软件作者不承担任何责任。\n"
     "6. 如果用户自行安装本软件，即表明用户信任软件作者，自愿选择安装本软件，并接受本协议所有条款。 如果用户不接受本协议，请立即删除。\n"
     </string>
+    <string name="app_error_gps">定位不可用，请检查 GPS 是否开启</string>
+    <string name="app_error_network">网络不可用，请检查网络连接</string>
+    <string name="app_error_permission">权限不足，请授予相关权限</string>
+
+    <!-- 通知栏 -->
+    <string name="note_show">显示摇杆</string>
+    <string name="note_hide">隐藏摇杆</string>
+
+    <!-- 欢迎页 -->
+    <string name="welcome_btn_txt">进入应用</string>
+    <string name="welcome_protocol_title">免责声明</string>
+    <string name="welcome_protocol_agree">同意并继续</string>
+    <string name="welcome_protocol_disagree">不同意</string>
+    <string name="welcome_protocol_check">不再显示</string>
+
     <!-- 主界面 -->
     <string name="label_longitude">经度</string>
     <string name="label_latitude">纬度</string>
@@ -35,6 +37,8 @@
     <string name="input_position_cancel">取消</string>
     <string name="input_position_baidu">BD09 坐标系</string>
     <string name="input_position_gps">GPS 坐标系</string>
+    <string name="error_gps">位置检索失败，请检查 GPS 是否开启</string>
+    <string name="error_network">搜索失败，请检查网络连接</string>
 
     <!-- 更新 -->
     <string name="update_title">新版本可用</string>

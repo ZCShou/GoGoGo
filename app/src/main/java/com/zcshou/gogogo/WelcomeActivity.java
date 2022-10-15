@@ -26,15 +26,18 @@ import java.util.Locale;
 
 public class WelcomeActivity extends AppCompatActivity {
     private Button startBtn;
-    private TimeCount mTimer;
-    private boolean isNetwork = false;
 
+    private static SharedPreferences preferences;
     private static final String KEY_IS_FIRST_USAGE = "KEY_IS_FIRST_USAGE";
-    private SharedPreferences preferences;
 
     private static boolean isPermission = false;
     private static final int SDK_PERMISSION_REQUEST = 127;
     private static final ArrayList<String> ReqPermissions = new ArrayList<>();
+
+    private static TimeCount mTimer;
+    private static final int TIMER_INTERVAL = 1000;
+    private static final int TIMER_DURATION = 3000;
+    private static final String TIMER_FORMAT = "%d 秒";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,36 +48,12 @@ public class WelcomeActivity extends AppCompatActivity {
         // 生成默认参数的值（一定要尽可能早的调用，因为后续有些界面可能需要使用参数）
         PreferenceManager.setDefaultValues(this, R.xml.preferences_main, false);
 
-        /* 定时器 */
-        int cnt = Integer.parseInt(getResources().getString(R.string.welcome_btn_cnt));
-        mTimer = new TimeCount(cnt, 1000);
-        mTimer.setListener(new TimeCount.TimeCountListener() {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                startBtn.setText(String.format(Locale.getDefault(), "%d秒", millisUntilFinished / 1000));
-            }
-
-            @Override
-            public void onFinish() {
-                startMainActivity();
-            }
-        });
-
         startBtn = findViewById(R.id.startButton);
         startBtn.setOnClickListener(v -> startMainActivity());
 
-        if (!GoUtils.isNetworkAvailable(this)) {
-            startBtn.setText(getResources().getString(R.string.welcome_network_error));
-        } else {
-            isNetwork = true;
-            preferences = getSharedPreferences(KEY_IS_FIRST_USAGE, MODE_PRIVATE);
+        checkFirstStartup();
 
-            if (preferences.getBoolean(KEY_IS_FIRST_USAGE, true)) {
-                showProtocolDialog();
-            } else {
-                checkDefaultPermissions();
-            }
-        }
+        initTimer();
     }
 
     @Override
@@ -102,22 +81,27 @@ public class WelcomeActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == SDK_PERMISSION_REQUEST) {
-            int i;
-            for (i = 0; i < ReqPermissions.size(); i++) {
+            for (int i = 0; i < ReqPermissions.size(); i++) {
                 if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                    break;// Permission Denied 权限被拒绝
+                    GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_permission));
+                    return;
                 }
             }
 
-            if (i >= ReqPermissions.size()) {
-                isPermission = true;
-                mTimer.start();
-            } else {
-                startBtn.setText(getResources().getString(R.string.welcome_permission_error));
-                startBtn.setClickable(true);
-            }
+            isPermission = true;
+            mTimer.start();
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    private void checkFirstStartup() {
+        preferences = getSharedPreferences(KEY_IS_FIRST_USAGE, MODE_PRIVATE);
+
+        if (preferences.getBoolean(KEY_IS_FIRST_USAGE, true)) {
+            showProtocolDialog();
+        } else {
+            checkDefaultPermissions();
+        }
     }
 
     private void checkDefaultPermissions() {
@@ -155,16 +139,40 @@ public class WelcomeActivity extends AppCompatActivity {
         }
     }
 
-    private void startMainActivity() {
-        if (isNetwork) {
-            if (isPermission) {
-                Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
-                startActivity(intent);
-                WelcomeActivity.this.finish();
-            } else {
-                checkDefaultPermissions();
+    private void initTimer() {
+        mTimer = new TimeCount(TIMER_DURATION, TIMER_INTERVAL);
+        mTimer.setListener(new TimeCount.TimeCountListener() {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                startBtn.setText(String.format(Locale.getDefault(), TIMER_FORMAT, millisUntilFinished / TIMER_INTERVAL));
             }
+
+            @Override
+            public void onFinish() {
+                startMainActivity();
+            }
+        });
+    }
+
+    private void startMainActivity() {
+        if (!GoUtils.isNetworkAvailable(this)) {
+            GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_network));
+            return;
         }
+
+        if (!GoUtils.isGpsOpened(this)) {
+            GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_gps));
+            return;
+        }
+
+        if (isPermission) {
+            Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
+            startActivity(intent);
+            WelcomeActivity.this.finish();
+        } else {
+            checkDefaultPermissions();
+        }
+
         mTimer.cancel();
     }
 
@@ -183,7 +191,7 @@ public class WelcomeActivity extends AppCompatActivity {
             Button tvAgree = window.findViewById(R.id.tv_agree);
             final CheckBox tvCheck = window.findViewById(R.id.tv_check);
             SpannableStringBuilder ssb = new SpannableStringBuilder();
-            ssb.append(getResources().getString(R.string.protocol));
+            ssb.append(getResources().getString(R.string.app_protocol));
             tvContent.setMovementMethod(LinkMovementMethod.getInstance());
             tvContent.setText(ssb, TextView.BufferType.SPANNABLE);
 

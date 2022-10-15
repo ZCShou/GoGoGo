@@ -361,8 +361,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     mBaiduMap.clear();
                     mSearchLayout.setVisibility(View.INVISIBLE);
                 } catch (Exception e) {
-                    GoUtils.DisplayToast(MainActivity.this,"搜索失败，请检查网络连接");
-                    XLog.d("HTTP: 搜索失败，请检查网络连接");
+                    GoUtils.DisplayToast(MainActivity.this, getResources().getString(R.string.error_gps));
+                    XLog.d(getResources().getString(R.string.error_gps));
                     e.printStackTrace();
                 }
 
@@ -775,7 +775,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             CheckBox tvCheck = window.findViewById(R.id.tv_check);
             tvCheck.setVisibility(GONE);
             SpannableStringBuilder ssb = new SpannableStringBuilder();
-            ssb.append(getResources().getString(R.string.protocol));
+            ssb.append(getResources().getString(R.string.app_protocol));
 
             tvContent.setMovementMethod(LinkMovementMethod.getInstance());
             tvContent.setText(ssb, TextView.BufferType.SPANNABLE);
