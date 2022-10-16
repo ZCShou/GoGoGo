@@ -155,7 +155,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private float mCurrentDirection = 0.0f;
     private boolean isFirstLoc = true; // 是否首次定位
     private boolean isMockServStart = false;
-    private boolean isMove = false;
     private ServiceGo.ServiceGoBinder mServiceBinder;
     private ServiceConnection mConnection;
     private FloatingActionButton mButtonStart;
@@ -751,16 +750,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     MyLocationConfiguration configuration = new MyLocationConfiguration(MyLocationConfiguration.LocationMode.NORMAL, true, null);
                     mBaiduMap.setMyLocationConfiguration(configuration);
 
-                    if (isMove) {
-                        isMove = false;
-                        mBaiduMap.clear();
-                        mMarkLatLngMap = null;
-
-                        if (GoUtils.isWifiEnabled(MainActivity.this)) {
-                            GoUtils.showDisableWifiDialog(MainActivity.this);
-                        }
-                    }
-
                     /* 如果出现错误，则需要重新请求位置 */
                     int err = bdLocation.getLocType();
                     if (err == BDLocation.TypeCriteriaException || err == BDLocation.TypeNetWorkException) {
@@ -1035,8 +1024,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         serviceGoIntent.putExtra(LNG_MSG_ID, mCurLng);
         serviceGoIntent.putExtra(LAT_MSG_ID, mCurLat);
 
-        isMove = true;
-
         //save record
         recordGetPositionInfo();
 
@@ -1084,9 +1071,15 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 mButtonStart.setImageResource(R.drawable.ic_position);
             } else {
                 mServiceBinder.setPosition(mCurLng, mCurLat);
-                isMove = true;
                 Snackbar.make(v, "已传送到新位置", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                mBaiduMap.clear();
+                mMarkLatLngMap = null;
+
+                if (GoUtils.isWifiEnabled(MainActivity.this)) {
+                    GoUtils.showDisableWifiDialog(MainActivity.this);
+                }
             }
         } else {
             if (mMarkLatLngMap == null) {
@@ -1097,6 +1090,13 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 mButtonStart.setImageResource(R.drawable.ic_fly);
                 Snackbar.make(v, "模拟位置已启动", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                mBaiduMap.clear();
+                mMarkLatLngMap = null;
+
+                if (GoUtils.isWifiEnabled(MainActivity.this)) {
+                    GoUtils.showDisableWifiDialog(MainActivity.this);
+                }
             }
         }
     }
