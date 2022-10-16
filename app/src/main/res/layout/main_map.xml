@@ -56,7 +56,7 @@
             android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"
-            android:theme="@style/AppTheme"
+            android:theme="@style/RippleWhite"
             app:srcCompat="@drawable/ic_home_position"
             app:tint="@color/colorAccent" />
 
@@ -69,7 +69,7 @@
             android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"
-            android:theme="@style/AppTheme"
+            android:theme="@style/RippleWhite"
             app:srcCompat="@drawable/ic_zoom_in"
             app:tint="@color/colorAccent" />
 
@@ -82,7 +82,7 @@
             android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"
-            android:theme="@style/AppTheme"
+            android:theme="@style/RippleWhite"
             app:srcCompat="@drawable/ic_zoom_out"
             app:tint="@color/colorAccent" />
 
@@ -95,7 +95,7 @@
             android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"
-            android:theme="@style/AppTheme"
+            android:theme="@style/RippleWhite"
             app:srcCompat="@drawable/ic_input"
             app:tint="@color/colorAccent" />
 
