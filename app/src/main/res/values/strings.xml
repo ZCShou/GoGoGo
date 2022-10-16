@@ -34,6 +34,7 @@
     <string name="app_error_longitude">经度超出限制!\n取值：-180.0 ~ 180.0</string>
     <string name="app_error_latitude">纬度超出限制!\n取值：-90.0 ~ 90.0</string>
     <string name="app_search_null">没有匹配结果，请重新搜索</string>
+    <string name="app_search_tips">请输入查找内容</string>
     <string name="app_location_ok">位置已传送</string>
     <string name="app_location_copy">位置已复制到剪切板</string>
     <string name="app_location_save">位置已保存</string>

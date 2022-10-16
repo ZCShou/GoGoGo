@@ -357,6 +357,80 @@ public class JoyStick extends View {
         }
     }
 
+    private void processDirection(boolean auto, double angle, double r) {
+        if (r <= 0) {
+            mTimer.cancel();
+            isMove = false;
+        } else {
+            mAngle = angle;
+            mR = r;
+            if (auto) {
+                if (!isMove) {
+                    mTimer.start();
+                    isMove = true;
+                }
+            } else {
+                mTimer.cancel();
+                isMove = false;
+                // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）且转换为 km
+                disLng = mSpeed * (double)(DivGo / 1000) * mR * Math.cos(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
+                disLat = mSpeed * (double)(DivGo / 1000) * mR * Math.sin(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
+                mListener.onMoveInfo(mSpeed, disLng, disLat);
+            }
+        }
+    }
+
+    private class JoyStickOnTouchListener implements OnTouchListener {
+        private int x;
+        private int y;
+
+        @Override
+        public boolean onTouch(View view, MotionEvent event) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    x = (int) event.getRawX();
+                    y = (int) event.getRawY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    int nowX = (int) event.getRawX();
+                    int nowY = (int) event.getRawY();
+                    int movedX = nowX - x;
+                    int movedY = nowY - y;
+                    x = nowX;
+                    y = nowY;
+                    switch (mCurWin) {
+                        case WINDOW_TYPE_MAP:
+                            mWindowParamMap.x = mWindowParamMap.x + movedX;
+                            mWindowParamMap.y = mWindowParamMap.y + movedY;
+                            mWindowManager.updateViewLayout(view, mWindowParamMap);
+                            break;
+                        case WINDOW_TYPE_HISTORY:
+                            mWindowParamHistory.x = mWindowParamHistory.x + movedX;
+                            mWindowParamHistory.y = mWindowParamHistory.y + movedY;
+                            mWindowManager.updateViewLayout(view, mWindowParamHistory);
+                            break;
+                        case WINDOW_TYPE_JOYSTICK:
+                            mWindowParamJoyStick.x = mWindowParamJoyStick.x + movedX;
+                            mWindowParamJoyStick.y = mWindowParamJoyStick.y + movedY;
+                            mWindowManager.updateViewLayout(view, mWindowParamJoyStick);
+                            break;
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    view.performClick();
+                    break;
+                default:
+                    break;
+            }
+            return false;
+        }
+    }
+
+    public interface JoyStickClickListener {
+        void onMoveInfo(double speed, double disLng, double disLat);
+        void onPositionInfo(double lng, double lat);
+    }
+
     @SuppressLint({"InflateParams", "ClickableViewAccessibility"})
     private void initJoyStickMapView() {
         mMapLayout = (FrameLayout)inflater.inflate(R.layout.joystick_map, null);
@@ -576,6 +650,7 @@ public class JoyStick extends View {
         mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
     }
 
+
     @SuppressLint({"InflateParams", "ClickableViewAccessibility"})
     private void initHistoryView() {
         mHistoryLayout = (FrameLayout)inflater.inflate(R.layout.joystick_history, null);
@@ -748,79 +823,5 @@ public class JoyStick extends View {
                 e.printStackTrace();
             }
         }
-    }
-
-    private void processDirection(boolean auto, double angle, double r) {
-        if (r <= 0) {
-            mTimer.cancel();
-            isMove = false;
-        } else {
-            mAngle = angle;
-            mR = r;
-            if (auto) {
-                if (!isMove) {
-                    mTimer.start();
-                    isMove = true;
-                }
-            } else {
-                mTimer.cancel();
-                isMove = false;
-                // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）且转换为 km
-                disLng = mSpeed * (double)(DivGo / 1000) * mR * Math.cos(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
-                disLat = mSpeed * (double)(DivGo / 1000) * mR * Math.sin(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
-                mListener.onMoveInfo(mSpeed, disLng, disLat);
-            }
-        }
-    }
-
-    private class JoyStickOnTouchListener implements OnTouchListener {
-        private int x;
-        private int y;
-
-        @Override
-        public boolean onTouch(View view, MotionEvent event) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    x = (int) event.getRawX();
-                    y = (int) event.getRawY();
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    int nowX = (int) event.getRawX();
-                    int nowY = (int) event.getRawY();
-                    int movedX = nowX - x;
-                    int movedY = nowY - y;
-                    x = nowX;
-                    y = nowY;
-                    switch (mCurWin) {
-                        case WINDOW_TYPE_MAP:
-                            mWindowParamMap.x = mWindowParamMap.x + movedX;
-                            mWindowParamMap.y = mWindowParamMap.y + movedY;
-                            mWindowManager.updateViewLayout(view, mWindowParamMap);
-                            break;
-                        case WINDOW_TYPE_HISTORY:
-                            mWindowParamHistory.x = mWindowParamHistory.x + movedX;
-                            mWindowParamHistory.y = mWindowParamHistory.y + movedY;
-                            mWindowManager.updateViewLayout(view, mWindowParamHistory);
-                            break;
-                        case WINDOW_TYPE_JOYSTICK:
-                            mWindowParamJoyStick.x = mWindowParamJoyStick.x + movedX;
-                            mWindowParamJoyStick.y = mWindowParamJoyStick.y + movedY;
-                            mWindowManager.updateViewLayout(view, mWindowParamJoyStick);
-                            break;
-                    }
-                    break;
-                case MotionEvent.ACTION_UP:
-                    view.performClick();
-                    break;
-                default:
-                    break;
-            }
-            return false;
-        }
-    }
-
-    public interface JoyStickClickListener {
-        void onMoveInfo(double speed, double disLng, double disLat);
-        void onPositionInfo(double lng, double lat);
     }
 }
