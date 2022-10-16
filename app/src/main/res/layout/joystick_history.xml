@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="300dp"
     android:layout_height="500dp"
+    android:minWidth="300dp"
     android:background="@drawable/border_window"
     android:orientation="vertical">
 
