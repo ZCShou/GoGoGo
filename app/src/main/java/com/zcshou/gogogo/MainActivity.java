@@ -1057,12 +1057,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             return;
         }
 
-        if (!GoUtils.isAllowMockLocation(this)) {
-            GoUtils.showEnableMockLocationDialog(this);
-            XLog.e("无模拟位置权限!");
-            return;
-        }
-
         if (isMockServStart) {
             if (mMarkLatLngMap == null) {
                 stopGoLocation();
@@ -1082,20 +1076,25 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 }
             }
         } else {
-            if (mMarkLatLngMap == null) {
-                Snackbar.make(v, "请先点击地图位置或者搜索位置", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            if (!GoUtils.isAllowMockLocation(this)) {
+                GoUtils.showEnableMockLocationDialog(this);
+                XLog.e("无模拟位置权限!");
             } else {
-                startGoLocation();
-                mButtonStart.setImageResource(R.drawable.ic_fly);
-                Snackbar.make(v, "模拟位置已启动", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                if (mMarkLatLngMap == null) {
+                    Snackbar.make(v, "请先点击地图位置或者搜索位置", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                } else {
+                    startGoLocation();
+                    mButtonStart.setImageResource(R.drawable.ic_fly);
+                    Snackbar.make(v, "模拟位置已启动", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
 
-                mBaiduMap.clear();
-                mMarkLatLngMap = null;
+                    mBaiduMap.clear();
+                    mMarkLatLngMap = null;
 
-                if (GoUtils.isWifiEnabled(MainActivity.this)) {
-                    GoUtils.showDisableWifiDialog(MainActivity.this);
+                    if (GoUtils.isWifiEnabled(MainActivity.this)) {
+                        GoUtils.showDisableWifiDialog(MainActivity.this);
+                    }
                 }
             }
         }
