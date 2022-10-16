@@ -23,6 +23,7 @@
     <string name="app_error_network">网络不可用，请检查网络连接</string>
     <string name="app_error_permission">权限不足，请授予相关权限</string>
     <string name="app_error_input">输入有误，请检查输入是否合法</string>
+    <string name="app_error_input_null">输入不能为空，请重新输入内容</string>
     <string name="app_error_search">查找失败，请检查网络或定位</string>
     <string name="app_error_location">请先选择位置</string>
     <string name="app_error_dev">无法跳转到开发者选项，请先确保已开启开发者模式</string>
@@ -42,7 +43,7 @@
 
     <!-- 设置界面 -->
     <string name="setting_group_move">移动</string>
-    <string name="setting_current_value">当前值: </string>
+    <string name="setting_current_value">"当前值: "</string> <!-- 使用双引号以保留空格 -->
     <string name="setting_joystick">摇杆类型</string>
     <string name="setting_joystick_tips">重启摇杆后生效</string>
     <string name="setting_walk">步行速度(米/秒)</string>

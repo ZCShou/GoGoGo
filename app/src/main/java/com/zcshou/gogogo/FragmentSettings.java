@@ -47,7 +47,7 @@ public class FragmentSettings extends PreferenceFragmentCompat {
             });
             pfWalk.setOnPreferenceChangeListener((preference, newValue) -> {
                 if (newValue.toString().trim().length() == 0) {
-                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input));
+                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input_null));
                     return false;
                 }
                 return true;
@@ -63,7 +63,7 @@ public class FragmentSettings extends PreferenceFragmentCompat {
             });
             pfRun.setOnPreferenceChangeListener((preference, newValue) -> {
                 if (newValue.toString().trim().length() == 0) {
-                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input));
+                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input_null));
                     return false;
                 }
                 return true;
@@ -78,7 +78,7 @@ public class FragmentSettings extends PreferenceFragmentCompat {
             });
             pfBike.setOnPreferenceChangeListener((preference, newValue) -> {
                 if (newValue.toString().trim().length() == 0) {
-                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input));
+                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input_null));
                     return false;
                 }
                 return true;
@@ -113,7 +113,7 @@ public class FragmentSettings extends PreferenceFragmentCompat {
             });
             pfPosHisValid.setOnPreferenceChangeListener((preference, newValue) -> {
                 if (newValue.toString().trim().length() == 0) {
-                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input));
+                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input_null));
                     return false;
                 }
                 return true;
