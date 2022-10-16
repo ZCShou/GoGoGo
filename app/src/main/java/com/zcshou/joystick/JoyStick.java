@@ -431,6 +431,7 @@ public class JoyStick extends View {
         void onPositionInfo(double lng, double lat);
     }
 
+
     @SuppressLint({"InflateParams", "ClickableViewAccessibility"})
     private void initJoyStickMapView() {
         mMapLayout = (FrameLayout)inflater.inflate(R.layout.joystick_map, null);
