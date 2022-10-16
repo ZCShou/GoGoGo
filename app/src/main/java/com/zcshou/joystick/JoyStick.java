@@ -55,9 +55,7 @@ public class JoyStick extends View {
     private static final int WINDOW_TYPE_HISTORY = 2;
 
     private final Context mContext;
-    private WindowManager.LayoutParams mWindowParamJoyStick;
-    private WindowManager.LayoutParams mWindowParamMap;
-    private WindowManager.LayoutParams mWindowParamHistory;
+    private WindowManager.LayoutParams mWindowParamCurrent;
     private WindowManager mWindowManager;
     private int mCurWin = WINDOW_TYPE_JOYSTICK;
     private final LayoutInflater inflater;
@@ -169,7 +167,7 @@ public class JoyStick extends View {
                 }
                 if (mMapLayout.getParent() == null) {
                     resetBaiduMap();
-                    mWindowManager.addView(mMapLayout, mWindowParamMap);
+                    mWindowManager.addView(mMapLayout, mWindowParamCurrent);
                 }
                 break;
             case WINDOW_TYPE_HISTORY:
@@ -180,7 +178,7 @@ public class JoyStick extends View {
                     mWindowManager.removeView(mJoystickLayout);
                 }
                 if (mHistoryLayout.getParent() == null) {
-                    mWindowManager.addView(mHistoryLayout, mWindowParamHistory);
+                    mWindowManager.addView(mHistoryLayout, mWindowParamCurrent);
                 }
                 break;
             case WINDOW_TYPE_JOYSTICK:
@@ -191,7 +189,7 @@ public class JoyStick extends View {
                     mWindowManager.removeView(mHistoryLayout);
                 }
                 if (mJoystickLayout.getParent() == null) {
-                    mWindowManager.addView(mJoystickLayout, mWindowParamJoyStick);
+                    mWindowManager.addView(mJoystickLayout, mWindowParamCurrent);
                 }
                 break;
         }
@@ -234,20 +232,17 @@ public class JoyStick extends View {
 
     private void initWindowManager() {
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mWindowParamJoyStick = new WindowManager.LayoutParams();
-        mWindowParamJoyStick.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        mWindowParamJoyStick.format = PixelFormat.RGBA_8888;
-        mWindowParamJoyStick.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE      // 不添加这个将导致游戏无法启动（MIUI12）,添加之后导致键盘无法显示
+        mWindowParamCurrent = new WindowManager.LayoutParams();
+        mWindowParamCurrent.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        mWindowParamCurrent.format = PixelFormat.RGBA_8888;
+        mWindowParamCurrent.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE      // 不添加这个将导致游戏无法启动（MIUI12）,添加之后导致键盘无法显示
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-        mWindowParamJoyStick.gravity = Gravity.START | Gravity.TOP;
-        mWindowParamJoyStick.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        mWindowParamJoyStick.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        mWindowParamJoyStick.x = 300;
-        mWindowParamJoyStick.y = 300;
-
-        mWindowParamMap = mWindowParamJoyStick;
-        mWindowParamHistory = mWindowParamJoyStick;
+        mWindowParamCurrent.gravity = Gravity.START | Gravity.TOP;
+        mWindowParamCurrent.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        mWindowParamCurrent.height = WindowManager.LayoutParams.WRAP_CONTENT;
+        mWindowParamCurrent.x = 300;
+        mWindowParamCurrent.y = 300;
     }
 
     @SuppressLint("InflateParams")
@@ -398,23 +393,10 @@ public class JoyStick extends View {
                     int movedY = nowY - y;
                     x = nowX;
                     y = nowY;
-                    switch (mCurWin) {
-                        case WINDOW_TYPE_MAP:
-                            mWindowParamMap.x = mWindowParamMap.x + movedX;
-                            mWindowParamMap.y = mWindowParamMap.y + movedY;
-                            mWindowManager.updateViewLayout(view, mWindowParamMap);
-                            break;
-                        case WINDOW_TYPE_HISTORY:
-                            mWindowParamHistory.x = mWindowParamHistory.x + movedX;
-                            mWindowParamHistory.y = mWindowParamHistory.y + movedY;
-                            mWindowManager.updateViewLayout(view, mWindowParamHistory);
-                            break;
-                        case WINDOW_TYPE_JOYSTICK:
-                            mWindowParamJoyStick.x = mWindowParamJoyStick.x + movedX;
-                            mWindowParamJoyStick.y = mWindowParamJoyStick.y + movedY;
-                            mWindowManager.updateViewLayout(view, mWindowParamJoyStick);
-                            break;
-                    }
+
+                    mWindowParamCurrent.x += movedX;
+                    mWindowParamCurrent.y += movedY;
+                    mWindowManager.updateViewLayout(view, mWindowParamCurrent);
                     break;
                 case MotionEvent.ACTION_UP:
                     view.performClick();
@@ -484,18 +466,18 @@ public class JoyStick extends View {
             tips.setVisibility(GONE);
 
             // 特殊处理：这里让搜索框获取焦点，以显示输入法
-            mWindowParamMap.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-            mWindowManager.updateViewLayout(mMapLayout, mWindowParamMap);
+            mWindowParamCurrent.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+            mWindowManager.updateViewLayout(mMapLayout, mWindowParamCurrent);
         });
         mSearchView.setOnCloseListener(() -> {
             tips.setVisibility(VISIBLE);
             mSearchLayout.setVisibility(GONE);
 
             // 关闭时清除焦点
-            mWindowParamMap.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+            mWindowParamCurrent.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-            mWindowManager.updateViewLayout(mMapLayout, mWindowParamMap);
+            mWindowManager.updateViewLayout(mMapLayout, mWindowParamCurrent);
 
             return false;       /* 这里必须返回false，否则需要自行处理搜索框的折叠 */
         });
@@ -517,6 +499,8 @@ public class JoyStick extends View {
                         GoUtils.DisplayToast(mContext,getResources().getString(R.string.app_error_search));
                         e.printStackTrace();
                     }
+                } else {
+                    mSearchLayout.setVisibility(GONE);
                 }
 
                 return true;
@@ -526,10 +510,10 @@ public class JoyStick extends View {
         ImageButton btnGo = mMapLayout.findViewById(R.id.btnGo);
         btnGo.setOnClickListener(v -> {
             // 关闭时清除焦点
-            mWindowParamMap.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+            mWindowParamCurrent.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-            mWindowManager.updateViewLayout(mMapLayout, mWindowParamMap);
+            mWindowManager.updateViewLayout(mMapLayout, mWindowParamCurrent);
 
             tips.setVisibility(VISIBLE);
             mSearchView.clearFocus();
@@ -556,11 +540,12 @@ public class JoyStick extends View {
         ImageButton btnClose = mMapLayout.findViewById(R.id.map_close);
         btnClose.setOnClickListener(v -> {
             // 关闭时清除焦点
-            mWindowParamMap.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+            mWindowParamCurrent.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 
             tips.setVisibility(VISIBLE);
+            mSearchLayout.setVisibility(GONE);
             mSearchView.clearFocus();
             mSearchView.onActionViewCollapsed();
 
@@ -663,17 +648,17 @@ public class JoyStick extends View {
             tips.setVisibility(GONE);
 
             // 特殊处理：这里让搜索框获取焦点，以显示输入法
-            mWindowParamHistory.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-            mWindowManager.updateViewLayout(mHistoryLayout, mWindowParamHistory);
+            mWindowParamCurrent.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+            mWindowManager.updateViewLayout(mHistoryLayout, mWindowParamCurrent);
         });
         mSearchView.setOnCloseListener(() -> {
             tips.setVisibility(VISIBLE);
 
             // 关闭时清除焦点
-            mWindowParamHistory.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+            mWindowParamCurrent.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-            mWindowManager.updateViewLayout(mHistoryLayout, mWindowParamHistory);
+            mWindowManager.updateViewLayout(mHistoryLayout, mWindowParamCurrent);
 
             return false;       /* 这里必须返回false，否则需要自行处理搜索框的折叠 */
         });
@@ -711,10 +696,10 @@ public class JoyStick extends View {
         mRecordListView = mHistoryLayout.findViewById(R.id.joystick_his_record_list_view);
         mRecordListView.setOnItemClickListener((adapterView, view, i, l) -> {
             // 关闭时清除焦点
-            mWindowParamHistory.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+            mWindowParamCurrent.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-            mWindowManager.updateViewLayout(mHistoryLayout, mWindowParamHistory);
+            mWindowManager.updateViewLayout(mHistoryLayout, mWindowParamCurrent);
 
             mSearchView.clearFocus();
             mSearchView.onActionViewCollapsed();
@@ -747,7 +732,7 @@ public class JoyStick extends View {
         ImageButton btnClose = mHistoryLayout.findViewById(R.id.joystick_his_close);
         btnClose.setOnClickListener(v -> {
             // 关闭时清除焦点
-            mWindowParamHistory.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+            mWindowParamCurrent.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 
