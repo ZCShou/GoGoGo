@@ -1059,6 +1059,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 Snackbar.make(v, "已传送到新位置", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
+                recordCurrentLocation();
+
                 mBaiduMap.clear();
                 mMarkLatLngMap = null;
 
