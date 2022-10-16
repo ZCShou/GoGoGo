@@ -11,28 +11,38 @@
         android:id="@+id/LocationID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:lines="1"
         android:visibility="gone"/>
 
     <TextView
         android:id="@+id/LocationText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:lines="1"
         android:textSize="18sp" />
 
     <TextView
         android:id="@+id/TimeText"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:lines="1"/>
 
     <TextView
         android:id="@+id/WGSLatLngText"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:lines="1" />
 
     <TextView
         android:id="@+id/BDLatLngText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:lines="1"
         android:visibility="gone" />
 
 </LinearLayout>
