@@ -164,7 +164,12 @@ public class HistoryActivity extends BaseActivity {
     }
 
     private void recordArchive() {
-        final double limits = Double.parseDouble(sharedPreferences.getString("setting_pos_history", getResources().getString(R.string.history_expiration)));
+        double limits;
+        try {
+            limits = Double.parseDouble(sharedPreferences.getString("setting_pos_history", getResources().getString(R.string.history_expiration)));
+        } catch (NumberFormatException e) {  // GOOD: The exception is caught.
+            limits = 7;
+        }
         final long weekSecond = (long) (limits * 24 * 60 * 60);
 
         try {
