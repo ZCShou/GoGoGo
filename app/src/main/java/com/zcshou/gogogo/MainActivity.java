@@ -670,7 +670,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         TextView poiLatitude = poiView.findViewById(R.id.poi_latitude);
         ImageButton ibSave = poiView.findViewById(R.id.poi_save);
         ibSave.setOnClickListener(v -> {
-            recordCurrentLocation();
+            recordCurrentLocation(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
             GoUtils.DisplayToast(this, getResources().getString(R.string.app_location_save));
         });
         ImageButton ibCopy = poiView.findViewById(R.id.poi_copy);
@@ -1014,9 +1014,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         serviceGoIntent.putExtra(LNG_MSG_ID, latLng[0]);
         serviceGoIntent.putExtra(LAT_MSG_ID, latLng[1]);
 
-        //save record
-        recordCurrentLocation();
-
         startForegroundService(serviceGoIntent);
         XLog.d("startForegroundService: ServiceGo");
 
@@ -1059,7 +1056,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 Snackbar.make(v, "已传送到新位置", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
-                recordCurrentLocation();
+                recordCurrentLocation(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
 
                 mBaiduMap.clear();
                 mMarkLatLngMap = null;
@@ -1082,6 +1079,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     Snackbar.make(v, "模拟位置已启动", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
 
+                    recordCurrentLocation(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
                     mBaiduMap.clear();
                     mMarkLatLngMap = null;
 
@@ -1136,14 +1134,13 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     }
 
     // 记录请求的位置信息
-    private void recordCurrentLocation() {
+    private void recordCurrentLocation(double lng, double lat) {
         //参数坐标系：bd09
         final String safeCode = getResources().getString(R.string.safecode);
         final String ak = getResources().getString(R.string.ak);
-        final String mapType = "bd09ll";
-        double[] latLng = MapUtils.bd2wgs(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
+        double[] latLng = MapUtils.bd2wgs(lng, lat);
         //bd09坐标的位置信息
-        String mapApiUrl = "https://api.map.baidu.com/reverse_geocoding/v3/?ak=" + ak + "&output=json&coordtype=" + mapType + "&location=" + mMarkLatLngMap.latitude + "," + mMarkLatLngMap.longitude + "&mcode=" + safeCode;
+        String mapApiUrl = "https://api.map.baidu.com/reverse_geocoding/v3/?ak=" + ak + "&output=json&coordtype=bd09ll" + "&location=" + lat + "," + lng + "&mcode=" + safeCode;
 
         okhttp3.Request request = new okhttp3.Request.Builder().url(mapApiUrl).get().build();
         final Call call = mOkHttpClient.newCall(request);
@@ -1158,8 +1155,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(mMarkLatLngMap.longitude));
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(mMarkLatLngMap.latitude));
+                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
+                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
 
                 DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
             }
@@ -1182,8 +1179,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(mMarkLatLngMap.longitude));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(mMarkLatLngMap.latitude));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
 
                             DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
                         } else { //位置获取失败
@@ -1193,8 +1190,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(mMarkLatLngMap.longitude));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(mMarkLatLngMap.latitude));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
 
                             DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
                         }
@@ -1206,8 +1203,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(mMarkLatLngMap.longitude));
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(mMarkLatLngMap.latitude));
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
 
                         DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
                         e.printStackTrace();
