@@ -106,6 +106,7 @@ import static android.view.View.GONE;
 
 import com.elvishew.xlog.XLog;
 
+import io.noties.markwon.Markwon;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -1428,10 +1429,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                                     updateCommit.setText(getRetJson.getString("target_commitish"));
 
                                     TextView updateContent = window.findViewById(R.id.update_content);
-                                    SpannableStringBuilder ssb = new SpannableStringBuilder();
-                                    ssb.append(getRetJson.getString("body"));
-                                    updateContent.setMovementMethod(LinkMovementMethod.getInstance());
-                                    updateContent.setText(ssb, TextView.BufferType.SPANNABLE);
+                                    final Markwon markwon = Markwon.create(MainActivity.this);
+                                    markwon.setMarkdown(updateContent, getRetJson.getString("body"));
 
                                     Button updateCancel = window.findViewById(R.id.update_ignore);
                                     updateCancel.setOnClickListener(v -> alertDialog.cancel());
