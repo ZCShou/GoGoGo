@@ -27,8 +27,8 @@
 2. 下载地址：[Github](https://github.com/ZCShou/GoGoGo/releases)（推荐）、[Gitee](https://gitee.com/itexp/gogogo/releases)（镜像）
 
 ## 警告
-&emsp;&emsp;**最近，发现有网友直接白嫖改名（标枪定位？）后添加广告（除了加广告，功能没有任何改变），但是，没有按照 GPLv3 协议的要求进行开源（我已经 @ 再分发的作者进了提醒，但并没有收到回复），在此提醒：**
-1. **白嫖可以，请遵循开源协议**
+&emsp;&emsp;**最近，发现有网友直接白嫖改名（标枪定位）后添加广告（除了加广告，功能没有任何改变），但是，没有按照 GPLv3 协议的要求进行开源（我已经联系过该网友进了提醒，但并没有收到回复），在此提醒：**
+1. **开源 ≠ 白嫖，请遵循开源协议**
 2. **开源不易，且行且珍惜**
 
 ## 背景
@@ -48,9 +48,9 @@
 5. 直接输入坐标
 
 ## 截图
-![摇杆类型.jpg](./docs/images/摇杆类型.jpg)
-![位置搜索与记录.jpg](./docs/images/位置搜索与记录.jpg)
-![悬浮窗地图_坐标输入.jpg](./docs/images/悬浮窗地图_坐标输入.jpg)
+![joystick.jpg](./docs/images/joystick.jpg)
+![search_history.jpg](./docs/images/search_history.jpg)
+![map.jpg](./docs/images/map.jpg)
 
 ## 用法
 1. 下载 APK 直接安装
@@ -86,10 +86,6 @@ A：经过测试，影梭可以在鸿蒙系统上正常运行。
 Q：为何在微信等腾讯系应用上定位不起作用？
 
 A：建议去问一下腾讯。
-
-Q：push 到 github 报错？
-
-A：请设置代理
 
 Q：编译时 java 报错？
 
