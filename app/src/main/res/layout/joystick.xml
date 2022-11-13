@@ -22,7 +22,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clickable="false"
-                android:contentDescription="@null"
+                android:contentDescription="@string/joystick_move"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_move"/>
         </LinearLayout>
@@ -43,7 +43,7 @@
                 android:id="@+id/joystick_history"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="@null"
+                android:contentDescription="@string/joystick_history"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_history"/>
         </LinearLayout>
@@ -64,7 +64,7 @@
                 android:id="@+id/joystick_position"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="@null"
+                android:contentDescription="@string/joystick_map"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_map"/>
         </LinearLayout>
@@ -96,7 +96,7 @@
                 android:id="@+id/joystick_walk"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="@null"
+                android:contentDescription="@string/joystick_walk"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_walk"/>
         </LinearLayout>
@@ -118,7 +118,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@null"
+                android:contentDescription="@string/joystick_run"
                 android:src="@drawable/ic_run"/>
         </LinearLayout>
 
@@ -139,7 +139,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@null"
+                android:contentDescription="@string/joystick_bike"
                 android:src="@drawable/ic_bike"/>
         </LinearLayout>
 

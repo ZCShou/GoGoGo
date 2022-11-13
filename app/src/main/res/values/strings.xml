@@ -75,6 +75,12 @@
     <!-- 摇杆 -->
     <string name="joystick_map_tips">搜索或点击地图位置</string>
     <string name="joystick_history_tips">搜索或点击历史位置</string>
+    <string name="joystick_history">历史记录</string>
+    <string name="joystick_map">地图</string>
+    <string name="joystick_move">移动</string>
+    <string name="joystick_walk">步行</string>
+    <string name="joystick_run">跑步</string>
+    <string name="joystick_bike">自行车</string>
     <!-- 导航页 -->
     <string name="nav_drawer_open">打开导航菜单</string>
     <string name="nav_drawer_close">关闭导航菜单</string>
@@ -95,6 +101,10 @@
     <string name="input_position_cancel">取消</string>
     <string name="input_position_baidu">BD09 坐标系</string>
     <string name="input_position_gps">GPS 坐标系</string>
+    <string name="input_button">输入位置</string>
+    <string name="cur_position">返回当前位置</string>
+    <string name="zoom_in">放大</string>
+    <string name="zoom_out">缩小</string>
 
     <!-- 百度地图 -->
     <string name="map_pic_sate">卫星图</string>

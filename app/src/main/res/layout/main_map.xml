@@ -36,7 +36,8 @@
                 android:layout_weight="1"
                 android:checked="true"
                 android:minHeight="48dp"
-                android:text="@string/map_pic_normal" />
+                android:text="@string/map_pic_normal"
+                android:textColor="#00796B" />
 
             <RadioButton
                 android:id="@+id/mapSatellite"
@@ -44,7 +45,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:minHeight="48dp"
-                android:text="@string/map_pic_sate" />
+                android:text="@string/map_pic_sate"
+                android:textColor="#00796B" />
         </RadioGroup>
 
         <ImageButton
@@ -55,7 +57,7 @@
             android:layout_marginTop="350dp"
             android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@null"
+            android:contentDescription="@string/cur_position"
             android:theme="@style/RippleWhite"
             app:srcCompat="@drawable/ic_home_position"
             app:tint="@color/colorAccent" />
@@ -68,7 +70,7 @@
             android:layout_marginTop="383dp"
             android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@null"
+            android:contentDescription="@string/zoom_in"
             android:theme="@style/RippleWhite"
             app:srcCompat="@drawable/ic_zoom_in"
             app:tint="@color/colorAccent" />
@@ -81,7 +83,7 @@
             android:layout_marginTop="416dp"
             android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@null"
+            android:contentDescription="@string/zoom_out"
             android:theme="@style/RippleWhite"
             app:srcCompat="@drawable/ic_zoom_out"
             app:tint="@color/colorAccent" />
@@ -94,7 +96,7 @@
             android:layout_marginTop="240dp"
             android:layout_marginEnd="10dp"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@null"
+            android:contentDescription="@string/input_button"
             android:theme="@style/RippleWhite"
             app:srcCompat="@drawable/ic_input"
             app:tint="@color/colorAccent" />
