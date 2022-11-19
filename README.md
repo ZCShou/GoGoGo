@@ -51,6 +51,7 @@
 ![joystick.jpg](./docs/images/joystick.jpg)
 ![search_history.jpg](./docs/images/search_history.jpg)
 ![map.jpg](./docs/images/map.jpg)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo?ref=badge_shield)
 
 ## 用法
 1. 下载 APK 直接安装
@@ -97,3 +98,7 @@ A：Gradle 使用的 java 版本与 Android Studio 使用的不一致。Gradle �
 
 ## 许可证
 GPL-3.0 © ZCShou
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo?ref=badge_large)
