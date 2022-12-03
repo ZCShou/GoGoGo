@@ -239,7 +239,7 @@ public class ButtonView extends LinearLayout {
                     btnSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                     isNorth = false;
                     btnNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
-                    isWest = true;
+                    isWest = false;
                     btnWest.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                     isEastNorth = false;
                     btnEastNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
@@ -279,7 +279,7 @@ public class ButtonView extends LinearLayout {
                     btnSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                     isNorth = false;
                     btnNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
-                    isWest = true;
+                    isWest = false;
                     btnWest.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                     isEast = false;
                     btnEast.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
@@ -319,7 +319,7 @@ public class ButtonView extends LinearLayout {
                     btnSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                     isNorth = false;
                     btnNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
-                    isWest = true;
+                    isWest = false;
                     btnWest.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                     isEast = false;
                     btnEast.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
@@ -359,7 +359,7 @@ public class ButtonView extends LinearLayout {
                     btnSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                     isNorth = false;
                     btnNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
-                    isWest = true;
+                    isWest = false;
                     btnWest.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                     isEast = false;
                     btnEast.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
@@ -399,7 +399,7 @@ public class ButtonView extends LinearLayout {
                     btnSouth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                     isNorth = false;
                     btnNorth.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
-                    isWest = true;
+                    isWest = false;
                     btnWest.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
                     isEast = false;
                     btnEast.setColorFilter(getResources().getColor(R.color.black, mContext.getTheme()));
