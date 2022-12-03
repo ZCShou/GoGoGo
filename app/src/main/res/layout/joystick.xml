@@ -77,8 +77,8 @@
         android:layout_height="wrap_content"/>
     <com.zcshou.joystick.RockerView
         android:id="@+id/joystick_rocker"
-        android:layout_width="90dp"
-        android:layout_height="90dp"/>
+        android:layout_width="@dimen/joystick_rockerview_width"
+        android:layout_height="@dimen/joystick_rockerview_height"/>
 
     <LinearLayout
         android:layout_width="match_parent"
