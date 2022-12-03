@@ -22,6 +22,7 @@ import com.zcshou.gogogo.R;
 public class RockerView extends View {
     private Paint outerCirclePaint;
     private Paint innerCirclePaint;
+    private Paint innerIconPaint;
     /** 内圆中心x坐标 */
     private float innerCenterX;
     /** 内圆中心y坐标 */
@@ -65,8 +66,13 @@ public class RockerView extends View {
 
         innerCirclePaint = new Paint();
         innerCirclePaint.setColor(ContextCompat.getColor(mContext, R.color.lightgrey));
-        innerCirclePaint.setAlpha(220);
+        innerCirclePaint.setAlpha(180);
         innerCirclePaint.setAntiAlias(true);
+
+        innerIconPaint = new Paint();
+        innerIconPaint.setAlpha(200);
+        innerIconPaint.setAntiAlias(true);
+        innerIconPaint.setFilterBitmap(true);
 
         isAuto = true;
         mRockerBitmap = scaleBitmap(getBitmap(getContext(), R.drawable.ic_lock_close));
@@ -102,7 +108,7 @@ public class RockerView extends View {
         canvas.drawCircle(viewCenterX, viewCenterY, outerCircleRadius, outerCirclePaint);
         /* 摇杆的控制部分由两部分组成 */
         canvas.drawCircle(innerCenterX, innerCenterY, innerCircleRadius, innerCirclePaint);
-        canvas.drawBitmap(mRockerBitmap, srcRect, dstRect, innerCirclePaint);
+        canvas.drawBitmap(mRockerBitmap, srcRect, dstRect, innerIconPaint);
     }
 
     @Override
