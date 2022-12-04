@@ -588,8 +588,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             TextView tvContent = window.findViewById(R.id.tv_content);
             Button tvCancel = window.findViewById(R.id.tv_cancel);
             Button tvAgree = window.findViewById(R.id.tv_agree);
-            CheckBox tvCheck = window.findViewById(R.id.tv_check);
-            tvCheck.setVisibility(GONE);
             SpannableStringBuilder ssb = new SpannableStringBuilder();
             ssb.append(getResources().getString(R.string.app_protocol));
 

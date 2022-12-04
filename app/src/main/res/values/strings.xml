@@ -15,10 +15,13 @@
     "5. 由于用户计算机软硬件环境的差异性和复杂性，本软件所提供的各项功能并不能保证在任何情况下都能正常执行或达到用户所期望的结果。 用户使用本软件所产生的一切后果，软件作者不承担任何责任。\n"
     "6. 如果用户自行安装本软件，即表明用户信任软件作者，自愿选择安装本软件，并接受本协议所有条款。 如果用户不接受本协议，请立即删除。\n"
     </string>
+    <string name="app_agreement">用户协议</string>
+    <string name="app_agreement_tips">已阅读《用户协议》及《隐私政策》</string>
     <string name="app_protocol_title">用户协议</string>
     <string name="app_protocol_agree">同意并继续</string>
     <string name="app_protocol_disagree">不同意</string>
     <string name="app_protocol_check">不再显示</string>
+    <string name="app_error_agreement">您必须先阅读并同意用户协议</string>
     <string name="app_error_gps">定位不可用，请检查 GPS 是否开启</string>
     <string name="app_error_network">网络不可用，请检查网络连接</string>
     <string name="app_error_permission">权限不足，请授予相关权限</string>

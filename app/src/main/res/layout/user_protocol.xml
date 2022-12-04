@@ -31,14 +31,6 @@
             android:textSize="15sp" />
     </ScrollView>
 
-    <CheckBox
-        android:id="@+id/tv_check"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:text="@string/app_protocol_check" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
