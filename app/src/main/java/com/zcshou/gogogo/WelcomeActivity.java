@@ -43,7 +43,7 @@ public class WelcomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.welcome);
+        setContentView(R.layout.activity_welcome);
 
         // 生成默认参数的值（一定要尽可能早的调用，因为后续有些界面可能需要使用参数）
         PreferenceManager.setDefaultValues(this, R.xml.preferences_main, false);
