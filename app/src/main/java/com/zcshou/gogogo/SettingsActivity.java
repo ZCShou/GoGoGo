@@ -11,7 +11,11 @@ public class SettingsActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // 临时处理，因为没有找到其他方法处理 填充 StatusBar
+        /* 为了启动欢迎页全屏，状态栏被设置了透明，但是会导致其他页面状态栏空白
+         * 这里设计如下：
+         * 1. 除了 WelcomeActivity 之外的所有 Activity 均继承 BaseActivity
+         * 2. WelcomeActivity 单独处理，其他 Activity 手动填充 StatusBar
+         * */
         getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimary, this.getTheme()));
 
         setContentView(R.layout.activity_settings);

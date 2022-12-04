@@ -40,7 +40,6 @@
             android:contentDescription="@null"
             app:elevation="6dp"
             app:pressedTranslationZ="12dp"
-            app:rippleColor="#a9a9a9"
             app:srcCompat="@drawable/ic_position" />
 
         <LinearLayout
