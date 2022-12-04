@@ -102,8 +102,6 @@ import com.zcshou.utils.ShareUtils;
 import com.zcshou.utils.GoUtils;
 import com.zcshou.utils.MapUtils;
 
-import static android.view.View.GONE;
-
 import com.elvishew.xlog.XLog;
 
 import io.noties.markwon.Markwon;
@@ -581,7 +579,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         Window window = alertDialog.getWindow();
         if (window != null) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);      // 防止出现闪屏
-            window.setContentView(R.layout.user_protocol);
+            window.setContentView(R.layout.user_agreement);
             window.setGravity(Gravity.CENTER);
             window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
 
@@ -589,7 +587,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             Button tvCancel = window.findViewById(R.id.tv_cancel);
             Button tvAgree = window.findViewById(R.id.tv_agree);
             SpannableStringBuilder ssb = new SpannableStringBuilder();
-            ssb.append(getResources().getString(R.string.app_protocol));
+            ssb.append(getResources().getString(R.string.app_agreement));
 
             tvContent.setMovementMethod(LinkMovementMethod.getInstance());
             tvContent.setText(ssb, TextView.BufferType.SPANNABLE);

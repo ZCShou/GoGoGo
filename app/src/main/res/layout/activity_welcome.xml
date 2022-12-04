@@ -26,6 +26,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
         android:gravity="center"
-        android:text="@string/app_agreement_tips" />
-
+        android:clickable="false"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:text="@string/app_agreement_privacy" />
 </merge>

@@ -6,7 +6,8 @@
     <string name="app_email">zcsexp@gmail.com</string>
     <string name="app_statement">仅供学习使用，否则后果自负！</string>
     <string name="app_service_tips">影梭服务正在运行中</string>
-    <string name="app_protocol">"1. 本软件专为学习 Android 开发使用，不会收集任何用户数据。"
+    <string name="app_agreement">用户协议</string>
+    <string name="app_agreement_content">"1. 本软件专为学习 Android 开发使用，不会收集任何用户数据。"
     "严禁利用本软件侵犯他人隐私权或者用于游戏牟利，如软件使用者不能遵守此规定， 请立即删除。"
     "对于因用户使用本软件而造成自身或他人隐私泄露等任何不良后果，均由用户自行承担，软件作者不负任何责任。\n"
     "2. 用户不得对本软件产品进行反向工程（reverse engineer）、反向编译（decompile）或反汇编（disassemble）， 违者属于侵权行为，并自行承担由此产生的不利后果。\n"
@@ -15,13 +16,16 @@
     "5. 由于用户计算机软硬件环境的差异性和复杂性，本软件所提供的各项功能并不能保证在任何情况下都能正常执行或达到用户所期望的结果。 用户使用本软件所产生的一切后果，软件作者不承担任何责任。\n"
     "6. 如果用户自行安装本软件，即表明用户信任软件作者，自愿选择安装本软件，并接受本协议所有条款。 如果用户不接受本协议，请立即删除。\n"
     </string>
-    <string name="app_agreement">用户协议</string>
-    <string name="app_agreement_tips">已阅读《用户协议》及《隐私政策》</string>
-    <string name="app_protocol_title">用户协议</string>
-    <string name="app_protocol_agree">同意并继续</string>
-    <string name="app_protocol_disagree">不同意</string>
-    <string name="app_protocol_check">不再显示</string>
-    <string name="app_error_agreement">您必须先阅读并同意用户协议</string>
+    <string name="app_privacy">隐私政策</string>
+    <string name="app_privacy_content">"1. 本软件专为学习 Android 开发使用，不会收集任何用户数据。\n"
+    "2. 用户不得对本软件产品进行反向工程（reverse engineer）、反向编译（decompile）或反汇编（disassemble）， 违者属于侵权行为，并自行承担由此产生的不利后果。\n"
+    "3. 软件保证不含任何病毒，木马，等破坏用户数据的恶意代码，但是由于本软件产品可以通过网络等途径下载、传播，对于从非软件作者指定站点下载的本软件产品软件作者无法保证该软件是否感染计算机病毒、是否隐藏有伪装的特洛伊木马程序或者黑客软件，不承担由此引起的直接和间接损害责任。\n"
+    "4. 软件会不断更新，以便及时为用户提供新功能和修正软件中的BUG。 同时软件作者保证本软件在升级过程中也不含有任何旨在破坏用户计算机数据的恶意代码。\n"
+    "5. 由于用户计算机软硬件环境的差异性和复杂性，本软件所提供的各项功能并不能保证在任何情况下都能正常执行或达到用户所期望的结果。 用户使用本软件所产生的一切后果，软件作者不承担任何责任。\n"
+    "6. 如果用户自行安装本软件，即表明用户信任软件作者，自愿选择安装本软件，并接受本协议所有条款。 如果用户不接受本协议，请立即删除。\n"
+    </string>
+    <string name="app_agreement_privacy">已阅读《用户协议》和《隐私政策》</string>
+    <string name="app_error_agreement">必须先接受《用户协议》和《隐私政策》</string>
     <string name="app_error_gps">定位不可用，请检查 GPS 是否开启</string>
     <string name="app_error_network">网络不可用，请检查网络连接</string>
     <string name="app_error_permission">权限不足，请授予相关权限</string>
@@ -44,6 +48,8 @@
 
     <!-- 欢迎页 -->
     <string name="welcome_btn_txt">进入应用</string>
+    <string name="app_btn_agree">同意并继续</string>
+    <string name="app_btn_disagree">不同意</string>
 
     <!-- 设置界面 -->
     <string name="setting_group_move">移动</string>
