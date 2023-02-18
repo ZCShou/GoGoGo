@@ -797,7 +797,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             //可选，默认false，设置是否收集CRASH信息，默认收集
             locationOption.SetIgnoreCacheException(true);
             //可选，默认false，设置是否开启Gps定位
-            locationOption.setOpenGps(true);
+            //locationOption.setOpenGps(true);
+            locationOption.setOpenGnss(true);
             //可选，默认false，设置定位时是否需要海拔信息，默认不需要，除基础定位版本都可用
             locationOption.setIsNeedAltitude(false);
             //需将配置好的LocationClientOption对象，通过setLocOption方法传递给LocationClient对象使用
