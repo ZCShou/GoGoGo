@@ -38,7 +38,7 @@ jobs:
       # https://github.com/marketplace/actions/auto-changelog
       # require commit format are "type(category): description [flag]"
       - name: Make Changelog
-        uses: ardalanamini/auto-changelog@v3
+        uses: ardalanamini/auto-changelog@v4
         id: changelog
         with:
           github-token: ${{ github.token }}
