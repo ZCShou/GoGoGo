@@ -260,7 +260,7 @@ public class JoyStick extends View {
                 // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）且转换为 km
                 disLng = mSpeed * (double)(DivGo / 1000) * mR * Math.cos(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
                 disLat = mSpeed * (double)(DivGo / 1000) * mR * Math.sin(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
-                mListener.onMoveInfo(mSpeed, disLng, disLat);
+                mListener.onMoveInfo(mSpeed, disLng, disLat, 90.0F-mAngle);
                 mTimer.start();
             }
         });
@@ -385,7 +385,7 @@ public class JoyStick extends View {
                 // 注意：这里的 x y 与 圆中角度的对应问题（以 X 轴正向为 0 度）且转换为 km
                 disLng = mSpeed * (double)(DivGo / 1000) * mR * Math.cos(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
                 disLat = mSpeed * (double)(DivGo / 1000) * mR * Math.sin(mAngle * 2 * Math.PI / 360) / 1000;// 注意安卓中的三角函数使用的是弧度
-                mListener.onMoveInfo(mSpeed, disLng, disLat);
+                mListener.onMoveInfo(mSpeed, disLng, disLat, 90.0F-mAngle);
             }
         }
     }
@@ -424,7 +424,7 @@ public class JoyStick extends View {
     }
 
     public interface JoyStickClickListener {
-        void onMoveInfo(double speed, double disLng, double disLat);
+        void onMoveInfo(double speed, double disLng, double disLat, double angle);
         void onPositionInfo(double lng, double lat);
     }
 

@@ -35,8 +35,10 @@ public class ServiceGo extends Service {
     // 定位相关变量
     public static final double DEFAULT_LAT = 36.667662;
     public static final double DEFAULT_LNG = 117.027707;
+    public static final float DEFAULT_BEA = 0.0F;
     private double mCurLat = DEFAULT_LAT;
     private double mCurLng = DEFAULT_LNG;
+    private float mCurBea = DEFAULT_BEA;
     private double mSpeed = 1.2;        /* 默认的速度，单位 m/s */
     private static final int HANDLER_MSG_ID = 0;
     private static final String SERVICE_GO_HANDLER_NAME = "ServiceGoLocation";
@@ -146,7 +148,7 @@ public class ServiceGo extends Service {
         mJoyStick = new JoyStick(this);
         mJoyStick.setListener(new JoyStick.JoyStickClickListener() {
             @Override
-            public void onMoveInfo(double speed, double disLng, double disLat) {
+            public void onMoveInfo(double speed, double disLng, double disLat, double angle) {
                 mSpeed = speed;
                 // 根据当前的经纬度和距离，计算下一个经纬度
                 // Latitude: 1 deg = 110.574 km // 纬度的每度的距离大约为 110.574km
@@ -154,6 +156,7 @@ public class ServiceGo extends Service {
                 // 具体见：http://wp.mlab.tw/?p=2200
                 mCurLng += disLng / (111.320 * Math.cos(Math.abs(mCurLat) * Math.PI / 180));
                 mCurLat += disLat / 110.574;
+                mCurBea = (float) angle;
             }
 
             @Override
@@ -231,7 +234,7 @@ public class ServiceGo extends Service {
             Location loc = new Location(LocationManager.GPS_PROVIDER);
             loc.setAccuracy(Criteria.ACCURACY_FINE);    // 设定此位置的估计水平精度，以米为单位。
             loc.setAltitude(55.0D);                     // 设置高度，在 WGS 84 参考坐标系中的米
-            loc.setBearing(1.0F);                       // 方向（度）
+            loc.setBearing(mCurBea);                       // 方向（度）
             loc.setLatitude(mCurLat);                   // 纬度（度）
             loc.setLongitude(mCurLng);                  // 经度（度）
             loc.setTime(System.currentTimeMillis());    // 本地时间
@@ -286,7 +289,7 @@ public class ServiceGo extends Service {
             Location loc = new Location(LocationManager.NETWORK_PROVIDER);
             loc.setAccuracy(Criteria.ACCURACY_COARSE);  // 设定此位置的估计水平精度，以米为单位。
             loc.setAltitude(55.0D);                     // 设置高度，在 WGS 84 参考坐标系中的米
-            loc.setBearing(1.0F);                       // 方向（度）
+            loc.setBearing(mCurBea);                       // 方向（度）
             loc.setLatitude(mCurLat);                   // 纬度（度）
             loc.setLongitude(mCurLng);                  // 经度（度）
             loc.setTime(System.currentTimeMillis());    // 本地时间
