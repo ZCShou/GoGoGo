@@ -27,7 +27,8 @@ jobs:
 
       - name: Get Tag
         id: var
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        #run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
       - name: Build APK
         run: bash ./gradlew assembleRelease
@@ -47,25 +48,25 @@ jobs:
       # require commit format are "type(category): description [flag]"
       - name: Make Changelog
         uses: ardalanamini/auto-changelog@v4
-        id: changelog
+        id  : changelog
         with:
           github-token            : ${{ github.token }}
           commit-types            : |
-            breaking: Breaking Changes
             feat: New Features
             fix: Bug Fixes
-            revert: Reverts
+            build: Build System & Dependencies
             perf: Performance Improvements
-            refactor: Refactors
-            deps: Dependencies
-            docs: Documentation Changes
-            style: Code Style Changes
-            build: Build System
-            ci: Continuous Integration
+            docs: Documentation
             test: Tests
+            refactor: Refactors
             chore: Chores
-            other: Other Changes
-          default-commit-type: Other Changes
+            ci: CI
+            style: Code Style
+            revert: Reverts
+          default-commit-type     : Other Changes
+          release-name            : v1.0.0
+          release-name-prefix     : ""
+          mention-authors         : true
           mention-new-contributors: true
           include-compare-link    : true
           include-pr-lints        : true
