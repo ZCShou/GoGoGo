@@ -33,11 +33,11 @@ jobs:
       - uses: actions/checkout@v3
 
       # 设置 JDK
-      - name: set up JDK 11
+      - name: set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
-          distribution: 'temurin'
+          java-version: '17'
+          distribution: 'adopt'
           cache: gradle
       
       # 给 gradlew 增加执行权限
