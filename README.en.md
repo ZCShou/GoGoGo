@@ -23,3 +23,7 @@ GoGoGo - A mock location app without root on android 8.0+.
 ##
 
 [Refrence Chinese, please](./README.md)
+
+## License
+GPL-3.0-only © ZCShou
+

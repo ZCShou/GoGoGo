@@ -96,4 +96,4 @@ A：Gradle 使用的 java 版本与 Android Studio 使用的不一致。Gradle �
 2. 加入影梭开发，共同完善
 
 ## 许可证
-GPL-3.0 © ZCShou
+GPL-3.0-only © ZCShou
