@@ -49,8 +49,8 @@ jobs:
         uses: ardalanamini/auto-changelog@v4
         id: changelog
         with:
-          github-token: ${{ github.token }}
-          commit-types: |
+          github-token            : ${{ github.token }}
+          commit-types            : |
             breaking: Breaking Changes
             feat: New Features
             fix: Bug Fixes
@@ -66,10 +66,12 @@ jobs:
             chore: Chores
             other: Other Changes
           default-commit-type: Other Changes
-          mention-authors: false
           mention-new-contributors: true
-          include-compare: false
-          semver: false
+          include-compare-link    : true
+          include-pr-lints        : true
+          include-commit-lints    : true
+          semver                  : true
+          use-github-autolink     : true
 
       # https://github.com/marketplace/actions/gh-release
       - name: Release APK
