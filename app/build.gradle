@@ -108,7 +108,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.preference:preference:1.2.0'
     implementation 'com.google.android.material:material:1.7.0'
-    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
     implementation 'com.elvishew:xlog:1.11.0'
     implementation 'io.noties.markwon:core:4.6.2'
     implementation files('libs/BaiduLBS_Android.jar')
