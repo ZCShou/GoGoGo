@@ -27,9 +27,9 @@
 2. 下载地址：[Github](https://github.com/ZCShou/GoGoGo/releases)（推荐）、[Gitee](https://gitee.com/itexp/gogogo/releases)（镜像）
 
 ## 警告一
-&emsp;&emsp;**最近，有网友直接白嫖影梭后改名为标枪定位，然后添加广告（除了加广告，功能没有任何改变），但是，没有按照 GPLv3 协议的要求进行开源（我已经联系过该网友进了提醒，但并没有收到回复），在此提醒：**
+&emsp;&emsp;**最近，有网友直接白嫖影梭后改名为 ==标枪定位==，然后添加广告（除了加广告，功能没有任何改变），但是，没有按照 GPLv3 协议的要求进行开源（我已经联系过该网友进了提醒，但并没有收到回复），在此提醒：**
 1. **开源 ≠ 白嫖，请遵循开源协议**
-2. **国内相关 GPL 侵权诉讼案例很多，请自行搜索，权衡利弊。影梭保留所有追究相关侵权人员的相关权利！**
+2. **GPL 的法律效力在国内相关诉讼案例很多，请自行搜索，权衡利弊。影梭保留追究相关侵权人员法律责任的所有权利！**
 3. **开源不易，且行且珍惜**
 
 ## 警告二
@@ -103,3 +103,5 @@ A：Gradle 使用的 java 版本与 Android Studio 使用的不一致。Gradle �
 
 ## 许可证
 GPL-3.0-only © ZCShou
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo?ref=badge_large&issueType=license)
