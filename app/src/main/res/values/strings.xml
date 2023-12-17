@@ -25,7 +25,8 @@
     "6. 如果用户自行安装本软件，即表明用户信任软件作者，自愿选择安装本软件，并接受本协议所有条款。 如果用户不接受本协议，请立即删除。\n"
     </string>
     <string name="app_agreement_privacy">已阅读《用户协议》和《隐私政策》</string>
-    <string name="app_error_agreement">必须先接受《用户协议》和《隐私政策》</string>
+    <string name="app_error_agreement">必须接受《用户协议》和《隐私政策》</string>
+    <string name="app_error_read">请先阅读《用户协议》和《隐私政策》</string>
     <string name="app_error_gps">定位不可用，请检查 GPS 是否开启</string>
     <string name="app_error_network">网络不可用，请检查网络连接</string>
     <string name="app_error_permission">权限不足，请授予相关权限</string>

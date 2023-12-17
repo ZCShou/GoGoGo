@@ -1,6 +1,7 @@
 package com.zcshou.gogogo;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,8 +11,10 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
+import android.text.method.MovementMethod;
 import android.text.style.ClickableSpan;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -106,16 +109,12 @@ public class WelcomeActivity extends AppCompatActivity {
             ReqPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
         }
 
-//        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-//            ReqPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-//        }
-
         // 读取电话状态权限
         if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             ReqPermissions.add(Manifest.permission.READ_PHONE_STATE);
         }
 
-        if (ReqPermissions.size() <= 0) {
+        if (ReqPermissions.size() == 0) {
             isPermission = true;
         } else {
             requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
@@ -235,18 +234,44 @@ public class WelcomeActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void checkAgreementAndPrivacy() {
         preferences = getSharedPreferences(KEY_ACCEPT_AGREEMENT, MODE_PRIVATE);
         mPrivacy = preferences.getBoolean(KEY_ACCEPT_PRIVACY, false);
         mAgreement = preferences.getBoolean(KEY_ACCEPT_AGREEMENT, false);
 
         checkBox = findViewById(R.id.check_agreement);
+        // 拦截 CheckBox 的点击事件
+        checkBox.setOnTouchListener((v, event) -> {
+            if (v instanceof TextView) {
+                TextView text = (TextView) v;
+                MovementMethod method = text.getMovementMethod();
+                if (method != null && text.getText() instanceof Spannable
+                        && event.getAction() == MotionEvent.ACTION_UP) {
+                    if (method.onTouchEvent(text, (Spannable) text.getText(), event)) {
+                        event.setAction(MotionEvent.ACTION_CANCEL);
+                    }
+                }
+            }
+            return false;
+        });
+        checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                if (!mPrivacy || !mAgreement) {
+                    GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_read));
+                    checkBox.setChecked(false);
+                }
+            } else {
+                mPrivacy = false;
+                mAgreement = false;
+            }
+        });
 
         String str = getString(R.string.app_agreement_privacy);
         SpannableStringBuilder builder = new SpannableStringBuilder(str);
         ClickableSpan clickSpanAgreement = new ClickableSpan() {
             @Override
-            public void onClick( View widget) {
+            public void onClick(@NonNull View widget) {
                 showAgreementDialog();
             }
 
@@ -261,7 +286,7 @@ public class WelcomeActivity extends AppCompatActivity {
         builder.setSpan(clickSpanAgreement, agreement_start,agreement_end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         ClickableSpan clickSpanPrivacy = new ClickableSpan() {
             @Override
-            public void onClick( View widget) {
+            public void onClick(@NonNull View widget) {
                 showPrivacyDialog();
             }
 
