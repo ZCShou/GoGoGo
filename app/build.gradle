@@ -15,26 +15,26 @@ android {
             keyPassword 'GoGoGo'
         }
     }
-    ndkVersion '25.2.9519653'
-    buildToolsVersion '33.0.2'
-    compileSdkVersion 32
+    ndkVersion '26.1.10909125'
+    compileSdk 32
+    buildToolsVersion = '34.0.0'
     defaultConfig {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 27
+        //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 32
         versionCode 1102
         versionName '1.11.2' // https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         resConfigs 'zh', 'zh-rCN', 'en', 'en-rUS'
         ndk {
+            //noinspection ChromeOsAbiSupport
             abiFilters "arm64-v8a"
         }
         signingConfig signingConfigs.release
     }
     buildTypes {
         release {
-            zipAlignEnabled true
-
             // Enables code shrinking, obfuscation, and optimization for only
             // your project's release build type.
             minifyEnabled true
@@ -49,6 +49,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
             signingConfig signingConfigs.release
+            multiDexEnabled true
         }
         debug {
             signingConfig signingConfigs.debug
@@ -84,8 +85,8 @@ android {
 //    }
 
     // 指定输出的可执行程序的名字
-    applicationVariants.all { variant ->
-        variant.outputs.all { output ->
+    applicationVariants.configureEach { variant ->
+        variant.outputs.configureEach { output ->
             def outputFile = output.outputFile
             if (outputFile != null && outputFile.name.endsWith('.apk')) {
                 def fileName
