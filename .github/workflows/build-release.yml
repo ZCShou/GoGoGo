@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # https://github.com/marketplace/actions/checkout
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # 设置 JDK
       - name: set up JDK 17
