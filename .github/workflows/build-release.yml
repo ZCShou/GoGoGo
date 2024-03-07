@@ -32,6 +32,13 @@ jobs:
       - name: Build APK
         run: bash ./gradlew assembleRelease
 
+      - name: Get Build Tool Version
+        shell: bash
+        run: |
+          BUILD_TOOL_VERSION=$(ls /usr/local/lib/android/sdk/build-tools/ | tail -n 1)
+          echo "BUILD_TOOL_VERSION=$BUILD_TOOL_VERSION" >> $GITHUB_ENV
+          echo Last build tool version is: $BUILD_TOOL_VERSION
+
       # https://github.com/marketplace/actions/sign-android-release
       - name: Sign APK
         id: sign_apk
@@ -42,6 +49,8 @@ jobs:
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
 
       # https://github.com/marketplace/actions/auto-changelog
       # require commit format are "type(category): description [flag]"
