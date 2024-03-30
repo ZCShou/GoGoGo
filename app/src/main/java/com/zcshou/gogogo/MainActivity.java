@@ -78,6 +78,7 @@ import com.baidu.mapapi.search.geocode.GeoCoder;
 import com.baidu.mapapi.search.geocode.OnGetGeoCoderResultListener;
 import com.baidu.mapapi.search.geocode.ReverseGeoCodeOption;
 import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
+import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -298,7 +299,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 //展示搜索历史
                 List<Map<String, Object>> data = getSearchHistory();
 
-                if (data.size() > 0) {
+                if (!data.isEmpty()) {
                     SimpleAdapter simAdapt = new SimpleAdapter(
                             MainActivity.this,
                             data,
@@ -349,7 +350,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 } catch (Exception e) {
                     GoUtils.DisplayToast(MainActivity.this, getResources().getString(R.string.app_error_search));
                     XLog.d(getResources().getString(R.string.app_error_search));
-                    e.printStackTrace();
                 }
 
                 return true;
@@ -361,7 +361,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 //搜索历史置为不可见
                 mHistoryLayout.setVisibility(View.INVISIBLE);
 
-                if (newText != null && newText.length() > 0) {
+                if (newText != null && !newText.isEmpty()) {
                     try {
                         mSuggestionSearch.requestSuggestion((new SuggestionSearchOption())
                                 .keyword(newText)
@@ -370,7 +370,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     } catch (Exception e) {
                         GoUtils.DisplayToast(MainActivity.this, getResources().getString(R.string.app_error_search));
                         XLog.d(getResources().getString(R.string.app_error_search));
-                        e.printStackTrace();
                     }
                 }
 
@@ -432,7 +431,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     startActivity(intent);
                 } catch (Exception e) {
                     GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_dev));
-                    e.printStackTrace();
                 }
             } else if (id == R.id.nav_update) {
                 checkUpdateVersion(true);
@@ -514,7 +512,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                             mReg.put("UserName", s.toString());
                             mRegReq.setText(mReg.toString());
                         } catch (JSONException e) {
-                            e.printStackTrace();
+                            XLog.e("ERROR: UserName");
                         }
                     }
                 }
@@ -531,7 +529,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     mReg.put("DateTime", 1111);
                     mRegReq.setText(mReg.toString());
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    XLog.e("ERROR: DateTime");
                 }
             });
 
@@ -564,7 +562,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     mReg.put("ReqResp", regResp.toString());
 
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    XLog.e("ERROR: RegReq");
                 }
 
                 alertDialog.cancel();
@@ -762,7 +760,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 }
                 /**
                  * 错误的状态码
-                 * <a>http://lbsyun.baidu.com/index.php?title=android-locsdk/guide/addition-func/error-code</a>
+                 * <a><a href="http://lbsyun.baidu.com/index.php?title=android-locsdk/guide/addition-func/error-code">...</a></a>
                  * <p>
                  * 回调定位诊断信息，开发者可以根据相关信息解决定位遇到的一些问题
                  *
@@ -775,39 +773,45 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     XLog.i("Baidu ERROR: " + locType + "-" + diagnosticType + "-" + diagnosticMessage);
                 }
             });
-            LocationClientOption locationOption = new LocationClientOption();
-            //可选，默认高精度，设置定位模式，高精度，低功耗，仅设备
-            locationOption.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
-            //可选，默认gcj02，设置返回的定位结果坐标系，如果配合百度地图使用，建议设置为bd09ll;
-            locationOption.setCoorType("bd09ll");
-            //可选，默认0，即仅定位一次，设置发起连续定位请求的间隔需要大于等于1000ms才是有效的
-            locationOption.setScanSpan(1000);
-            //可选，设置是否需要地址信息，默认不需要
-            locationOption.setIsNeedAddress(true);
-            //可选，设置是否需要设备方向结果
-            locationOption.setNeedDeviceDirect(false);
-            //可选，默认false，设置是否当gps有效时按照1S1次频率输出GPS结果
-            locationOption.setLocationNotify(true);
-            //可选，默认true，定位SDK内部是一个SERVICE，并放到了独立进程，设置是否在stop的时候杀死这个进程，默认不杀死
-            locationOption.setIgnoreKillProcess(true);
-            //可选，默认false，设置是否需要位置语义化结果，可以在BDLocation.getLocationDescribe里得到，结果类似于“在北京天安门附近”
-            locationOption.setIsNeedLocationDescribe(false);
-            //可选，默认false，设置是否需要POI结果，可以在BDLocation.getPoiList里得到
-            locationOption.setIsNeedLocationPoiList(false);
-            //可选，默认false，设置是否收集CRASH信息，默认收集
-            locationOption.SetIgnoreCacheException(true);
-            //可选，默认false，设置是否开启Gps定位
-            //locationOption.setOpenGps(true);
-            locationOption.setOpenGnss(true);
-            //可选，默认false，设置定位时是否需要海拔信息，默认不需要，除基础定位版本都可用
-            locationOption.setIsNeedAltitude(false);
+            LocationClientOption locationOption = getLocationClientOption();
             //需将配置好的LocationClientOption对象，通过setLocOption方法传递给LocationClient对象使用
             mLocClient.setLocOption(locationOption);
             //开始定位
             mLocClient.start();
         } catch (Exception e) {
-            e.printStackTrace();
+            XLog.e("ERROR: initMapLocation");
         }
+    }
+
+    @NonNull
+    private static LocationClientOption getLocationClientOption() {
+        LocationClientOption locationOption = new LocationClientOption();
+        //可选，默认高精度，设置定位模式，高精度，低功耗，仅设备
+        locationOption.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
+        //可选，默认gcj02，设置返回的定位结果坐标系，如果配合百度地图使用，建议设置为bd09ll;
+        locationOption.setCoorType("bd09ll");
+        //可选，默认0，即仅定位一次，设置发起连续定位请求的间隔需要大于等于1000ms才是有效的
+        locationOption.setScanSpan(1000);
+        //可选，设置是否需要地址信息，默认不需要
+        locationOption.setIsNeedAddress(true);
+        //可选，设置是否需要设备方向结果
+        locationOption.setNeedDeviceDirect(false);
+        //可选，默认false，设置是否当gps有效时按照1S1次频率输出GPS结果
+        locationOption.setLocationNotify(true);
+        //可选，默认true，定位SDK内部是一个SERVICE，并放到了独立进程，设置是否在stop的时候杀死这个进程，默认不杀死
+        locationOption.setIgnoreKillProcess(true);
+        //可选，默认false，设置是否需要位置语义化结果，可以在BDLocation.getLocationDescribe里得到，结果类似于“在北京天安门附近”
+        locationOption.setIsNeedLocationDescribe(false);
+        //可选，默认false，设置是否需要POI结果，可以在BDLocation.getPoiList里得到
+        locationOption.setIsNeedLocationPoiList(false);
+        //可选，默认false，设置是否收集CRASH信息，默认收集
+        locationOption.SetIgnoreCacheException(true);
+        //可选，默认false，设置是否开启Gps定位
+        //locationOption.setOpenGps(true);
+        locationOption.setOpenGnss(true);
+        //可选，默认false，设置定位时是否需要海拔信息，默认不需要，除基础定位版本都可用
+        locationOption.setIsNeedAltitude(false);
+        return locationOption;
     }
 
     //地图上各按键的监听
@@ -994,7 +998,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         } catch (Exception e) {
             ret = false;
             XLog.e("ERROR: showHistoryLocation");
-            e.printStackTrace();
         }
 
         return ret;
@@ -1095,17 +1098,23 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             long expirationTime = System.currentTimeMillis() / 1000 -
                     Long.parseLong(getResources().getString(R.string.history_expiration)) * 24 * 60 * 60;
             // 定位历史
-            DataBaseHistoryLocation dbLocation = new DataBaseHistoryLocation(getApplicationContext());
-            mLocationHistoryDB = dbLocation.getWritableDatabase();
-            mLocationHistoryDB.delete(DataBaseHistoryLocation.TABLE_NAME,
-                    DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " < ?",
-                    new String[] {Long.toString(expirationTime)});
+            try (DataBaseHistoryLocation dbLocation = new DataBaseHistoryLocation(getApplicationContext())) {
+                mLocationHistoryDB = dbLocation.getWritableDatabase();
+                mLocationHistoryDB.delete(DataBaseHistoryLocation.TABLE_NAME,
+                        DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " < ?",
+                        new String[] {Long.toString(expirationTime)});
+            } catch (Exception e) {
+                XLog.e("ERROR: DataBaseHistoryLocation");
+            }
             // 搜索历史
-            DataBaseHistorySearch dbHistory = new DataBaseHistorySearch(getApplicationContext());
-            mSearchHistoryDB = dbHistory.getWritableDatabase();
-            mLocationHistoryDB.delete(DataBaseHistorySearch.TABLE_NAME,
-                    DataBaseHistorySearch.DB_COLUMN_TIMESTAMP + " < ?",
-                    new String[] {Long.toString(expirationTime)});
+            try (DataBaseHistorySearch dbHistory = new DataBaseHistorySearch(getApplicationContext())) {
+                mSearchHistoryDB = dbHistory.getWritableDatabase();
+                mLocationHistoryDB.delete(DataBaseHistorySearch.TABLE_NAME,
+                        DataBaseHistorySearch.DB_COLUMN_TIMESTAMP + " < ?",
+                        new String[] {Long.toString(expirationTime)});
+            } catch (Exception e) {
+                XLog.e("ERROR: DataBaseHistorySearch");
+            }
         } catch (Exception e) {
             XLog.e("ERROR: sqlite init error");
         }
@@ -1126,14 +1135,13 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_DESCRIPTION, cursor.getString(2));
                 searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_TIMESTAMP, "" + cursor.getInt(3));
                 searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_IS_LOCATION, "" + cursor.getInt(4));
-                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_LONGITUDE_CUSTOM, "" + cursor.getString(7));
-                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_LATITUDE_CUSTOM, "" + cursor.getString(8));
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_LONGITUDE_CUSTOM, cursor.getString(7));
+                searchHistoryItem.put(DataBaseHistorySearch.DB_COLUMN_LATITUDE_CUSTOM, cursor.getString(8));
                 data.add(searchHistoryItem);
             }
             cursor.close();
         } catch (Exception e) {
-            XLog.e("ERROR: query error");
-            e.printStackTrace();
+            XLog.e("ERROR: getSearchHistory");
         }
 
         return data;
@@ -1202,7 +1210,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                             DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
                         }
                     } catch (JSONException e) {
-                        XLog.e("JSON: resolve json error");
+                        XLog.e("ERROR: resolve json error");
                         //插表参数
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, getResources().getString(R.string.history_location_default_name));
@@ -1213,7 +1221,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
 
                         DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
-                        e.printStackTrace();
                     }
                 }
             }
@@ -1297,7 +1304,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 } catch (Exception e) {
                     GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_search));
                     XLog.e(getResources().getString(R.string.app_error_search));
-                    e.printStackTrace();
                 }
             } else {
                 XLog.e(getResources().getString(R.string.app_error_param));
@@ -1316,7 +1322,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                             //展示搜索历史
                             List<Map<String, Object>> data = getSearchHistory();
 
-                            if (data.size() > 0) {
+                            if (!data.isEmpty()) {
                                 SimpleAdapter simAdapt = new SimpleAdapter(
                                         MainActivity.this,
                                         data,
@@ -1347,22 +1353,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mSuggestionSearch.setOnGetSuggestionResultListener(suggestionResult -> {
             if (suggestionResult == null || suggestionResult.getAllSuggestions() == null) {
                 GoUtils.DisplayToast(this,getResources().getString(R.string.app_search_null));
-            } else { //获取在线建议检索结果
-                List<Map<String, Object>> data = new ArrayList<>();
-                int retCnt = suggestionResult.getAllSuggestions().size();
-
-                for (int i = 0; i < retCnt; i++) {
-                    if (suggestionResult.getAllSuggestions().get(i).pt == null) {
-                        continue;
-                    }
-
-                    Map<String, Object> poiItem = new HashMap<>();
-                    poiItem.put(POI_NAME, suggestionResult.getAllSuggestions().get(i).key);
-                    poiItem.put(POI_ADDRESS, suggestionResult.getAllSuggestions().get(i).city + " " + suggestionResult.getAllSuggestions().get(i).district);
-                    poiItem.put(POI_LONGITUDE, "" + suggestionResult.getAllSuggestions().get(i).pt.longitude);
-                    poiItem.put(POI_LATITUDE, "" + suggestionResult.getAllSuggestions().get(i).pt.latitude);
-                    data.add(poiItem);
-                }
+            } else {
+                List<Map<String, Object>> data = getMapList(suggestionResult);
 
                 SimpleAdapter simAdapt = new SimpleAdapter(
                         MainActivity.this,
@@ -1375,6 +1367,26 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 mSearchLayout.setVisibility(View.VISIBLE);
             }
         });
+    }
+
+    @NonNull
+    private static List<Map<String, Object>> getMapList(SuggestionResult suggestionResult) {
+        List<Map<String, Object>> data = new ArrayList<>();
+        int retCnt = suggestionResult.getAllSuggestions().size();
+
+        for (int i = 0; i < retCnt; i++) {
+            if (suggestionResult.getAllSuggestions().get(i).pt == null) {
+                continue;
+            }
+
+            Map<String, Object> poiItem = new HashMap<>();
+            poiItem.put(POI_NAME, suggestionResult.getAllSuggestions().get(i).key);
+            poiItem.put(POI_ADDRESS, suggestionResult.getAllSuggestions().get(i).city + " " + suggestionResult.getAllSuggestions().get(i).district);
+            poiItem.put(POI_LONGITUDE, "" + suggestionResult.getAllSuggestions().get(i).pt.longitude);
+            poiItem.put(POI_LATITUDE, "" + suggestionResult.getAllSuggestions().get(i).pt.latitude);
+            data.add(poiItem);
+        }
+        return data;
     }
 
     /*============================== 更新 相关 ==============================*/
@@ -1460,7 +1472,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                             }
                         } catch (JSONException e) {
                             XLog.e("ERROR:  resolve json");
-                            e.printStackTrace();
                         }
                     });
                 }
