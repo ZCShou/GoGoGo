@@ -114,7 +114,7 @@ public class WelcomeActivity extends AppCompatActivity {
             ReqPermissions.add(Manifest.permission.READ_PHONE_STATE);
         }
 
-        if (ReqPermissions.size() == 0) {
+        if (ReqPermissions.isEmpty()) {
             isPermission = true;
         } else {
             requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
@@ -146,7 +146,7 @@ public class WelcomeActivity extends AppCompatActivity {
         }
     }
 
-    private void doAccetion() {
+    private void doAcceptation() {
         if (mAgreement && mPrivacy) {
             checkBox.setChecked(true);
             checkDefaultPermissions();
@@ -183,7 +183,7 @@ public class WelcomeActivity extends AppCompatActivity {
             tvCancel.setOnClickListener(v -> {
                 mAgreement = false;
 
-                doAccetion();
+                doAcceptation();
 
                 alertDialog.cancel();
             });
@@ -191,7 +191,7 @@ public class WelcomeActivity extends AppCompatActivity {
             tvAgree.setOnClickListener(v -> {
                 mAgreement = true;
 
-                doAccetion();
+                doAcceptation();
 
                 alertDialog.cancel();
             });
@@ -219,7 +219,7 @@ public class WelcomeActivity extends AppCompatActivity {
             tvCancel.setOnClickListener(v -> {
                 mPrivacy = false;
 
-                doAccetion();
+                doAcceptation();
 
                 alertDialog.cancel();
             });
@@ -227,7 +227,7 @@ public class WelcomeActivity extends AppCompatActivity {
             tvAgree.setOnClickListener(v -> {
                 mPrivacy = true;
 
-                doAccetion();
+                doAcceptation();
 
                 alertDialog.cancel();
             });
@@ -268,6 +268,21 @@ public class WelcomeActivity extends AppCompatActivity {
         });
 
         String str = getString(R.string.app_agreement_privacy);
+        SpannableStringBuilder builder = getSpannableStringBuilder(str);
+
+        checkBox.setText(builder);
+        checkBox.setMovementMethod(LinkMovementMethod.getInstance());
+
+        if (mPrivacy && mAgreement) {
+            checkBox.setChecked(true);
+            checkDefaultPermissions();
+        } else {
+            checkBox.setChecked(false);
+        }
+    }
+
+    @NonNull
+    private SpannableStringBuilder getSpannableStringBuilder(String str) {
         SpannableStringBuilder builder = new SpannableStringBuilder(str);
         ClickableSpan clickSpanAgreement = new ClickableSpan() {
             @Override
@@ -299,15 +314,6 @@ public class WelcomeActivity extends AppCompatActivity {
         int privacy_start = str.indexOf("《", agreement_end);
         int privacy_end = str.indexOf("》", agreement_end) + 1;
         builder.setSpan(clickSpanPrivacy, privacy_start, privacy_end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        checkBox.setText(builder);
-        checkBox.setMovementMethod(LinkMovementMethod.getInstance());
-
-        if (mPrivacy && mAgreement) {
-            checkBox.setChecked(true);
-            checkDefaultPermissions();
-        } else {
-            checkBox.setChecked(false);
-        }
+        return builder;
     }
 }
