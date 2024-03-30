@@ -44,8 +44,12 @@ public class DataBaseHistoryLocation extends SQLiteOpenHelper {
     public static void saveHistoryLocation(SQLiteDatabase sqLiteDatabase, ContentValues contentValues) {
         try {
             // 先删除原来的记录，再插入新记录
-            String location = contentValues.get(DB_COLUMN_LOCATION).toString();
-            sqLiteDatabase.delete(TABLE_NAME, DB_COLUMN_LOCATION + " = ?", new String[] {location});
+            String longitudeWgs84 = contentValues.getAsString(DB_COLUMN_LONGITUDE_WGS84);
+            String latitudeWgs84 = contentValues.getAsString(DB_COLUMN_LATITUDE_WGS84);
+            sqLiteDatabase.delete(TABLE_NAME,
+                            DB_COLUMN_LONGITUDE_WGS84 + " = ? AND " +
+                            DB_COLUMN_LATITUDE_WGS84 + " = ?",
+                    new String[] {longitudeWgs84, latitudeWgs84});
             sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
         } catch (Exception e) {
             XLog.e("DATABASE: insert error");

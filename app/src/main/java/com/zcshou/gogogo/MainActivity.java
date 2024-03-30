@@ -1092,12 +1092,20 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     /*============================== 历史记录 相关 ==============================*/
     private void initStoreHistory() {
         try {
+            long expirationTime = System.currentTimeMillis() / 1000 -
+                    Long.parseLong(getResources().getString(R.string.history_expiration)) * 24 * 60 * 60;
             // 定位历史
             DataBaseHistoryLocation dbLocation = new DataBaseHistoryLocation(getApplicationContext());
             mLocationHistoryDB = dbLocation.getWritableDatabase();
+            mLocationHistoryDB.delete(DataBaseHistoryLocation.TABLE_NAME,
+                    DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " < ?",
+                    new String[] {Long.toString(expirationTime)});
             // 搜索历史
             DataBaseHistorySearch dbHistory = new DataBaseHistorySearch(getApplicationContext());
             mSearchHistoryDB = dbHistory.getWritableDatabase();
+            mLocationHistoryDB.delete(DataBaseHistorySearch.TABLE_NAME,
+                    DataBaseHistorySearch.DB_COLUMN_TIMESTAMP + " < ?",
+                    new String[] {Long.toString(expirationTime)});
         } catch (Exception e) {
             XLog.e("ERROR: sqlite init error");
         }
@@ -1149,7 +1157,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 XLog.e("HTTP: HTTP GET FAILED");
                 //插表参数
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
+                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, getResources().getString(R.string.history_location_default_name));
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
@@ -1184,7 +1192,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                         } else { //位置获取失败
                             //插表参数
                             ContentValues contentValues = new ContentValues();
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, getResources().getString(R.string.history_location_default_name));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
@@ -1197,7 +1205,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                         XLog.e("JSON: resolve json error");
                         //插表参数
                         ContentValues contentValues = new ContentValues();
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, "NULL");
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, getResources().getString(R.string.history_location_default_name));
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);

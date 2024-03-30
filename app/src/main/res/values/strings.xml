@@ -73,6 +73,7 @@
 
     <!-- 历史记录页面 -->
     <string name="history_expiration">7</string>
+    <string name="history_location_default_name">地图位置</string>
     <string name="history_idle">暂无历史记录</string>
     <string name="history_delete_ok">删除成功！</string>
     <string name="history_delete_error">删除记录失败</string>
