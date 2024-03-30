@@ -1106,7 +1106,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             // 搜索历史
             DataBaseHistorySearch dbHistory = new DataBaseHistorySearch(getApplicationContext());
             mSearchHistoryDB = dbHistory.getWritableDatabase();
-            mLocationHistoryDB.delete(DataBaseHistorySearch.TABLE_NAME,
+            mSearchHistoryDB.delete(DataBaseHistorySearch.TABLE_NAME,
                     DataBaseHistorySearch.DB_COLUMN_TIMESTAMP + " < ?",
                     new String[] {Long.toString(expirationTime)});
         } catch (Exception e) {
