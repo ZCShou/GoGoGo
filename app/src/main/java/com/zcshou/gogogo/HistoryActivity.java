@@ -265,14 +265,15 @@ public class HistoryActivity extends BaseActivity {
         mRecordListView.setOnItemClickListener((adapterView, view, i, l) -> {
             String bd09Longitude;
             String bd09Latitude;
-            //bd09坐标
+            String name;
+            name = (String) ((TextView) view.findViewById(R.id.LocationText)).getText();
             String bd09LatLng = (String) ((TextView) view.findViewById(R.id.BDLatLngText)).getText();
             bd09LatLng = bd09LatLng.substring(bd09LatLng.indexOf('[') + 1, bd09LatLng.indexOf(']'));
             String[] latLngStr = bd09LatLng.split(" ");
             bd09Longitude = latLngStr[0].substring(latLngStr[0].indexOf(':') + 1);
             bd09Latitude = latLngStr[1].substring(latLngStr[1].indexOf(':') + 1);
 
-            if (!MainActivity.showLocation(bd09Longitude, bd09Latitude)) {
+            if (!MainActivity.showLocation(name, bd09Longitude, bd09Latitude)) {
                 GoUtils.DisplayToast(this, getResources().getString(R.string.history_error_location));
             }
             this.finish();

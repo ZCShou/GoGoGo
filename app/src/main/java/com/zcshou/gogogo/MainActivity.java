@@ -136,6 +136,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private MapView mMapView;
     private static BaiduMap mBaiduMap = null;
     private static LatLng mMarkLatLngMap = new LatLng(36.547743718042415, 117.07018449827267); // 当前标记的地图点
+    private static String mMarkName = null;
     private GeoCoder mGeoCoder;
     private SensorManager mSensorManager;
     private Sensor mSensorAccelerometer;
@@ -695,6 +696,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 if (reverseGeoCodeResult == null || reverseGeoCodeResult.error != SearchResult.ERRORNO.NO_ERROR) {
                     XLog.i("逆地理位置失败!");
                 } else {
+                    mMarkName = String.valueOf(reverseGeoCodeResult.getAddress());
                     poiLatitude.setText(String.valueOf(reverseGeoCodeResult.getLocation().latitude));
                     poiLongitude.setText(String.valueOf(reverseGeoCodeResult.getLocation().longitude));
                     poiAddress.setText(reverseGeoCodeResult.getAddress());
@@ -872,6 +874,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                                 double[] bdLonLat = MapUtils.wgs2bd09(dialog_lat_double, dialog_lng_double);
                                 mMarkLatLngMap = new LatLng(bdLonLat[1], bdLonLat[0]);
                             }
+                            mMarkName = "手动输入的坐标";
 
                             markMap();
 
@@ -983,11 +986,12 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 //    }
 
     // 在地图上显示位置
-    public static boolean showLocation(String bd09Longitude, String bd09Latitude) {
+    public static boolean showLocation(String name, String bd09Longitude, String bd09Latitude) {
         boolean ret = true;
 
         try {
             if (!bd09Longitude.isEmpty() && !bd09Latitude.isEmpty()) {
+                mMarkName = name;
                 mMarkLatLngMap = new LatLng(Double.parseDouble(bd09Latitude), Double.parseDouble(bd09Longitude));
                 MarkerOptions ooA = new MarkerOptions().position(mMarkLatLngMap).icon(mMapIndicator);
                 mBaiduMap.clear();
@@ -1159,7 +1163,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 XLog.e("HTTP: HTTP GET FAILED");
                 //插表参数
                 ContentValues contentValues = new ContentValues();
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, getResources().getString(R.string.history_location_default_name));
+                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, mMarkName);
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
@@ -1189,31 +1193,29 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
-
                             DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
-                        } else { //位置获取失败
-                            //插表参数
+                        } else {
                             ContentValues contentValues = new ContentValues();
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, getResources().getString(R.string.history_location_default_name));
+                            // contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, getResources().getString(R.string.history_location_default_name));
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, mMarkName);
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
-
                             DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
                         }
                     } catch (JSONException e) {
                         XLog.e("JSON: resolve json error");
                         //插表参数
                         ContentValues contentValues = new ContentValues();
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, getResources().getString(R.string.history_location_default_name));
+                        // contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, getResources().getString(R.string.history_location_default_name));
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, mMarkName);
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
-
                         DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
                     }
                 }
@@ -1230,9 +1232,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mSearchList.setOnItemClickListener((parent, view, position, id) -> {
             String lng = ((TextView) view.findViewById(R.id.poi_longitude)).getText().toString();
             String lat = ((TextView) view.findViewById(R.id.poi_latitude)).getText().toString();
+            mMarkName = ((TextView) view.findViewById(R.id.poi_name)).getText().toString();
             mMarkLatLngMap = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
             MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
-            //对地图的中心点进行更新，
             mBaiduMap.setMapStatus(mapstatusupdate);
 
             markMap();
@@ -1243,7 +1245,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             // mSearchList.setVisibility(View.GONE);
             //搜索历史 插表参数
             ContentValues contentValues = new ContentValues();
-            contentValues.put(DataBaseHistorySearch.DB_COLUMN_KEY, ((TextView) view.findViewById(R.id.poi_name)).getText().toString());
+            contentValues.put(DataBaseHistorySearch.DB_COLUMN_KEY, mMarkName);
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_DESCRIPTION, ((TextView) view.findViewById(R.id.poi_address)).getText().toString());
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_IS_LOCATION, DataBaseHistorySearch.DB_SEARCH_TYPE_RESULT);
             contentValues.put(DataBaseHistorySearch.DB_COLUMN_LONGITUDE_CUSTOM, lng);
@@ -1267,7 +1269,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             if (searchIsLoc.equals("1")) {
                 String lng = ((TextView) view.findViewById(R.id.search_longitude)).getText().toString();
                 String lat = ((TextView) view.findViewById(R.id.search_latitude)).getText().toString();
-                //对地图的中心点进行更新
+                mMarkName = ((TextView) view.findViewById(R.id.poi_name)).getText().toString();
                 mMarkLatLngMap = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
                 MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
                 mBaiduMap.setMapStatus(mapstatusupdate);
