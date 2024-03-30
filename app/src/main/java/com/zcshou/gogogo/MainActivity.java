@@ -1099,20 +1099,12 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     /*============================== 历史记录 相关 ==============================*/
     private void initStoreHistory() {
         try {
-            long expirationTime = System.currentTimeMillis() / 1000 -
-                    Long.parseLong(getResources().getString(R.string.history_expiration)) * 24 * 60 * 60;
             // 定位历史
             DataBaseHistoryLocation dbLocation = new DataBaseHistoryLocation(getApplicationContext());
             mLocationHistoryDB = dbLocation.getWritableDatabase();
-            mLocationHistoryDB.delete(DataBaseHistoryLocation.TABLE_NAME,
-                    DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " < ?",
-                    new String[] {Long.toString(expirationTime)});
             // 搜索历史
             DataBaseHistorySearch dbHistory = new DataBaseHistorySearch(getApplicationContext());
             mSearchHistoryDB = dbHistory.getWritableDatabase();
-            mSearchHistoryDB.delete(DataBaseHistorySearch.TABLE_NAME,
-                    DataBaseHistorySearch.DB_COLUMN_TIMESTAMP + " < ?",
-                    new String[] {Long.toString(expirationTime)});
         } catch (Exception e) {
             XLog.e("ERROR: sqlite init error");
         }
