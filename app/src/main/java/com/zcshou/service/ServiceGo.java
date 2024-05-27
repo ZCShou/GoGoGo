@@ -35,9 +35,11 @@ public class ServiceGo extends Service {
     // 定位相关变量
     public static final double DEFAULT_LAT = 36.667662;
     public static final double DEFAULT_LNG = 117.027707;
+    public static final double DEFAULT_ALT = 55.0D;
     public static final float DEFAULT_BEA = 0.0F;
     private double mCurLat = DEFAULT_LAT;
     private double mCurLng = DEFAULT_LNG;
+    private double mCurAlt = DEFAULT_ALT;
     private float mCurBea = DEFAULT_BEA;
     private double mSpeed = 1.2;        /* 默认的速度，单位 m/s */
     private static final int HANDLER_MSG_ID = 0;
@@ -86,8 +88,9 @@ public class ServiceGo extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         mCurLng = intent.getDoubleExtra(MainActivity.LNG_MSG_ID, DEFAULT_LNG);
         mCurLat = intent.getDoubleExtra(MainActivity.LAT_MSG_ID, DEFAULT_LAT);
+        mCurAlt = intent.getDoubleExtra(MainActivity.ALT_MSG_ID, DEFAULT_ALT);
 
-        mJoyStick.setCurrentPosition(mCurLng, mCurLat);
+        mJoyStick.setCurrentPosition(mCurLng, mCurLat, mCurAlt);
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -160,9 +163,10 @@ public class ServiceGo extends Service {
             }
 
             @Override
-            public void onPositionInfo(double lng, double lat) {
+            public void onPositionInfo(double lng, double lat, double alt) {
                 mCurLng = lng;
                 mCurLat = lat;
+                mCurAlt = alt;
             }
         });
         mJoyStick.show();
@@ -233,7 +237,7 @@ public class ServiceGo extends Service {
             // 尽可能模拟真实的 GPS 数据
             Location loc = new Location(LocationManager.GPS_PROVIDER);
             loc.setAccuracy(Criteria.ACCURACY_FINE);    // 设定此位置的估计水平精度，以米为单位。
-            loc.setAltitude(55.0D);                     // 设置高度，在 WGS 84 参考坐标系中的米
+            loc.setAltitude(mCurAlt);                     // 设置高度，在 WGS 84 参考坐标系中的米
             loc.setBearing(mCurBea);                       // 方向（度）
             loc.setLatitude(mCurLat);                   // 纬度（度）
             loc.setLongitude(mCurLng);                  // 经度（度）
@@ -288,7 +292,7 @@ public class ServiceGo extends Service {
             // 尽可能模拟真实的 NETWORK 数据
             Location loc = new Location(LocationManager.NETWORK_PROVIDER);
             loc.setAccuracy(Criteria.ACCURACY_COARSE);  // 设定此位置的估计水平精度，以米为单位。
-            loc.setAltitude(55.0D);                     // 设置高度，在 WGS 84 参考坐标系中的米
+            loc.setAltitude(mCurAlt);                     // 设置高度，在 WGS 84 参考坐标系中的米
             loc.setBearing(mCurBea);                       // 方向（度）
             loc.setLatitude(mCurLat);                   // 纬度（度）
             loc.setLongitude(mCurLng);                  // 经度（度）
@@ -319,12 +323,13 @@ public class ServiceGo extends Service {
     }
 
     public class ServiceGoBinder extends Binder {
-        public void setPosition(double lng, double lat) {
+        public void setPosition(double lng, double lat, double alt) {
             mLocHandler.removeMessages(HANDLER_MSG_ID);
             mCurLng = lng;
             mCurLat = lat;
+            mCurAlt = alt;
             mLocHandler.sendEmptyMessage(HANDLER_MSG_ID);
-            mJoyStick.setCurrentPosition(mCurLng, mCurLat);
+            mJoyStick.setCurrentPosition(mCurLng, mCurLat, mCurAlt);
         }
     }
 }

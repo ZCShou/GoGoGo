@@ -85,6 +85,22 @@ public class FragmentSettings extends PreferenceFragmentCompat {
             });
         }
 
+        EditTextPreference pfAltitude = findPreference("setting_altitude");
+        if (pfAltitude != null) {
+            pfAltitude.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> getResources().getString(R.string.setting_current_value) + preference.getText());
+            pfAltitude.setOnBindEditTextListener(editText -> {
+                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
+                Selection.setSelection(editText.getText(), editText.length());
+            });
+            pfAltitude.setOnPreferenceChangeListener((preference, newValue) -> {
+                if (newValue.toString().trim().length() == 0) {
+                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input_null));
+                    return false;
+                }
+                return true;
+            });
+        }
+
         SwitchPreferenceCompat pLog = findPreference("setting_log_off");
         if (pLog != null) {
             pLog.setOnPreferenceChangeListener((preference, newValue) -> {

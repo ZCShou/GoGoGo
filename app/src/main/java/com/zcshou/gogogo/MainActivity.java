@@ -116,6 +116,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     /* 对外 */
     public static final String LAT_MSG_ID = "LAT_VALUE";
     public static final String LNG_MSG_ID = "LNG_VALUE";
+    public static final String ALT_MSG_ID = "ALT_VALUE";
 
     public static final String POI_NAME = "POI_NAME";
     public static final String POI_ADDRESS = "POI_ADDRESS";
@@ -1018,6 +1019,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         double[] latLng = MapUtils.bd2wgs(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
         serviceGoIntent.putExtra(LNG_MSG_ID, latLng[0]);
         serviceGoIntent.putExtra(LAT_MSG_ID, latLng[1]);
+        double alt = Double.parseDouble(sharedPreferences.getString("setting_altitude", "55.0"));
+        serviceGoIntent.putExtra(ALT_MSG_ID, alt);
 
         startForegroundService(serviceGoIntent);
         XLog.d("startForegroundService: ServiceGo");
@@ -1057,7 +1060,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 mButtonStart.setImageResource(R.drawable.ic_position);
             } else {
                 double[] latLng = MapUtils.bd2wgs(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
-                mServiceBinder.setPosition(latLng[0], latLng[1]);
+                double alt = Double.parseDouble(sharedPreferences.getString("setting_altitude", "55.0"));
+                mServiceBinder.setPosition(latLng[0], latLng[1], alt);
                 Snackbar.make(v, "已传送到新位置", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 

@@ -63,6 +63,8 @@
     <string name="setting_run_default">3.6</string>
     <string name="setting_bike">驾驶速度(米/秒)</string>
     <string name="setting_bike_default">10.0</string>
+    <string name="setting_altitude">海拔高度(米)</string>
+    <string name="setting_altitude_default">55.0</string>
     <string name="setting_group_log">记录</string>
     <string name="setting_log_off">关闭日志</string>
     <string name="setting_pos_history">历史记录有效期(天)</string>

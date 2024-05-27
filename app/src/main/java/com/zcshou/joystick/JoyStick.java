@@ -72,6 +72,7 @@ public class JoyStick extends View {
     private GoUtils.TimeCount mTimer;
     private boolean isMove;
     private double mSpeed = 1.2;        /* 默认的速度，单位 m/s */
+    private double mAltitude = 55.0;
     private double mAngle = 0;
     private double mR = 0;
     private double disLng = 0;
@@ -149,9 +150,10 @@ public class JoyStick extends View {
         }
     }
 
-    public void setCurrentPosition(double lng, double lat) {
+    public void setCurrentPosition(double lng, double lat, double alt) {
         double[] lngLat = MapUtils.wgs2bd09(lng, lat);
         mCurMapLngLat = new LatLng(lngLat[1], lngLat[0]);
+        mAltitude = alt;
 
         resetBaiduMap();
     }
@@ -425,7 +427,7 @@ public class JoyStick extends View {
 
     public interface JoyStickClickListener {
         void onMoveInfo(double speed, double disLng, double disLat, double angle);
-        void onPositionInfo(double lng, double lat);
+        void onPositionInfo(double lng, double lat, double alt);
     }
 
 
@@ -542,7 +544,7 @@ public class JoyStick extends View {
                     mMarkMapLngLat = null;
 
                     double[] lngLat = MapUtils.bd2wgs(mCurMapLngLat.longitude, mCurMapLngLat.latitude);
-                    mListener.onPositionInfo(lngLat[0], lngLat[1]);
+                    mListener.onPositionInfo(lngLat[0], lngLat[1], mAltitude);
 
                     resetBaiduMap();
 
@@ -727,7 +729,7 @@ public class JoyStick extends View {
             String wgs84Longitude = wgs84latLngStr[0].substring(wgs84latLngStr[0].indexOf(':') + 1);
             String wgs84Latitude = wgs84latLngStr[1].substring(wgs84latLngStr[1].indexOf(':') + 1);
 
-            mListener.onPositionInfo(Double.parseDouble(wgs84Longitude), Double.parseDouble(wgs84Latitude));
+            mListener.onPositionInfo(Double.parseDouble(wgs84Longitude), Double.parseDouble(wgs84Latitude), mAltitude);
 
             // 注意这里在选择位置之后需要刷新地图
             String bdLatLng = (String) ((TextView) view.findViewById(R.id.BDLatLngText)).getText();
