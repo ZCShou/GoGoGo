@@ -27,6 +27,7 @@ import android.os.SystemClock;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
+import com.elvishew.xlog.XLog;
 import com.zcshou.gogogo.MainActivity;
 import com.zcshou.gogogo.R;
 import com.zcshou.joystick.JoyStick;
@@ -192,7 +193,7 @@ public class ServiceGo extends Service {
                         sendEmptyMessage(HANDLER_MSG_ID);
                     }
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    XLog.e("SERVICEGO: ERROR - handleMessage");
                     Thread.currentThread().interrupt();
                 }
             }
@@ -208,7 +209,7 @@ public class ServiceGo extends Service {
                 mLocManager.removeTestProvider(LocationManager.GPS_PROVIDER);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            XLog.e("SERVICEGO: ERROR - removeTestProviderGPS");
         }
     }
 
@@ -228,7 +229,7 @@ public class ServiceGo extends Service {
                 mLocManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            XLog.e("SERVICEGO: ERROR - addTestProviderGPS");
         }
     }
 
@@ -250,7 +251,7 @@ public class ServiceGo extends Service {
 
             mLocManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, loc);
         } catch (Exception e) {
-            e.printStackTrace();
+            XLog.e("SERVICEGO: ERROR - setLocationGPS");
         }
     }
 
@@ -261,7 +262,7 @@ public class ServiceGo extends Service {
                 mLocManager.removeTestProvider(LocationManager.NETWORK_PROVIDER);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            XLog.e("SERVICEGO: ERROR - removeTestProviderNetwork");
         }
     }
 
@@ -283,7 +284,7 @@ public class ServiceGo extends Service {
                 mLocManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
             }
         } catch (SecurityException e) {
-            e.printStackTrace();
+            XLog.e("SERVICEGO: ERROR - addTestProviderNetwork");
         }
     }
 
@@ -302,7 +303,7 @@ public class ServiceGo extends Service {
 
             mLocManager.setTestProviderLocation(LocationManager.NETWORK_PROVIDER, loc);
         } catch (Exception e) {
-            e.printStackTrace();
+            XLog.e("SERVICEGO: ERROR - setLocationNetwork");
         }
     }
 

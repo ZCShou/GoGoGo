@@ -53,7 +53,6 @@ public class DataBaseHistoryLocation extends SQLiteOpenHelper {
             sqLiteDatabase.insert(TABLE_NAME, null, contentValues);
         } catch (Exception e) {
             XLog.e("DATABASE: insert error");
-            e.printStackTrace();
         }
     }
 }

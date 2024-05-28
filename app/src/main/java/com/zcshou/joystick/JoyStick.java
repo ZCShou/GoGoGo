@@ -801,8 +801,7 @@ public class JoyStick extends View {
             cursor.close();
             mHistoryLocationDB.close();
         } catch (Exception e) {
-            Log.e("HistoryActivity", "SQLiteDatabase init error");
-            e.printStackTrace();
+            Log.e("JOYSTICK", "ERROR - fetchAllRecord");
         }
     }
 
@@ -823,7 +822,7 @@ public class JoyStick extends View {
                         new int[]{R.id.LocationID, R.id.LocationText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
                 mRecordListView.setAdapter(simAdapt);
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("JOYSTICK", "ERROR - showHistory");
             }
         }
     }

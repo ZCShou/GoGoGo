@@ -117,8 +117,7 @@ public class HistoryActivity extends BaseActivity {
             DataBaseHistoryLocation hisLocDBHelper = new DataBaseHistoryLocation(getApplicationContext());
             mHistoryLocationDB = hisLocDBHelper.getWritableDatabase();
         } catch (Exception e) {
-            Log.e("HistoryActivity", "SQLiteDatabase init error");
-            e.printStackTrace();
+            Log.e("HistoryActivity", "ERROR - initLocationDataBase");
         }
 
         recordArchive();
@@ -161,7 +160,7 @@ public class HistoryActivity extends BaseActivity {
             cursor.close();
         } catch (Exception e) {
             data.clear();
-            e.printStackTrace();
+            Log.e("HistoryActivity", "ERROR - fetchAllRecord");
         }
 
         return data;
@@ -180,8 +179,7 @@ public class HistoryActivity extends BaseActivity {
             mHistoryLocationDB.delete(DataBaseHistoryLocation.TABLE_NAME,
                     DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " < ?", new String[] {Long.toString(System.currentTimeMillis() / 1000 - weekSecond)});
         } catch (Exception e) {
-            Log.e("SQLITE", "archive error");
-            e.printStackTrace();
+            Log.e("HistoryActivity", "ERROR - recordArchive");
         }
     }
 
@@ -196,9 +194,8 @@ public class HistoryActivity extends BaseActivity {
                         DataBaseHistoryLocation.DB_COLUMN_ID + " = ?", new String[] {Integer.toString(ID)});
             }
         } catch (Exception e) {
-            Log.e("SQLITE", "delete error");
             deleteRet = false;
-            e.printStackTrace();
+            Log.e("HistoryActivity", "ERROR - deleteRecord");
         }
 
         return deleteRet;
@@ -324,7 +321,7 @@ public class HistoryActivity extends BaseActivity {
                         new int[]{R.id.LocationID, R.id.LocationText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
                 mRecordListView.setAdapter(simAdapt);
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("HistoryActivity", "ERROR - updateRecordList");
             }
         }
     }

@@ -55,7 +55,6 @@ public class DataBaseHistorySearch extends SQLiteOpenHelper {
             sqLiteDatabase.insert(DataBaseHistorySearch.TABLE_NAME, null, contentValues);
         } catch (Exception e) {
             XLog.e("DATABASE: insert error");
-            e.printStackTrace();
         }
     }
 }
