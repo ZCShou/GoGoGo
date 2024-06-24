@@ -90,7 +90,7 @@ jobs:
 
       # https://github.com/marketplace/actions/gh-release
       - name: Release APK
-        uses: softprops/action-gh-release@v2.0.5
+        uses: softprops/action-gh-release@v2.0.6
         if: startsWith(github.ref, 'refs/tags/')
         with:
           token: ${{ github.token }}
