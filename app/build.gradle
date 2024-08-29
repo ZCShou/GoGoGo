@@ -110,7 +110,7 @@ dependencies {
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'com.google.android.material:material:1.7.0'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    implementation 'com.elvishew:xlog:1.11.0'
+    implementation 'com.elvishew:xlog:1.11.1'
     implementation 'io.noties.markwon:core:4.6.2'
     implementation files('libs/BaiduLBS_Android.jar')
     testImplementation 'junit:junit:4.13.2'
