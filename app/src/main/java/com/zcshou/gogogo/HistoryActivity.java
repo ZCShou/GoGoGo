@@ -9,6 +9,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.PreferenceManager;
 
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -19,6 +20,9 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.PopupMenu;
+import android.view.Gravity;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -255,6 +259,40 @@ public class HistoryActivity extends BaseActivity {
         });
     }
 
+    private void showDeleteDialog(String locID) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("警告");
+        builder.setMessage("确定要删除该项历史记录吗?");
+        builder.setPositiveButton("确定", (dialog, whichButton) -> {
+            boolean deleteRet = deleteRecord(Integer.parseInt(locID));
+            if (deleteRet) {
+                GoUtils.DisplayToast(HistoryActivity.this, getResources().getString(R.string.history_delete_ok));
+                updateRecordList();
+            }
+        });
+        builder.setNegativeButton("取消", null);
+
+        builder.show();
+    }
+
+    private void showInputDialog(String locID, String name) {
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setText(name);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("名称");
+        builder.setView(input);
+        builder.setPositiveButton("确认", (dialog, whichButton) -> {
+            String userInput = input.getText().toString();
+            DataBaseHistoryLocation.updateHistoryLocation(mHistoryLocationDB, locID, userInput);
+            updateRecordList();
+        });
+        builder.setNegativeButton("取消", null);
+
+        builder.show();
+    }
+
     private void initRecordListView() {
         noRecordText = findViewById(R.id.record_no_textview);
         mSearchLayout = findViewById(R.id.search_linear);
@@ -277,23 +315,27 @@ public class HistoryActivity extends BaseActivity {
         });
 
         mRecordListView.setOnItemLongClickListener((parent, view, position, id) -> {
-            new AlertDialog.Builder(HistoryActivity.this)
-                    .setTitle("警告")//这里是表头的内容
-                    .setMessage("确定要删除该项历史记录吗?")//这里是中间显示的具体信息
-                    .setPositiveButton("确定",
-                            (dialog, which) -> {
-                                String locID = (String) ((TextView) view.findViewById(R.id.LocationID)).getText();
-                                boolean deleteRet = deleteRecord(Integer.parseInt(locID));
+            PopupMenu popupMenu = new PopupMenu(HistoryActivity.this, view);
+            popupMenu.setGravity(Gravity.END | Gravity.BOTTOM);
+            popupMenu.getMenu().add("编辑");
+            popupMenu.getMenu().add("删除");
 
-                                if (deleteRet) {
-                                    GoUtils.DisplayToast(this, getResources().getString(R.string.history_delete_ok));
-                                    updateRecordList();
-                                }
-                            })
-                    .setNegativeButton("取消",
-                            (dialog, which) -> {
-                            })
-                    .show();
+            popupMenu.setOnMenuItemClickListener(item -> {
+                String locID = ((TextView) view.findViewById(R.id.LocationID)).getText().toString();
+                String name = ((TextView) view.findViewById(R.id.LocationText)).getText().toString();
+                switch (item.getTitle().toString()) {
+                    case "编辑":
+                        showInputDialog(locID, name);
+                        return true;
+                    case "删除":
+                        showDeleteDialog(locID);
+                        return true;
+                    default:
+                        return false;
+                }
+            });
+
+            popupMenu.show();
             return true;
         });
 
