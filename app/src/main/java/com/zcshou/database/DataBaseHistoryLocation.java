@@ -55,4 +55,15 @@ public class DataBaseHistoryLocation extends SQLiteOpenHelper {
             XLog.e("DATABASE: insert error");
         }
     }
+
+    // 修改历史记录名称
+    public static void updateHistoryLocation(SQLiteDatabase sqLiteDatabase, String locID, String location) {
+        try{
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(DB_COLUMN_LOCATION, location);
+            sqLiteDatabase.update(TABLE_NAME, contentValues, DB_COLUMN_ID + " = ?", new String[]{locID});
+        } catch (Exception e){
+            XLog.e("DATABASE: update error");
+        }
+    }
 }

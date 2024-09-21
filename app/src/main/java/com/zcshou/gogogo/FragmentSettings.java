@@ -2,7 +2,6 @@ package com.zcshou.gogogo;
 
 import android.os.Bundle;
 import android.text.InputType;
-import android.text.Selection;
 
 import androidx.preference.EditTextPreference;
 import androidx.preference.ListPreference;
@@ -16,6 +15,25 @@ import com.zcshou.utils.GoUtils;
 import java.util.Objects;
 
 public class FragmentSettings extends PreferenceFragmentCompat {
+
+    // Set a non-empty decimal EditTextPreference
+    private void setupDecimalEditTextPreference(EditTextPreference preference) {
+        if (preference != null) {
+            preference.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) pref ->
+                    getResources().getString(R.string.setting_current_value) + pref.getText());
+            preference.setOnBindEditTextListener(editText -> {
+                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
+                editText.setSelection(editText.length());
+            });
+            preference.setOnPreferenceChangeListener((pref, newValue) -> {
+                if (newValue.toString().trim().isEmpty()) {
+                    GoUtils.DisplayToast(this.getContext(), getResources().getString(R.string.app_error_input_null));
+                    return false;
+                }
+                return true;
+            });
+        }
+    }
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -38,68 +56,16 @@ public class FragmentSettings extends PreferenceFragmentCompat {
         }
 
         EditTextPreference pfWalk = findPreference("setting_walk");
-        if (pfWalk != null) {
-            // 使用自定义 SummaryProvider
-            pfWalk.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> getResources().getString(R.string.setting_current_value) + preference.getText());
-            pfWalk.setOnBindEditTextListener(editText -> {
-                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
-                Selection.setSelection(editText.getText(), editText.length());
-            });
-            pfWalk.setOnPreferenceChangeListener((preference, newValue) -> {
-                if (newValue.toString().trim().length() == 0) {
-                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input_null));
-                    return false;
-                }
-                return true;
-            });
-        }
+        setupDecimalEditTextPreference(pfWalk);
 
         EditTextPreference pfRun = findPreference("setting_run");
-        if (pfRun != null) {
-            pfRun.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> getResources().getString(R.string.setting_current_value) + preference.getText());
-            pfRun.setOnBindEditTextListener(editText -> {
-                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
-                Selection.setSelection(editText.getText(), editText.length());
-            });
-            pfRun.setOnPreferenceChangeListener((preference, newValue) -> {
-                if (newValue.toString().trim().length() == 0) {
-                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input_null));
-                    return false;
-                }
-                return true;
-            });
-        }
+        setupDecimalEditTextPreference(pfRun);
+
         EditTextPreference pfBike = findPreference("setting_bike");
-        if (pfBike != null) {
-            pfBike.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> getResources().getString(R.string.setting_current_value) + preference.getText());
-            pfBike.setOnBindEditTextListener(editText -> {
-                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
-                Selection.setSelection(editText.getText(), editText.length());
-            });
-            pfBike.setOnPreferenceChangeListener((preference, newValue) -> {
-                if (newValue.toString().trim().length() == 0) {
-                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input_null));
-                    return false;
-                }
-                return true;
-            });
-        }
+        setupDecimalEditTextPreference(pfBike);
 
         EditTextPreference pfAltitude = findPreference("setting_altitude");
-        if (pfAltitude != null) {
-            pfAltitude.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> getResources().getString(R.string.setting_current_value) + preference.getText());
-            pfAltitude.setOnBindEditTextListener(editText -> {
-                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
-                Selection.setSelection(editText.getText(), editText.length());
-            });
-            pfAltitude.setOnPreferenceChangeListener((preference, newValue) -> {
-                if (newValue.toString().trim().length() == 0) {
-                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input_null));
-                    return false;
-                }
-                return true;
-            });
-        }
+        setupDecimalEditTextPreference(pfAltitude);
 
         SwitchPreferenceCompat pLog = findPreference("setting_log_off");
         if (pLog != null) {
@@ -120,20 +86,12 @@ public class FragmentSettings extends PreferenceFragmentCompat {
         }
 
         EditTextPreference pfPosHisValid = findPreference("setting_pos_history");
-        if (pfPosHisValid != null) {
-            // 使用自定义 SummaryProvider
-            pfPosHisValid.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) preference -> getResources().getString(R.string.setting_current_value) + preference.getText());
-            pfPosHisValid.setOnBindEditTextListener(editText -> {
-                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
-                Selection.setSelection(editText.getText(), editText.length());
-            });
-            pfPosHisValid.setOnPreferenceChangeListener((preference, newValue) -> {
-                if (newValue.toString().trim().length() == 0) {
-                    GoUtils.DisplayToast(this.getContext(),getResources().getString(R.string.app_error_input_null));
-                    return false;
-                }
-                return true;
-            });
-        }
+        setupDecimalEditTextPreference(pfPosHisValid);
+
+        EditTextPreference pfLatOffset = findPreference("setting_lat_max_offset");
+        setupDecimalEditTextPreference(pfLatOffset);
+
+        EditTextPreference pfLonOffset = findPreference("setting_lon_max_offset");
+        setupDecimalEditTextPreference(pfLonOffset);
     }
 }

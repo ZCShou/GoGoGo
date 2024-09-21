@@ -65,6 +65,12 @@
     <string name="setting_bike_default">10.0</string>
     <string name="setting_altitude">海拔高度(米)</string>
     <string name="setting_altitude_default">55.0</string>
+    <string name="setting_location">位置</string>
+    <string name="setting_random_offset">随机偏移</string>
+    <string name="setting_random_offset_summary">仅在使用历史位置时生效</string>
+    <string name="setting_random_offset_default">10.0</string>
+    <string name="setting_lat_max_offset">经度最大偏移距离(米)</string>
+    <string name="setting_lon_max_offset">纬度最大偏移距离(米)</string>
     <string name="setting_group_log">记录</string>
     <string name="setting_log_off">关闭日志</string>
     <string name="setting_pos_history">历史记录有效期(天)</string>
