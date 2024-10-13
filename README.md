@@ -95,7 +95,7 @@ A：建议去问一下腾讯。
 
 Q：编译时 java 报错？
 
-A：Gradle 使用的 java 版本与 Android Studio 使用的不一致。Gradle 默认会在环境变量中收缩 JAVA_HOME 来确定 Java 位置。
+A：Gradle 使用的 java 版本与 Android Studio 使用的不一致。Gradle 默认会在环境变量中搜索 JAVA_HOME 来确定 Java 位置。
 
 ## 如何贡献
 1. FORK -> PR
