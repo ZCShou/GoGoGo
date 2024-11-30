@@ -45,6 +45,30 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        app:title="@string/setting_location"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            app:key="setting_random_offset"
+            app:title="@string/setting_random_offset"
+            app:summary="@string/setting_random_offset_summary"
+            app:defaultValue="false"
+            app:iconSpaceReserved="false"/>
+        <EditTextPreference
+            app:key="setting_lat_max_offset"
+            app:title="@string/setting_lat_max_offset"
+            app:defaultValue="@string/setting_random_offset_default"
+            app:summary="@string/setting_random_offset_default"
+            app:iconSpaceReserved="false"/>
+        <EditTextPreference
+            app:key="setting_lon_max_offset"
+            app:title="@string/setting_lon_max_offset"
+            app:defaultValue="@string/setting_random_offset_default"
+            app:summary="@string/setting_random_offset_default"
+            app:iconSpaceReserved="false"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:title="@string/setting_group_log"
         app:iconSpaceReserved="false">
 
