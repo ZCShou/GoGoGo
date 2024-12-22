@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.PixelFormat;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -159,6 +160,9 @@ public class JoyStick extends View {
     }
 
     public void show() {
+        if (!Settings.canDrawOverlays(mContext)) {
+            return;
+        }
         switch (mCurWin) {
             case WINDOW_TYPE_MAP:
                 if (mJoystickLayout.getParent() != null) {

@@ -18,9 +18,12 @@ import android.os.Build;
 import android.os.CountDownTimer;
 import android.provider.Settings;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -244,6 +247,28 @@ public class GoUtils {
                 .setNegativeButton("忽略",(dialog, which) -> {
                 })
                 .show();
+    }
+
+    public static void showLocationNotice(Context context, View view, boolean started) {
+        String text = started ? "已传送到新位置" : "模拟位置已启动";
+        if (Settings.canDrawOverlays(context)) {
+            Snackbar.make(view, text, Snackbar.LENGTH_LONG).show();
+        } else {
+            text += "；为了模拟定位的稳定性，建议开启\"显示悬浮窗\"权限";
+            Snackbar.make(view, text, Snackbar.LENGTH_LONG).setAction("去设置", v -> {
+                try {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:" + context.getPackageName()));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                } catch (Exception e) {
+                    DisplayToast(context, "无法跳转到悬浮窗权限设置界面");
+                }
+            }).show();
+        }
+        if (isWifiEnabled(context) && !started) {
+            Toast.makeText(context, "开启 WIFI (即使未连接) 可能导致虚拟定位失败", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public static  void DisplayToast(Context context, String str) {
