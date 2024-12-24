@@ -875,9 +875,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                                 double[] bdLonLat = MapUtils.wgs2bd09(dialog_lat_double, dialog_lng_double);
                                 mMarkLatLngMap = new LatLng(bdLonLat[1], bdLonLat[0]);
                             }
-                            mMarkName = "手动输入的坐标";
 
                             markMap();
+                            mMarkName = "手动输入的坐标";
 
                             MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
                             mBaiduMap.setMapStatus(mapstatusupdate);
