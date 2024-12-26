@@ -1,5 +1,7 @@
 package com.zcshou.gogogo;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -28,8 +30,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
-import java.util.Locale;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +48,6 @@ public class HistoryActivity extends BaseActivity {
     private LinearLayout mSearchLayout;
     private SQLiteDatabase mHistoryLocationDB;
     private List<Map<String, Object>> mAllRecord;
-    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +66,6 @@ public class HistoryActivity extends BaseActivity {
         if(actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         initLocationDataBase();
 
@@ -175,6 +172,7 @@ public class HistoryActivity extends BaseActivity {
     private void recordArchive() {
         double limits;
         try {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             limits = Double.parseDouble(sharedPreferences.getString("setting_pos_history", getResources().getString(R.string.history_expiration)));
         } catch (NumberFormatException e) {  // GOOD: The exception is caught.
             limits = 7;
@@ -295,50 +293,20 @@ public class HistoryActivity extends BaseActivity {
         builder.show();
     }
 
-    private String[] randomOffset(String longitude, String latitude) {
-        String max_offset_default = getResources().getString(R.string.setting_random_offset_default);
-        double lon_max_offset = Double.parseDouble(Objects.requireNonNull(sharedPreferences.getString("setting_lon_max_offset", max_offset_default)));
-        double lat_max_offset = Double.parseDouble(Objects.requireNonNull(sharedPreferences.getString("setting_lat_max_offset", max_offset_default)));
-        double lon = Double.parseDouble(longitude);
-        double lat = Double.parseDouble(latitude);
-
-        double randomLonOffset = (Math.random() * 2 - 1) * lon_max_offset;  // Longitude offset (meters)
-        double randomLatOffset = (Math.random() * 2 - 1) * lat_max_offset;  // Latitude offset (meters)
-
-        lon += randomLonOffset / 111320;    // (meters -> longitude)
-        lat += randomLatOffset / 110574;    // (meters -> latitude)
-
-        String offsetMessage = String.format(Locale.US, "经度偏移: %.2f米\n纬度偏移: %.2f米", randomLonOffset, randomLatOffset);
-        GoUtils.DisplayToast(this, offsetMessage);
-
-        return new String[]{String.valueOf(lon), String.valueOf(lat)};
-    }
-
     private void initRecordListView() {
         noRecordText = findViewById(R.id.record_no_textview);
         mSearchLayout = findViewById(R.id.search_linear);
         mRecordListView = findViewById(R.id.record_list_view);
         mRecordListView.setOnItemClickListener((adapterView, view, i, l) -> {
-            String bd09Longitude;
-            String bd09Latitude;
-            String name;
-            name = (String) ((TextView) view.findViewById(R.id.LocationText)).getText();
             String bd09LatLng = (String) ((TextView) view.findViewById(R.id.BDLatLngText)).getText();
             bd09LatLng = bd09LatLng.substring(bd09LatLng.indexOf('[') + 1, bd09LatLng.indexOf(']'));
             String[] latLngStr = bd09LatLng.split(" ");
-            bd09Longitude = latLngStr[0].substring(latLngStr[0].indexOf(':') + 1);
-            bd09Latitude = latLngStr[1].substring(latLngStr[1].indexOf(':') + 1);
-
-            // Random offset
-            if(sharedPreferences.getBoolean("setting_random_offset", false)) {
-                String[] offsetResult = randomOffset(bd09Longitude, bd09Latitude);
-                bd09Longitude = offsetResult[0];
-                bd09Latitude = offsetResult[1];
-            }
-
-            if (!MainActivity.showLocation(name, bd09Longitude, bd09Latitude)) {
-                GoUtils.DisplayToast(this, getResources().getString(R.string.history_error_location));
-            }
+            String bd09Longitude = latLngStr[0].substring(latLngStr[0].indexOf(':') + 1);
+            String bd09Latitude = latLngStr[1].substring(latLngStr[1].indexOf(':') + 1);
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("bd09_lon", bd09Longitude);
+            resultIntent.putExtra("bd09_lat", bd09Latitude);
+            setResult(Activity.RESULT_OK, resultIntent);
             this.finish();
         });
 

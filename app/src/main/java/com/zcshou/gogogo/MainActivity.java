@@ -1,5 +1,6 @@
 package com.zcshou.gogogo;
 
+import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -46,6 +47,8 @@ import android.widget.RadioGroup;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
@@ -94,7 +97,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import com.zcshou.service.ServiceGo;
 import com.zcshou.database.DataBaseHistoryLocation;
@@ -225,10 +230,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     DataBaseHistoryLocation.DB_COLUMN_ID + " > ?", new String[]{"0"},
                     null, null, DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " DESC", null);
             if (cursor.moveToFirst()) {
-                String name = cursor.getString(1);
                 String bd09Longitude = cursor.getString(5);
                 String bd09Latitude = cursor.getString(6);
-                MainActivity.showLocation(name, bd09Longitude, bd09Latitude);
+                showLocation(bd09Longitude, bd09Latitude);
                 isFirstLoc = false;
             }
             cursor.close();
@@ -431,14 +435,22 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
     /*============================== NavigationView 相关 ==============================*/
     private void initNavigationView() {
+        ActivityResultLauncher<Intent> historyLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        String lon = result.getData().getStringExtra("bd09_lon");
+                        String lat = result.getData().getStringExtra("bd09_lat");
+                        showLocation(lon, lat);
+                    }
+                }
+        );
         mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
-
             if (id == R.id.nav_history) {
                 Intent intent = new Intent(MainActivity.this, HistoryActivity.class);
-
-                startActivity(intent);
+                historyLauncher.launch(intent);
             } else if (id == R.id.nav_settings) {
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(intent);
@@ -1005,27 +1017,35 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 //    }
 
     // 在地图上显示位置
-    public static boolean showLocation(String name, String bd09Longitude, String bd09Latitude) {
-        boolean ret = true;
-
+    void showLocation(String bd09Longitude, String bd09Latitude) {
         try {
-            if (!bd09Longitude.isEmpty() && !bd09Latitude.isEmpty()) {
-                mMarkLatLngMap = new LatLng(Double.parseDouble(bd09Latitude), Double.parseDouble(bd09Longitude));
-                MarkerOptions ooA = new MarkerOptions().position(mMarkLatLngMap).icon(mMapIndicator);
-                mBaiduMap.clear();
-                mBaiduMap.addOverlay(ooA);
-                MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
-                mBaiduMap.setMapStatus(mapstatusupdate);
-                MapStatus.Builder builder = new MapStatus.Builder();
-                builder.target(mMarkLatLngMap).zoom(18).rotate(0);
-                mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
+            double lon = Double.parseDouble(bd09Longitude);
+            double lat = Double.parseDouble(bd09Latitude);
+            // Random offset
+            if (sharedPreferences.getBoolean("setting_random_offset", false)) {
+                String max_offset_default = getResources().getString(R.string.setting_random_offset_default);
+                double lon_max_offset = Double.parseDouble(Objects.requireNonNull(sharedPreferences.getString("setting_lon_max_offset", max_offset_default)));
+                double lat_max_offset = Double.parseDouble(Objects.requireNonNull(sharedPreferences.getString("setting_lat_max_offset", max_offset_default)));
+                double randomLonOffset = (Math.random() * 2 - 1) * lon_max_offset;  // Longitude offset (meters)
+                double randomLatOffset = (Math.random() * 2 - 1) * lat_max_offset;  // Latitude offset (meters)
+                lon += randomLonOffset / 111320;    // (meters -> longitude)
+                lat += randomLatOffset / 110574;    // (meters -> latitude)
+                String msg = String.format(Locale.US, "经度偏移: %.2f米\n纬度偏移: %.2f米", randomLonOffset, randomLatOffset);
+                GoUtils.DisplayToast(this, msg);
             }
+            mMarkLatLngMap = new LatLng(lat, lon);
+            MarkerOptions ooA = new MarkerOptions().position(mMarkLatLngMap).icon(mMapIndicator);
+            mBaiduMap.clear();
+            mBaiduMap.addOverlay(ooA);
+            MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
+            mBaiduMap.setMapStatus(mapstatusupdate);
+            MapStatus.Builder builder = new MapStatus.Builder();
+            builder.target(mMarkLatLngMap).zoom(18).rotate(0);
+            mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
         } catch (Exception e) {
-            ret = false;
             XLog.e("ERROR: showHistoryLocation");
+            GoUtils.DisplayToast(this, getResources().getString(R.string.history_error_location));
         }
-
-        return ret;
     }
 
     private void initGoBtn() {
