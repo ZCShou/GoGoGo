@@ -55,13 +55,13 @@
             app:defaultValue="false"
             app:iconSpaceReserved="false"/>
         <EditTextPreference
-            app:key="setting_lat_max_offset"
+            app:key="setting_lon_max_offset"
             app:title="@string/setting_lat_max_offset"
             app:defaultValue="@string/setting_random_offset_default"
             app:summary="@string/setting_random_offset_default"
             app:iconSpaceReserved="false"/>
         <EditTextPreference
-            app:key="setting_lon_max_offset"
+            app:key="setting_lat_max_offset"
             app:title="@string/setting_lon_max_offset"
             app:defaultValue="@string/setting_random_offset_default"
             app:summary="@string/setting_random_offset_default"
