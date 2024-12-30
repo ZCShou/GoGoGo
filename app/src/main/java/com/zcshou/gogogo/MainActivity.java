@@ -908,6 +908,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                                 mMarkLatLngMap = new LatLng(bdLonLat[1], bdLonLat[0]);
                             }
                             markMap();
+                            mMarkName = "手动输入的坐标";
 
                             MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
                             mBaiduMap.setMapStatus(mapstatusupdate);
