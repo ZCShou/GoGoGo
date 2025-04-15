@@ -1,4 +1,4 @@
-package com.zcshou.gogogo;
+package com.booster.run;
 
 import org.junit.Test;
 

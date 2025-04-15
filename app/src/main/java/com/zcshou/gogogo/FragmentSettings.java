@@ -1,4 +1,4 @@
-package com.zcshou.gogogo;
+package com.booster.run;
 
 import android.os.Bundle;
 import android.text.InputType;

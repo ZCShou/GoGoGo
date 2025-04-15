@@ -1,4 +1,4 @@
-package com.zcshou.gogogo;
+package com.booster.run;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.zcshou.gogogo", appContext.getPackageName());
+        assertEquals("com.booster.run", appContext.getPackageName());
     }
 }

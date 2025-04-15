@@ -36,9 +36,9 @@ import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.zcshou.database.DataBaseHistoryLocation;
-import com.zcshou.gogogo.HistoryActivity;
-import com.zcshou.gogogo.MainActivity;
-import com.zcshou.gogogo.R;
+import com.booster.run.HistoryActivity;
+import com.booster.run.MainActivity;
+import com.booster.run.R;
 import com.zcshou.utils.GoUtils;
 import com.zcshou.utils.MapUtils;
 

@@ -17,7 +17,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
-import com.zcshou.gogogo.R;
+import com.booster.run.R;
 
 public class RockerView extends View {
     private Paint outerCirclePaint;
