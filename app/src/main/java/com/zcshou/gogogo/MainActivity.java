@@ -1177,11 +1177,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     try {
                         JSONObject getRetJson = new JSONObject(resp);
 
-                        //位置获取成功
-                        if (Integer.parseInt(getRetJson.getString("status")) == 0) {
+                        if (Integer.parseInt(getRetJson.getString("status")) == 0) { // 位置获取成功
                             JSONObject posInfoJson = getRetJson.getJSONObject("result");
                             String formatted_address = posInfoJson.getString("formatted_address");
-                            //插表参数
                             ContentValues contentValues = new ContentValues();
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, formatted_address);
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
@@ -1192,8 +1190,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                             DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
                         } else {
                             ContentValues contentValues = new ContentValues();
-                            // contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, getResources().getString(R.string.history_location_default_name));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, mMarkName);
+                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, mMarkName == null ? getRetJson.getString("message"): mMarkName);
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
@@ -1203,9 +1200,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                         }
                     } catch (JSONException e) {
                         XLog.e("JSON: resolve json error");
-                        //插表参数
                         ContentValues contentValues = new ContentValues();
-                        // contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, getResources().getString(R.string.history_location_default_name));
+                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, mMarkName == null ? getResources().getString(R.string.history_location_default_name) : mMarkName);
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, mMarkName);
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
