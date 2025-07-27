@@ -18,7 +18,7 @@
         android:text="@string/welcome_btn_txt"
         android:textAlignment="center"
         android:layout_gravity="bottom|center"
-        android:layout_margin="120dp" />
+        android:layout_margin="100dp" />
 
     <CheckBox
         android:id="@+id/check_agreement"
