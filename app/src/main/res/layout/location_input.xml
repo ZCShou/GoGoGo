@@ -14,6 +14,7 @@
         android:autofillHints="longitude"
         android:hint="@string/label_longitude"
         android:inputType="numberDecimal"
+        android:digits="-0123456789."
         android:minHeight="48dp" />
 
     <EditText
@@ -25,6 +26,7 @@
         android:autofillHints="latitude"
         android:hint="@string/label_latitude"
         android:inputType="numberDecimal"
+        android:digits="-0123456789."
         android:minHeight="48dp" />
 
     <RadioGroup
