@@ -17,7 +17,7 @@ android {
     }
     ndkVersion '26.2.11394342'
     compileSdk 32
-    buildToolsVersion = '34.0.0'
+    buildToolsVersion = '36.0.0'
     defaultConfig {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 27
@@ -26,7 +26,7 @@ android {
         versionCode 1121
         versionName '1.12.1' // https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        resConfigs 'zh', 'zh-rCN', 'en', 'en-rUS'
+        resourceConfigurations += ['zh', 'zh-rCN', 'en', 'en-rUS']
         ndk {
             //noinspection ChromeOsAbiSupport
             abiFilters "arm64-v8a"
