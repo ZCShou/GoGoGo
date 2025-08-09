@@ -15,8 +15,8 @@ android {
             keyPassword 'GoGoGo'
         }
     }
-    ndkVersion '26.2.11394342'
-    compileSdk 32
+    ndkVersion = '26.2.11394342'
+    compileSdk = 32
     buildToolsVersion = '36.0.0'
     defaultConfig {
         applicationId "com.zcshou.gogogo"
@@ -31,28 +31,28 @@ android {
             //noinspection ChromeOsAbiSupport
             abiFilters "arm64-v8a"
         }
-        signingConfig signingConfigs.release
+        signingConfig = signingConfigs.release
     }
     buildTypes {
         release {
             // Enables code shrinking, obfuscation, and optimization for only
             // your project's release build type.
-            minifyEnabled true
+            minifyEnabled = true
 
             // Enables resource shrinking, which is performed by the
             // Android Gradle plugin.
-            shrinkResources true
+            shrinkResources = true
 
             // Includes the default ProGuard rules files that are packaged with
             // the Android Gradle plugin. To learn more, go to the section about
             // R8 configuration files.
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
-            signingConfig signingConfigs.release
-            multiDexEnabled true
+            signingConfig = signingConfigs.release
+            multiDexEnabled = true
         }
         debug {
-            signingConfig signingConfigs.debug
+            signingConfig = signingConfigs.debug
         }
     }
     compileOptions {
@@ -73,10 +73,10 @@ android {
         }
     }
     dependenciesInfo {
-        includeInApk false
-        includeInBundle false
+        includeInApk = false
+        includeInBundle = false
     }
-    namespace 'com.zcshou.gogogo'
+    namespace = 'com.zcshou.gogogo'
 //    lintOptions {
 //        checkReleaseBuilds false
 //        // Or, if you prefer, you can continue to check for errors in release builds,
@@ -114,9 +114,9 @@ dependencies {
     implementation 'io.noties.markwon:core:4.6.2'
     implementation files('libs/BaiduLBS_Android.jar')
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test:runner:1.6.2'
-    androidTestImplementation('androidx.test.espresso:espresso-core:3.5.1', {
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.7.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 }
