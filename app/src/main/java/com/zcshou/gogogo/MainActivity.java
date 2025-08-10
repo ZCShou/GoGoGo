@@ -420,11 +420,15 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(intent);
             } else if (id == R.id.nav_dev) {
-                try {
-                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
-                    startActivity(intent);
-                } catch (Exception e) {
+                if (!GoUtils.isDeveloperOptionsEnabled(this)) {
                     GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_dev));
+                } else {
+                    try {
+                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_dev));
+                    }
                 }
             } else if (id == R.id.nav_update) {
                 checkUpdateVersion(true);

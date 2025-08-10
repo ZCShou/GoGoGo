@@ -28,6 +28,14 @@ import java.util.List;
 import java.util.Locale;
 
 public class GoUtils {
+    public static boolean isDeveloperOptionsEnabled(Context context) {
+        return Settings.Global.getInt(
+                context.getContentResolver(),
+                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+                0
+        ) == 1;
+    }
+
     // WIFI是否可用
     public static boolean isWifiConnected(Context context) {
         // 从 API 29 开始，NetworkInfo 被标记为过时，这里更换新方法
