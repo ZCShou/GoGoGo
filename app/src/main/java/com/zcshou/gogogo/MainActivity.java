@@ -21,11 +21,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.text.Editable;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,8 +30,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -127,10 +121,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private OkHttpClient mOkHttpClient;
     private SharedPreferences sharedPreferences;
 
-    /*============================== NavigationView 相关 ==============================*/
-    private NavigationView mNavigationView;
-    private CheckBox mPtlCheckBox;
-    private final JSONObject mReg = new JSONObject();
     /*============================== 主界面地图 相关 ==============================*/
     /************** 地图 *****************/
     public final static BitmapDescriptor mMapIndicator = BitmapDescriptorFactory.fromResource(R.drawable.icon_gcoding);
@@ -417,7 +407,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
     /*============================== NavigationView 相关 ==============================*/
     private void initNavigationView() {
-        mNavigationView = findViewById(R.id.nav_view);
+        /*============================== NavigationView 相关 ==============================*/
+        NavigationView mNavigationView = findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
 
