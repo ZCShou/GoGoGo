@@ -83,8 +83,6 @@
     <string name="setting_group_about">关于</string>
     <string name="setting_version">版本号</string>
     <string name="setting_author">开发者</string>
-    <!-- 关于相关参数 -->
-    <string name="setting_group_sys">系统</string>
 
     <!-- 历史记录页面 -->
     <string name="history_expiration">7</string>
@@ -117,8 +115,7 @@
     <string name="nav_menu_upgrade">检测更新</string>
     <string name="nav_menu_feedback">问题反馈</string>
     <string name="nav_menu_contact">联系作者</string>
-    <string name="nav_user_name">影梭</string>
-    <string name="nav_user_limit_info">仅供学习使用，否则后果自负!</string>
+    <string name="nav_app_tips">仅供学习使用，否则后果自负!</string>
 
     <!-- 主界面 -->
     <string name="label_longitude">经度</string>
@@ -145,14 +142,4 @@
     <string name="update_ignore">忽略一次</string>
     <string name="update_time">更新时间：</string>
     <string name="update_commit">提交信息：</string>
-
-    <!-- 注册 -->
-    <string name="register_title">离线注册</string>
-    <string name="register_user_name">用户名</string>
-    <string name="register_response">注册码</string>
-    <string name="register_limit">有效期</string>
-    <string name="register_ok">注册</string>
-    <string name="register_tips">长按复制以上代码发送给开发者，然后在下面填写获取到的注册码</string>
-    <string name="register_cancel">取消</string>
-    <string name="register_check">我已阅读免责声明，并同意所有条款</string>
 </resources>
