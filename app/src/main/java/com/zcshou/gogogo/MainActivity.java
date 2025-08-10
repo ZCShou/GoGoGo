@@ -451,6 +451,11 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
             return true;
         });
+
+        // 直接获取第 0 个头部视图
+        View headerView = mNavigationView.getHeaderView(0);
+        TextView app_version = headerView.findViewById(R.id.app_version);
+        app_version.setText(GoUtils.getVersionName(this));
     }
 
     /*============================== 主界面地图 相关 ==============================*/
