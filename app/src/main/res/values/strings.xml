@@ -52,11 +52,9 @@
     <string name="app_btn_agree">同意并继续</string>
     <string name="app_btn_disagree">不同意</string>
 
-    <!-- 设置界面 -->
+    <!-- 移动相关参数 -->
     <string name="setting_group_move">移动</string>
-    <string name="setting_current_value">"当前值: "</string> <!-- 使用双引号以保留空格 -->
-    <string name="setting_joystick">摇杆类型</string>
-    <string name="setting_joystick_tips">重启摇杆后生效</string>
+    <string name="setting_joystick_type">摇杆类型</string>
     <string name="setting_walk">步行速度(米/秒)</string>
     <string name="setting_walk_default">1.2</string>
     <string name="setting_run">跑步速度(米/秒)</string>
@@ -65,18 +63,27 @@
     <string name="setting_bike_default">10.0</string>
     <string name="setting_altitude">海拔高度(米)</string>
     <string name="setting_altitude_default">55.0</string>
-    <string name="setting_location">位置</string>
+    <!-- 地图相关参数 -->
+    <string name="setting_group_map">地图</string>
+    <string name="setting_map_type">地图类型</string>
+    <string name="setting_map_key">地图 KEY</string>
+    <string name="setting_map_key_default">fb7YwlKY3ntx8hBDGMGLqX2FhlPkDMvv</string>
+    <!-- 位置偏移相关参数 -->
+    <string name="setting_group_location_offset">位置偏移</string>
     <string name="setting_random_offset">随机偏移</string>
     <string name="setting_random_offset_summary">仅在使用历史位置时生效</string>
     <string name="setting_random_offset_default">10.0</string>
     <string name="setting_lat_max_offset">经度最大偏移距离(米)</string>
     <string name="setting_lon_max_offset">纬度最大偏移距离(米)</string>
+    <!-- 记录相关参数 -->
     <string name="setting_group_log">记录</string>
     <string name="setting_log_off">关闭日志</string>
-    <string name="setting_pos_history">历史记录有效期(天)</string>
+    <string name="setting_history_expiration">历史记录有效期(天)</string>
+    <!-- 关于相关参数 -->
     <string name="setting_group_about">关于</string>
     <string name="setting_version">版本号</string>
     <string name="setting_author">开发者</string>
+    <!-- 关于相关参数 -->
     <string name="setting_group_sys">系统</string>
 
     <!-- 历史记录页面 -->

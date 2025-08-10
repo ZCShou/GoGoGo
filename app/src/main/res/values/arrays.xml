@@ -7,4 +7,15 @@
         <item>0</item>
         <item>1</item>
     </string-array>
+    <string-array name="array_map_type">
+        <item>百度地图</item>
+        <item>高德地图</item>
+        <item>腾讯地图</item>
+    </string-array>
+    <string-array name="array_map_type_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
 </resources>

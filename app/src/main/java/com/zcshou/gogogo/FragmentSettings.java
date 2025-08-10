@@ -9,6 +9,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreferenceCompat;
 
+import com.baidu.mapapi.SDKInitializer;
 import com.elvishew.xlog.XLog;
 import com.zcshou.utils.GoUtils;
 
@@ -19,8 +20,7 @@ public class FragmentSettings extends PreferenceFragmentCompat {
     // Set a non-empty decimal EditTextPreference
     private void setupDecimalEditTextPreference(EditTextPreference preference) {
         if (preference != null) {
-            preference.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) pref ->
-                    getResources().getString(R.string.setting_current_value) + pref.getText());
+            preference.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) EditTextPreference::getText);
             preference.setOnBindEditTextListener(editText -> {
                 editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
                 editText.setSelection(editText.length());
@@ -40,19 +40,11 @@ public class FragmentSettings extends PreferenceFragmentCompat {
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences_main);
 
-        // 设置版本号
-        String verName;
-        verName = GoUtils.getVersionName(FragmentSettings.this.getContext());
-        Preference pfVersion = findPreference("setting_version");
-        if (pfVersion != null) {
-            pfVersion.setSummary(verName);
-        }
-
         ListPreference pfJoystick = findPreference("setting_joystick_type");
         if (pfJoystick != null) {
             // 使用自定义 SummaryProvider
-            pfJoystick.setSummaryProvider((Preference.SummaryProvider<ListPreference>) preference -> getResources().getString(R.string.setting_current_value) + Objects.requireNonNull(preference.getEntry()));
-            pfJoystick.setOnPreferenceChangeListener((preference, newValue) -> newValue.toString().trim().length() != 0);
+            pfJoystick.setSummaryProvider((Preference.SummaryProvider<ListPreference>) preference -> Objects.requireNonNull(preference.getEntry()));
+            pfJoystick.setOnPreferenceChangeListener((preference, newValue) -> !newValue.toString().trim().isEmpty());
         }
 
         EditTextPreference pfWalk = findPreference("setting_walk");
@@ -66,6 +58,39 @@ public class FragmentSettings extends PreferenceFragmentCompat {
 
         EditTextPreference pfAltitude = findPreference("setting_altitude");
         setupDecimalEditTextPreference(pfAltitude);
+
+        ListPreference pfMap = findPreference("setting_map_type");
+        if (pfMap != null) {
+            // 使用自定义 SummaryProvider
+            pfMap.setSummaryProvider((Preference.SummaryProvider<ListPreference>) preference -> Objects.requireNonNull(preference.getEntry()));
+            pfMap.setOnPreferenceChangeListener((preference, newValue) -> !newValue.toString().trim().isEmpty());
+        }
+        EditTextPreference pfMapKey = findPreference("setting_map_key");
+        if (pfMapKey != null) {
+            pfMapKey.setSummary(pfMapKey.getText());
+            pfMapKey.setText("P9I4SjSfRtFenM1hLTyZwoW3YLnmtSda");
+            pfMapKey.setOnPreferenceChangeListener((preference, newValue) -> {
+                if (newValue.toString().trim().isEmpty()) {
+                    GoUtils.DisplayToast(this.getContext(), getResources().getString(R.string.app_error_input_null));
+                    return false;
+                } else {
+                    if (!newValue.toString().matches("[a-zA-Z0-9]+")) {
+                        GoUtils.DisplayToast(this.getContext(), getResources().getString(R.string.app_error_input));
+                        return false;
+                    } else {
+                        pfMapKey.setSummary(newValue.toString());
+                        SDKInitializer.setApiKey(newValue.toString());
+                        return true;
+                    }
+                }
+            });
+        }
+
+        EditTextPreference pfLatOffset = findPreference("setting_lat_max_offset");
+        setupDecimalEditTextPreference(pfLatOffset);
+
+        EditTextPreference pfLonOffset = findPreference("setting_lon_max_offset");
+        setupDecimalEditTextPreference(pfLonOffset);
 
         SwitchPreferenceCompat pLog = findPreference("setting_log_off");
         if (pLog != null) {
@@ -85,13 +110,15 @@ public class FragmentSettings extends PreferenceFragmentCompat {
             });
         }
 
-        EditTextPreference pfPosHisValid = findPreference("setting_pos_history");
+        EditTextPreference pfPosHisValid = findPreference("setting_history_expiration");
         setupDecimalEditTextPreference(pfPosHisValid);
 
-        EditTextPreference pfLatOffset = findPreference("setting_lat_max_offset");
-        setupDecimalEditTextPreference(pfLatOffset);
-
-        EditTextPreference pfLonOffset = findPreference("setting_lon_max_offset");
-        setupDecimalEditTextPreference(pfLonOffset);
+        // 设置版本号
+        String verName;
+        verName = GoUtils.getVersionName(FragmentSettings.this.getContext());
+        Preference pfVersion = findPreference("setting_version");
+        if (pfVersion != null) {
+            pfVersion.setSummary(verName);
+        }
     }
 }

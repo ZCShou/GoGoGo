@@ -1,4 +1,5 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     app:iconSpaceReserved="false">
 
     <PreferenceCategory
@@ -6,10 +7,10 @@
         app:iconSpaceReserved="false">
         <ListPreference
             app:key="setting_joystick_type"
-            app:title="@string/setting_joystick"
+            app:title="@string/setting_joystick_type"
             app:entries="@array/array_joystick_type"
             app:entryValues="@array/array_joystick_type_values"
-            app:dialogTitle="@string/setting_joystick_tips"
+            app:dialogTitle="@string/setting_joystick_type"
             app:defaultValue="0"
             app:iconSpaceReserved="false">
         </ListPreference>
@@ -45,7 +46,30 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        app:title="@string/setting_location"
+        app:title="@string/setting_group_map"
+        app:iconSpaceReserved="false">
+        <ListPreference
+            app:key="setting_map_type"
+            app:title="@string/setting_map_type"
+            app:entries="@array/array_map_type"
+            app:entryValues="@array/array_map_type_values"
+            app:dialogTitle="@string/setting_map_type"
+            app:defaultValue="0"
+            app:iconSpaceReserved="false">
+        </ListPreference>
+
+        <EditTextPreference
+            app:key="setting_map_key"
+            app:title="@string/setting_map_key"
+            app:defaultValue="@string/setting_map_key_default"
+            app:summary="@string/setting_map_key_default"
+            android:inputType="textCapCharacters|textNoSuggestions"
+            app:iconSpaceReserved="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/setting_group_location_offset"
         app:iconSpaceReserved="false">
 
         <SwitchPreferenceCompat
@@ -78,8 +102,8 @@
             app:defaultValue="false"
             app:iconSpaceReserved="false"/>
         <EditTextPreference
-            app:key="setting_pos_history"
-            app:title="@string/setting_pos_history"
+            app:key="setting_history_expiration"
+            app:title="@string/setting_history_expiration"
             app:defaultValue="@string/history_expiration"
             app:summary="@string/history_expiration"
             app:iconSpaceReserved="false"/>

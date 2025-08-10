@@ -59,6 +59,7 @@ import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
@@ -606,6 +607,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
     /*============================== 主界面地图 相关 ==============================*/
     private void initMap() {
+        // 从参数区取地图key
+        String key = sharedPreferences.getString("setting_map_key", getResources().getString(R.string.setting_map_key_default));
+        SDKInitializer.setApiKey(key);
         // 地图初始化
         mMapView = findViewById(R.id.bdMapView);
         mMapView.showZoomControls(false);
@@ -1145,7 +1149,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private void recordCurrentLocation(double lng, double lat) {
         //参数坐标系：bd09
         final String safeCode = getResources().getString(R.string.safecode);
-        final String ak = getResources().getString(R.string.ak);
+        final String ak = sharedPreferences.getString("setting_map_key", getResources().getString(R.string.setting_map_key_default));
         double[] latLng = MapUtils.bd2wgs(lng, lat);
         //bd09坐标的位置信息
         String mapApiUrl = "https://api.map.baidu.com/reverse_geocoding/v3/?ak=" + ak + "&output=json&coordtype=bd09ll" + "&location=" + lat + "," + lng + "&mcode=" + safeCode;
