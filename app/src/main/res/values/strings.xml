@@ -136,7 +136,6 @@
     <string name="map_pic_sate">卫星图</string>
     <string name="map_pic_normal">普通图</string>
     <string name="safecode">32:2F:E6:05:6C:2F:11:6D:CD:ED:AC:FF:23:02:5A:29:68:FD:45:D2;com.zcshou.gogogo</string>
-    <string name="ak">fb7YwlKY3ntx8hBDGMGLqX2FhlPkDMvv</string>
 
     <!-- 更新 -->
     <string name="update_title">新版本可用</string>

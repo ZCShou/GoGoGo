@@ -627,9 +627,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             public void onMapClick(LatLng point) {
                 mMarkLatLngMap = point;
                 markMap();
-
-                //百度坐标系转wgs坐标系
-                // transformCoordinate(String.valueOf(point.longitude), String.valueOf(point.latitude));
             }
             /**
              * 单击地图中的POI点
@@ -638,8 +635,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             public void onMapPoiClick(MapPoi poi) {
                 mMarkLatLngMap = poi.getPosition();
                 markMap();
-                //百度坐标系转wgs坐标系
-                // transformCoordinate(String.valueOf(poi.getPosition().longitude), String.valueOf(poi.getPosition().latitude));
             }
         });
         mBaiduMap.setOnMapLongClickListener(new BaiduMap.OnMapLongClickListener() {
@@ -651,8 +646,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 mMarkLatLngMap = point;
                 markMap();
                 mGeoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(point));
-                //百度坐标系转wgs坐标系
-                // transformCoordinate(String.valueOf(point.longitude), String.valueOf(point.latitude));
             }
         });
         mBaiduMap.setOnMapDoubleClickListener(new BaiduMap.OnMapDoubleClickListener() {
@@ -922,74 +915,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
     }
 
-//    //坐标转换
-//    private void transformCoordinate(final String longitude, final String latitude) {
-//        final double error = 0.00000001;
-//        final String safeCode = getResources().getString(R.string.safecode);
-//        final String ak = getResources().getString(R.string.ak);
-//        String mapApiUrl = "https://api.map.baidu.com/geoconv/v1/?coords=" + longitude + "," + latitude +
-//                "&from=5&to=3&ak=" + ak + "&mcode=" + safeCode;
-//
-//        okhttp3.Request request = new okhttp3.Request.Builder().url(mapApiUrl).get().build();
-//        final Call call = mOkHttpClient.newCall(request);
-//        call.enqueue(new Callback() {
-//            @Override
-//            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-//                XLog.e("ERROR: HTTP GET FAILED");
-//                //http 请求失败 离线转换坐标系
-//                double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
-//                mCurLng = latLng[0];
-//                mCurLat = latLng[1];
-//            }
-//
-//            @Override
-//            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
-//                ResponseBody responseBody = response.body();
-//                if (responseBody != null) {
-//                    String resp = responseBody.string();
-//                    try {
-//                        JSONObject getRetJson = new JSONObject(resp);
-//                        if (Integer.parseInt(getRetJson.getString("status")) == 0) {
-//                            JSONArray coordinateArr = getRetJson.getJSONArray("result");
-//                            JSONObject coordinate = coordinateArr.getJSONObject(0);
-//                            String gcj02Longitude = coordinate.getString("x");
-//                            String gcj02Latitude = coordinate.getString("y");
-//                            BigDecimal bigDecimalGcj02Longitude = BigDecimal.valueOf(Double.parseDouble(gcj02Longitude));
-//                            BigDecimal bigDecimalGcj02Latitude = BigDecimal.valueOf(Double.parseDouble(gcj02Latitude));
-//                            BigDecimal bigDecimalBd09Longitude = BigDecimal.valueOf(Double.parseDouble(longitude));
-//                            BigDecimal bigDecimalBd09Latitude = BigDecimal.valueOf(Double.parseDouble(latitude));
-//                            double gcj02LongitudeDouble = bigDecimalGcj02Longitude.setScale(9, RoundingMode.HALF_UP).doubleValue();
-//                            double gcj02LatitudeDouble = bigDecimalGcj02Latitude.setScale(9, RoundingMode.HALF_UP).doubleValue();
-//                            double bd09LongitudeDouble = bigDecimalBd09Longitude.setScale(9, RoundingMode.HALF_UP).doubleValue();
-//                            double bd09LatitudeDouble = bigDecimalBd09Latitude.setScale(9, RoundingMode.HALF_UP).doubleValue();
-//
-//                            //如果bd09转gcj02 结果误差很小  认为该坐标在国外
-//                            if ((Math.abs(gcj02LongitudeDouble - bd09LongitudeDouble)) <= error && (Math.abs(gcj02LatitudeDouble - bd09LatitudeDouble)) <= error) {
-//                                mCurLat = Double.parseDouble(latitude);
-//                                mCurLng = Double.parseDouble(longitude);
-//                            } else {
-//                                double[] latLng = MapUtils.gcj02towgs84(Double.parseDouble(gcj02Longitude), Double.parseDouble(gcj02Latitude));
-//                                mCurLng = latLng[0];
-//                                mCurLat = latLng[1];
-//                            }
-//                        } else {
-//                            XLog.e("ERROR:http get ");
-//                            double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
-//                            mCurLng = latLng[0];
-//                            mCurLat = latLng[1];
-//                        }
-//                    } catch (JSONException e) {
-//                        XLog.e("ERROR: resolve json");
-//                        e.printStackTrace();
-//                        double[] latLng = MapUtils.bd2wgs(Double.parseDouble(longitude), Double.parseDouble(latitude));
-//                        mCurLng = latLng[0];
-//                        mCurLat = latLng[1];
-//                    }
-//                }
-//            }
-//        });
-//    }
-
     // 在地图上显示位置
     public static boolean showLocation(String name, String bd09Longitude, String bd09Latitude) {
         boolean ret = true;
@@ -1235,7 +1160,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
             markMap();
 
-            // transformCoordinate(lng, lat);
             double[] latLng = MapUtils.bd2wgs(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
 
             // mSearchList.setVisibility(View.GONE);
@@ -1272,7 +1196,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
                 markMap();
 
-                // transformCoordinate(lng, lat);
                 double[] latLng = MapUtils.bd2wgs(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
 
                 //设置列表不可见
