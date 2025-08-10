@@ -68,7 +68,6 @@ public class FragmentSettings extends PreferenceFragmentCompat {
         EditTextPreference pfMapKey = findPreference("setting_map_key");
         if (pfMapKey != null) {
             pfMapKey.setSummary(pfMapKey.getText());
-            pfMapKey.setText("P9I4SjSfRtFenM1hLTyZwoW3YLnmtSda");
             pfMapKey.setOnPreferenceChangeListener((preference, newValue) -> {
                 if (newValue.toString().trim().isEmpty()) {
                     GoUtils.DisplayToast(this.getContext(), getResources().getString(R.string.app_error_input_null));
@@ -80,6 +79,7 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                     } else {
                         pfMapKey.setSummary(newValue.toString());
                         SDKInitializer.setApiKey(newValue.toString());
+                        SDKInitializer.initialize(requireContext().getApplicationContext());
                         return true;
                     }
                 }
