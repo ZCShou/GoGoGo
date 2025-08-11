@@ -64,7 +64,7 @@
     <string name="setting_altitude">海拔高度(米)</string>
     <string name="setting_altitude_default">55.0</string>
     <!-- 地图相关参数 -->
-    <string name="setting_group_map">地图(重启后生效)</string>
+    <string name="setting_group_map">地图（重启后生效）</string>
     <string name="setting_map_type">地图类型</string>
     <string name="setting_map_key">地图 KEY</string>
     <string name="setting_map_key_default">内置 KEY</string>
