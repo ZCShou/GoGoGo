@@ -236,7 +236,7 @@ public class HistoryActivity extends BaseActivity {
                             searchRet.add(mAllRecord.get(i));
                         }
                     }
-                    if (searchRet.size() > 0) {
+                    if (!searchRet.isEmpty()) {
                         SimpleAdapter simAdapt = new SimpleAdapter(
                                 HistoryActivity.this.getBaseContext(),
                                 searchRet,
@@ -373,7 +373,7 @@ public class HistoryActivity extends BaseActivity {
     private void updateRecordList() {
         mAllRecord = fetchAllRecord();
 
-        if (mAllRecord.size() == 0) {
+        if (mAllRecord.isEmpty()) {
             mRecordListView.setVisibility(View.GONE);
             mSearchLayout.setVisibility(View.GONE);
             noRecordText.setVisibility(View.VISIBLE);
