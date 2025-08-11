@@ -23,7 +23,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceManager;
 
 import com.zcshou.utils.GoUtils;
 
@@ -47,9 +46,6 @@ public class WelcomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_welcome);
-
-        // 生成默认参数的值（一定要尽可能早的调用，因为后续有些界面可能需要使用参数）
-        PreferenceManager.setDefaultValues(this, R.xml.preferences_main, false);
 
         Button startBtn = findViewById(R.id.startButton);
         startBtn.setOnClickListener(v -> startMainActivity());

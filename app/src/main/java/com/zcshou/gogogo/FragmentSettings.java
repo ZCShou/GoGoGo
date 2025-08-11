@@ -78,8 +78,6 @@ public class FragmentSettings extends PreferenceFragmentCompat {
                         return false;
                     } else {
                         pfMapKey.setSummary(newValue.toString());
-                        SDKInitializer.setApiKey(newValue.toString());
-                        SDKInitializer.initialize(requireContext().getApplicationContext());
                         return true;
                     }
                 }

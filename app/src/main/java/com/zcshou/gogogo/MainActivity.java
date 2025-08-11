@@ -53,7 +53,6 @@ import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
-import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
@@ -455,13 +454,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
     /*============================== 主界面地图 相关 ==============================*/
     private void initMap() {
-        // 从参数区取地图key
-        String key = sharedPreferences.getString("setting_map_key", BuildConfig.MAPS_API_KEY);
-        if (key != null && !key.equals(getResources().getString(R.string.setting_map_key_default))) {
-            SDKInitializer.setApiKey(key);
-            SDKInitializer.initialize(getApplicationContext());
-        }
-
         // 地图初始化
         mMapView = findViewById(R.id.bdMapView);
         mMapView.showZoomControls(false);

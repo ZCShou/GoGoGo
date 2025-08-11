@@ -1,12 +1,13 @@
 package com.zcshou.gogogo;
 
 import android.app.Application;
+import android.content.SharedPreferences;
+import androidx.preference.PreferenceManager;
 
 import com.baidu.location.LocationClient;
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
 
-import com.baidu.mapapi.common.BaiduMapSDKException;
 import com.elvishew.xlog.LogConfiguration;
 import com.elvishew.xlog.LogLevel;
 import com.elvishew.xlog.XLog;
@@ -30,18 +31,26 @@ public class GoApplication extends Application {
 
         initXlog();
 
+        // 参数生成默认值
+        PreferenceManager.setDefaultValues(this, R.xml.preferences_main, false);
+        // 获取参数实例
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // 获取地图的 KEY 用来初始化地图 SDK
+        String key = preferences.getString("setting_map_key", BuildConfig.MAPS_API_KEY);
+        // 从参数区取地图 key
+        if (key != null && !key.equals(getResources().getString(R.string.setting_map_key_default))) {
+            SDKInitializer.setApiKey(key);
+        } else {
+            SDKInitializer.setApiKey(BuildConfig.MAPS_API_KEY);
+        }
         // 百度地图 7.5 开始，要求必须同意隐私政策，默认为false
         SDKInitializer.setAgreePrivacy(this, true);
         // 百度定位 7.5 开始，要求必须同意隐私政策，默认为false(官方说可以统一为以上接口，但实际测试并不行，定位还是需要单独设置)
         LocationClient.setAgreePrivacy(true);
-
-        try {
-            // 在使用 SDK 各组间之前初始化 context 信息，传入 ApplicationContext
-            SDKInitializer.initialize(this);
-            SDKInitializer.setCoordType(CoordType.BD09LL);
-        } catch (BaiduMapSDKException e) {
-            XLog.e("ERROR init baidu sdk");
-        }
+        // 在使用 SDK 各组间之前初始化 context 信息，传入 ApplicationContext
+        SDKInitializer.initialize(this);
+        SDKInitializer.setCoordType(CoordType.BD09LL);
     }
 
     /**
