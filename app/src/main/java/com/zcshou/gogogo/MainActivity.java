@@ -456,9 +456,12 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     /*============================== 主界面地图 相关 ==============================*/
     private void initMap() {
         // 从参数区取地图key
-        String key = sharedPreferences.getString("setting_map_key", getResources().getString(R.string.setting_map_key_default));
-        SDKInitializer.setApiKey(key);
-        SDKInitializer.initialize(getApplicationContext());
+        String key = sharedPreferences.getString("setting_map_key", BuildConfig.MAPS_API_KEY);
+        if (key != null && !key.equals(getResources().getString(R.string.setting_map_key_default))) {
+            SDKInitializer.setApiKey(key);
+            SDKInitializer.initialize(getApplicationContext());
+        }
+
         // 地图初始化
         mMapView = findViewById(R.id.bdMapView);
         mMapView.showZoomControls(false);
@@ -922,8 +925,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     // 记录请求的位置信息
     private void recordCurrentLocation(double lng, double lat) {
         //参数坐标系：bd09
-        final String safeCode = getResources().getString(R.string.safecode);
-        final String ak = sharedPreferences.getString("setting_map_key", getResources().getString(R.string.setting_map_key_default));
+        final String safeCode = BuildConfig.MAPS_SAFE_CODE;
+        final String ak = sharedPreferences.getString("setting_map_key", BuildConfig.MAPS_API_KEY);
         double[] latLng = MapUtils.bd2wgs(lng, lat);
         //bd09坐标的位置信息
         String mapApiUrl = "https://api.map.baidu.com/reverse_geocoding/v3/?ak=" + ak + "&output=json&coordtype=bd09ll" + "&location=" + lat + "," + lng + "&mcode=" + safeCode;

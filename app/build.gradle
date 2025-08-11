@@ -1,6 +1,15 @@
-apply plugin: 'com.android.application'
+plugins {
+    id "com.android.application"
+    // 谷歌官方推荐的用于隐藏地图 KEY 的插件 https://developers.google.com/maps/documentation/places/android-sdk/secrets-gradle-plugin?hl=zh-cn
+    id "com.google.android.libraries.mapsplatform.secrets-gradle-plugin"
+}
 
 android {
+    ndkVersion = '26.2.11394342'
+    compileSdk = 32
+    buildToolsVersion = '36.0.0'
+    namespace = 'com.zcshou.gogogo'
+
     signingConfigs {
         debug {
             storeFile file('..\\keystore\\GoGoGo.jks')
@@ -15,9 +24,7 @@ android {
             keyPassword 'GoGoGo'
         }
     }
-    ndkVersion = '26.2.11394342'
-    compileSdk = 32
-    buildToolsVersion = '36.0.0'
+
     defaultConfig {
         applicationId "com.zcshou.gogogo"
         minSdkVersion 27
@@ -33,6 +40,7 @@ android {
         }
         signingConfig = signingConfigs.release
     }
+
     buildTypes {
         release {
             // Enables code shrinking, obfuscation, and optimization for only
@@ -55,10 +63,17 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+
+    // 要存取 secret value 必須要使用到一個 BuildScript 的類別，默认会从 local.properties 中获取
+    buildFeatures {
+        buildConfig = true
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+
     packagingOptions {
         jniLibs {
             excludes += ['lib/armeabi/**']
@@ -67,22 +82,17 @@ android {
             excludes += ['lib/armeabi/**']
         }
     }
+
     sourceSets {
         main {
             jniLibs.srcDirs = ['libs']
         }
     }
+
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
     }
-    namespace = 'com.zcshou.gogogo'
-//    lintOptions {
-//        checkReleaseBuilds false
-//        // Or, if you prefer, you can continue to check for errors in release builds,
-//        // but continue the build even when errors are found:
-//        abortOnError false
-//    }
 
     // 指定输出的可执行程序的名字
     applicationVariants.configureEach { variant ->
