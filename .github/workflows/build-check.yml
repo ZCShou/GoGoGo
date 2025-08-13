@@ -30,7 +30,7 @@ jobs:
     # 该 job 的一系列步骤。每个以“-”开头
     steps:
       # 检出我们的源代码
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # 设置 JDK
       - name: set up JDK 17
