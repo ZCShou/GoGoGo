@@ -57,6 +57,13 @@ jobs:
         with:
           distribution: "temurin"
           java-version: 17
+      # 创建 local.properties 文件
+      - name: Create local.properties
+        run: |
+          cat << EOF > local.properties
+          MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}
+          MAPS_SAFE_CODE=${{ secrets.MAPS_SAFE_CODE }}
+          EOF
       - name: Assemble
         run: |
           mkdir -p "$HOME/.gradle"

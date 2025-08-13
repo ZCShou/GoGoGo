@@ -44,7 +44,7 @@ jobs:
         run: |
           cat << EOF > local.properties
           MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}
-          ADMOB_API_KEY=${{ secrets.ADMOB_API_KEY }}
+          MAPS_SAFE_CODE=${{ secrets.MAPS_SAFE_CODE }}
           EOF
       # 给 gradlew 增加执行权限
       - name: Grant execute permission for gradlew
