@@ -39,7 +39,13 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: gradle
-      
+      # 创建 local.properties 文件
+      - name: Create local.properties
+        run: |
+          cat << EOF > local.properties
+          MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}
+          ADMOB_API_KEY=${{ secrets.ADMOB_API_KEY }}
+          EOF
       # 给 gradlew 增加执行权限
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew

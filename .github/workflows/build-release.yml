@@ -12,7 +12,7 @@ permissions:
 jobs:
   Build:
     name: Release APK
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       # https://github.com/marketplace/actions/checkout
       - uses: actions/checkout@v4
@@ -28,6 +28,14 @@ jobs:
       - name: Get Tag
         id: var
         run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+
+      # 创建 local.properties 文件
+      - name: Create local.properties
+        run: |
+          cat << EOF > local.properties
+          MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}
+          ADMOB_API_KEY=${{ secrets.ADMOB_API_KEY }}
+          EOF
 
       - name: Build APK
         run: bash ./gradlew assembleRelease
