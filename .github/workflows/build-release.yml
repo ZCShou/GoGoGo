@@ -12,10 +12,10 @@ permissions:
 jobs:
   Build:
     name: Release APK
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       # https://github.com/marketplace/actions/checkout
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # 设置 JDK
       - name: set up JDK 17
@@ -28,6 +28,14 @@ jobs:
       - name: Get Tag
         id: var
         run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+
+      # 创建 local.properties 文件
+      - name: Create local.properties
+        run: |
+          cat << EOF > local.properties
+          MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}
+          MAPS_SAFE_CODE=${{ secrets.MAPS_SAFE_CODE }}
+          EOF
 
       - name: Build APK
         run: bash ./gradlew assembleRelease
@@ -52,10 +60,16 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
 
+      - name: Get Signed APK Name
+        run: |
+          FULL_PATH=${{steps.sign_apk.outputs.signedReleaseFile}}
+          FILENAME=$(basename "$FULL_PATH")
+          echo "FILENAME=${FILENAME}" >> $GITHUB_ENV  # 存储到环境变量
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ${{steps.sign_apk.outputs.signedReleaseFile}}
+          name: ${{ env.FILENAME }}
           path: ${{steps.sign_apk.outputs.signedReleaseFile}}
 
       # https://github.com/marketplace/actions/auto-changelog

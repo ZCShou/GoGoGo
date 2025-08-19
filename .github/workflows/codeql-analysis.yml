@@ -43,13 +43,13 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@49819abfb41bd9b44fb781159c033dba90353a7c # v1.0
         with:
           swap-size-gb: 10
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@51f77329afa6477de8c49fc9c7046c15b9a4e79d # v3.29.5
+        uses: github/codeql-action/init@76621b61decf072c1cee8dd1ce2d2a82d33c17ed # v3.29.5
         with:
           languages: ${{ matrix.language }}
       - name: Set up JDK 17
@@ -57,10 +57,17 @@ jobs:
         with:
           distribution: "temurin"
           java-version: 17
+      # 创建 local.properties 文件
+      - name: Create local.properties
+        run: |
+          cat << EOF > local.properties
+          MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}
+          MAPS_SAFE_CODE=${{ secrets.MAPS_SAFE_CODE }}
+          EOF
       - name: Assemble
         run: |
           mkdir -p "$HOME/.gradle"
           echo "org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError" > "$HOME/.gradle/gradle.properties"
           ./gradlew assembleDebug
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@51f77329afa6477de8c49fc9c7046c15b9a4e79d # v3.29.5
+        uses: github/codeql-action/analyze@76621b61decf072c1cee8dd1ce2d2a82d33c17ed # v3.29.5
