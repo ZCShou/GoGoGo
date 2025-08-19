@@ -59,33 +59,6 @@ public class FragmentSettings extends PreferenceFragmentCompat {
         EditTextPreference pfAltitude = findPreference("setting_altitude");
         setupDecimalEditTextPreference(pfAltitude);
 
-        ListPreference pfMap = findPreference("setting_map_type");
-        if (pfMap != null) {
-            // 使用自定义 SummaryProvider
-            pfMap.setSummaryProvider((Preference.SummaryProvider<ListPreference>) preference -> Objects.requireNonNull(preference.getEntry()));
-            pfMap.setOnPreferenceChangeListener((preference, newValue) -> !newValue.toString().trim().isEmpty());
-        }
-        EditTextPreference pfMapKey = findPreference("setting_map_key");
-        if (pfMapKey != null) {
-            pfMapKey.setSummary(pfMapKey.getText());
-            pfMapKey.setOnPreferenceChangeListener((preference, newValue) -> {
-                if (newValue.toString().trim().isEmpty()) {
-                    GoUtils.DisplayToast(this.getContext(), getResources().getString(R.string.app_error_input_null));
-                    return false;
-                } else {
-                    if (!newValue.toString().matches("[a-zA-Z0-9]+")) {
-                        GoUtils.DisplayToast(this.getContext(), getResources().getString(R.string.app_error_input));
-                        return false;
-                    } else {
-                        pfMapKey.setSummary(newValue.toString());
-                        SDKInitializer.setApiKey(newValue.toString());
-                        SDKInitializer.initialize(requireContext().getApplicationContext());
-                        return true;
-                    }
-                }
-            });
-        }
-
         EditTextPreference pfLatOffset = findPreference("setting_lat_max_offset");
         setupDecimalEditTextPreference(pfLatOffset);
 

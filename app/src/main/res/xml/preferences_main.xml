@@ -46,29 +46,6 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        app:title="@string/setting_group_map"
-        app:iconSpaceReserved="false">
-        <ListPreference
-            app:key="setting_map_type"
-            app:title="@string/setting_map_type"
-            app:entries="@array/array_map_type"
-            app:entryValues="@array/array_map_type_values"
-            app:dialogTitle="@string/setting_map_type"
-            app:defaultValue="0"
-            app:iconSpaceReserved="false">
-        </ListPreference>
-
-        <EditTextPreference
-            app:key="setting_map_key"
-            app:title="@string/setting_map_key"
-            app:defaultValue="@string/setting_map_key_default"
-            app:summary="@string/setting_map_key_default"
-            android:inputType="textCapCharacters|textNoSuggestions"
-            app:iconSpaceReserved="false"/>
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
         app:title="@string/setting_group_location_offset"
         app:iconSpaceReserved="false">
 

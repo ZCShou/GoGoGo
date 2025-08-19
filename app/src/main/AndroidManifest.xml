@@ -61,11 +61,6 @@
             android:name="org.apache.http.legacy"
             android:required="false" />
 
-        <!-- 百度地图开发者 Key -->
-        <meta-data
-            android:name="com.baidu.lbsapi.API_KEY"
-            android:value="${MAPS_API_KEY}" />
-
         <!-- 百度地图 间隔定位必须配置此service否则功能无效 -->
         <service
             android:name="com.baidu.location.f"

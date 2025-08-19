@@ -63,11 +63,7 @@
     <string name="setting_bike_default">10.0</string>
     <string name="setting_altitude">海拔高度(米)</string>
     <string name="setting_altitude_default">55.0</string>
-    <!-- 地图相关参数 -->
-    <string name="setting_group_map">地图</string>
-    <string name="setting_map_type">地图类型</string>
-    <string name="setting_map_key">地图 KEY</string>
-    <string name="setting_map_key_default">无自定义 KEY</string>
+
     <!-- 位置偏移相关参数 -->
     <string name="setting_group_location_offset">位置偏移</string>
     <string name="setting_random_offset">随机偏移</string>
