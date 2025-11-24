@@ -67,7 +67,7 @@ jobs:
           echo "FILENAME=${FILENAME}" >> $GITHUB_ENV  # 存储到环境变量
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ env.FILENAME }}
           path: ${{steps.sign_apk.outputs.signedReleaseFile}}
@@ -97,7 +97,7 @@ jobs:
           include-compare-link    : true
 
       - name: Upload Changelog
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Changelog
           path: ${{ steps.changelog.outputs.changelog }}
