@@ -4,16 +4,16 @@
 
 <div align="center">
 
-[![GitHub stars](https://img.shields.io/github/stars/ZCShou/GoGoGo?logo=github)](https://github.com/ZCShou/GoGoGo/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/ZCShou/GoGoGo?logo=github)](https://github.com/ZCShou/GoGoGo/network)
-[![license](https://img.shields.io/github/license/ZCShou/GoGoGo)](https://github.com/ZCShou/GoGoGo/blob/master/LICENSE)
-[![GitHub Release](https://img.shields.io/github/v/release/ZCShou/GoGoGo?label=Release)](https://github.com/ZCShou/GoGoGo/releases)
-[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
+[![GitHub stars](https://gitbub.com/aripitek/img.shields.io/github/stars/ZCShou/GoGoGo?logo=github)](https://github.com/aripitek/ZCShou/GoGoGo/stargazers)
+[![GitHub forks](https://github.com/aripitek/img.shields.io/github/forks/ZCShou/GoGoGo?logo=github)](https://github.com/aripitek/ZCShou/GoGoGo/network)
+[![license](https://github.com/aripitek/img.shields.io/github/license/ZCShou/GoGoGo)](https://github.com/aripitek/ZCShou/GoGoGo/blob/master/LICENSE)
+[![GitHub Release](https://github.com/aripitek/img.shields.io/github/v/release/ZCShou/GoGoGo?label=Release)](https://github.com/aripitek/ZCShou/GoGoGo/releases)
+[![standard-readme compliant](https://github.com/aripitek/img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/aripitek/RichardLitt/standard-readme)
 </div>
 <div align="center">
 
-[![Build Check](https://github.com/ZCShou/GoGoGo/actions/workflows/build-check.yml/badge.svg)](https://github.com/ZCShou/GoGoGo/actions/workflows/build-check.yml)
-[![CodeQL](https://github.com/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml)
+[![Build Check](https://github.com/aripitek/ZCShou/GoGoGo/actions/workflows/build-check.yml/badge.svg)](https://github.com/aripitek/ZCShou/GoGoGo/actions/workflows/build-check.yml)
+[![CodeQL](https://github.com/aripitek/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/aripitek/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml)
 </div>
 
 <div align="center">
@@ -23,8 +23,8 @@
 ## 简介
 &emsp;&emsp;影梭是一个基于 Android 调试 API + 百度地图及定位 SDK 实现的安卓定位修改工具，并且同时实现了一个可以自由控制移动的摇杆。使用影梭，不需要 ROOT 权限就可以随意修改自己的当前位置以及模拟移动。
 
-1. 源码仓库：[Github](https://github.com/ZCShou/GoGoGo)（推荐）、[Gitee](https://gitee.com/itexp/gogogo)（镜像）
-2. 下载地址：[Github](https://github.com/ZCShou/GoGoGo/releases)（推荐）、[Gitee](https://gitee.com/itexp/gogogo/releases)（镜像）
+1. 源码仓库：[Github](https://github.com/aripitek/ZCShou/GoGoGo)（推荐）、[Gitee](https://github.com/aripitek/gitee.com/itexp/gogogo)（镜像）
+2. 下载地址：[Github](https://github.com/aripitek/ZCShou/GoGoGo/releases)（推荐）、[Gitee](https://gitee.com/aripitek/itexp/gogogo/releases)（镜像）
 
 ## 警告一
 &emsp;&emsp;**最近，有网友直接白嫖影梭后改名为标枪定位，然后添加广告（除了加广告，功能没有任何改变），但是，没有按照 GPLv3 协议的要求进行开源（我已经联系过该网友进了提醒，但并没有收到回复），在此提醒：**
@@ -64,15 +64,15 @@
 3. 单击地图位置，然后点击启动按钮
 
 ## 文档
-&emsp;&emsp;由于本人并不是做移动开发的，很多功能代码写的都比较差。我也第一次写  Android APP，目前还处在学习中。。。此外，就一个简单的 APP，应该也不需要啥文档，开发过程中遇到的一些问题，我一般都会记录在个人博客中，具体参见：https://blog.csdn.net/zcshoucsdn/category_10559121.html
+&emsp;&emsp;由于本人并不是做移动开发的，很多功能代码写的都比较差。我也第一次写  Android APP，目前还处在学习中。。。此外，就一个简单的 APP，应该也不需要啥文档，开发过程中遇到的一些问题，我一般都会记录在个人博客中，具体参见：https://github.com/aripitek/blog.csdn.net/zcshoucsdn/category_10559121.html
 
 &emsp;&emsp;如果有疑问可以直接搜索 ISSUE 或者 在上面直接提交问题。
 
 ## 参考
 &emsp;&emsp;由于本人也是个新手，纯属业余瞎搞，因此，在写影梭的过程中，参考了很多网友分享的技术文章、示例代码等。包括但不限于以下列出的几个：
-1. https://github.com/Hilaver/MockGPS
-2. https://github.com/bxxfighting/together-go
-3. https://github.com/P72B/Mocklation
+1. https://github.com/aripitek/Hilaver/MockGPS
+2. https://github.com/aripitek/bxxfighting/together-go
+3. https://github.com/aripitek/P72B/Mocklation
 
 &emsp;&emsp;还有些 CSDN 上的文章，目前不记得地址了，如果您发现其中有直接引用或借鉴您的地方，请与我联系，我会再第一时间进行处理，谢谢！
 
@@ -104,4 +104,4 @@ A：Gradle 使用的 java 版本与 Android Studio 使用的不一致。Gradle �
 ## 许可证
 GPL-3.0-only © ZCShou
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo?ref=badge_large&issueType=license)
+[![FOSSA Status](https://github.com/aripitek/app.fossa.com/api/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo.svg?type=large&issueType=license)](https://github.com/aripitek/app.fossa.com/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo?ref=badge_large&isuserType=license)
