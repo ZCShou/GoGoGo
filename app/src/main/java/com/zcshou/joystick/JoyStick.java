@@ -692,7 +692,7 @@ public class JoyStick extends View {
                 } else {
                     List<Map<String, Object>> searchRet = new ArrayList<>();
                     for (int i = 0; i < mAllRecord.size(); i++){
-                        if (mAllRecord.get(i).toString().indexOf(newText) > 0){
+                        if (mAllRecord.get(i).toString().indexOf(newText) >= 0){
                             searchRet.add(mAllRecord.get(i));
                         }
                     }
