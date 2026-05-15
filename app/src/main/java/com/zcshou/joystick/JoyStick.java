@@ -779,7 +779,7 @@ public class JoyStick extends View {
                 String Location = cursor.getString(1);
                 String Longitude = cursor.getString(2);
                 String Latitude = cursor.getString(3);
-                long TimeStamp = cursor.getInt(4);
+                long TimeStamp = cursor.getLong(4);
                 String BD09Longitude = cursor.getString(5);
                 String BD09Latitude = cursor.getString(6);
                 Log.d("TB", ID + "\t" + Location + "\t" + Longitude + "\t" + Latitude + "\t" + TimeStamp + "\t" + BD09Longitude + "\t" + BD09Latitude);
