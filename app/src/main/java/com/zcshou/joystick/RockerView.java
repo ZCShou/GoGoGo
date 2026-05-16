@@ -29,7 +29,7 @@ public class RockerView extends View {
     private float innerCenterY;
     /** view中心点x坐标 */
     private float viewCenterX;
-    /** view中心点y左边 */
+    /** view中心点y坐标 */
     private float viewCenterY;
     /** 外圆半径 */
     private int outerCircleRadius;
