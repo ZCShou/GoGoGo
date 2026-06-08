@@ -1,13 +1,11 @@
 plugins {
     id "com.android.application"
     // 谷歌官方推荐的用于隐藏地图 KEY 的插件 https://developers.google.com/maps/documentation/places/android-sdk/secrets-gradle-plugin?hl=zh-cn
-    id "com.google.android.libraries.mapsplatform.secrets-gradle-plugin"
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 android {
-    ndkVersion = '26.2.11394342'
     compileSdk = 32
-    buildToolsVersion = '36.0.0'
     namespace = 'com.zcshou.gogogo'
 
     signingConfigs {
@@ -31,7 +29,7 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 32
         versionCode 1123
-        versionName '1.12.3' // https://semver.org/lang/zh-CN/
+        versionName '1.12.3'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         resourceConfigurations += ['zh', 'zh-rCN', 'en', 'en-rUS']
         ndk {
@@ -54,7 +52,7 @@ android {
             // Includes the default ProGuard rules files that are packaged with
             // the Android Gradle plugin. To learn more, go to the section about
             // R8 configuration files.
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             signingConfig = signingConfigs.release
             multiDexEnabled = true
@@ -64,7 +62,6 @@ android {
         }
     }
 
-    // 要存取 secret value 必須要使用到一個 BuildScript 的類別，默认会从 local.properties 中获取
     buildFeatures {
         buildConfig = true
     }
@@ -109,6 +106,21 @@ android {
             }
         }
     }
+}
+
+secrets {
+    // Optionally specify a different file name containing your secrets.
+    // The plugin defaults to "local.properties"
+    propertiesFileName = "secrets.properties"
+
+    // A properties file containing default secret values. This file can be
+    // checked in version control.
+    //    defaultPropertiesFileName = "local.defaults.properties"
+
+    // Configure which keys should be ignored by the plugin by providing regular expressions.
+    // "sdk.dir" is ignored by default.
+    ignoreList.add("keyToIgnore") // Ignore the key "keyToIgnore"
+    ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
 }
 
 dependencies {
