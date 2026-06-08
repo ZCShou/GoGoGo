@@ -471,16 +471,20 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
              */
             @Override
             public void onMapClick(LatLng point) {
+                mMarkHistoryId = -1;
                 mMarkLatLngMap = point;
                 markMap();
+                mGeoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(point));
             }
             /**
              * 单击地图中的POI点
              */
             @Override
             public void onMapPoiClick(MapPoi poi) {
+                mMarkHistoryId = -1;
                 mMarkLatLngMap = poi.getPosition();
                 markMap();
+                mGeoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(mMarkLatLngMap));
             }
         });
         mBaiduMap.setOnMapLongClickListener(new BaiduMap.OnMapLongClickListener() {
@@ -489,6 +493,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
              */
             @Override
             public void onMapLongClick(LatLng point) {
+                mMarkHistoryId = -1;
                 mMarkLatLngMap = point;
                 markMap();
                 mGeoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(point));
@@ -712,6 +717,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                         if (dialog_lat_double > 90.0 || dialog_lat_double < -90.0) {
                             GoUtils.DisplayToast(MainActivity.this,  getResources().getString(R.string.app_error_latitude));
                         } else {
+                            mMarkHistoryId = -1;
                             if (rbBD.isChecked()) {
                                 mMarkLatLngMap = new LatLng(dialog_lat_double, dialog_lng_double);
                             } else {
@@ -1024,6 +1030,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mSearchList.setOnItemClickListener((parent, view, position, id) -> {
             String lng = ((TextView) view.findViewById(R.id.poi_longitude)).getText().toString();
             String lat = ((TextView) view.findViewById(R.id.poi_latitude)).getText().toString();
+            mMarkHistoryId = -1;
             mMarkName = ((TextView) view.findViewById(R.id.poi_name)).getText().toString();
             mMarkLatLngMap = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
             MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
@@ -1060,7 +1067,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             if (searchIsLoc.equals("1")) {
                 String lng = ((TextView) view.findViewById(R.id.search_longitude)).getText().toString();
                 String lat = ((TextView) view.findViewById(R.id.search_latitude)).getText().toString();
-                // mMarkName = ((TextView) view.findViewById(R.id.poi_name)).getText().toString();
+                mMarkHistoryId = -1;
+                mMarkName = searchKey;
                 mMarkLatLngMap = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
                 MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
                 mBaiduMap.setMapStatus(mapstatusupdate);
