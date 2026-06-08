@@ -81,7 +81,8 @@
     <string name="setting_author">开发者</string>
 
     <!-- 历史记录页面 -->
-    <string name="history_expiration">7</string>
+    <string name="history_expiration">30</string>
+    <string name="history_expiration_never_warn">已设置为永不过期，历史记录将不会被自动清理，请注意数据积累！</string>
     <string name="history_location_default_name">地图位置</string>
     <string name="history_idle">暂无历史记录</string>
     <string name="history_delete_ok">删除成功！</string>
@@ -137,4 +138,5 @@
     <string name="update_ignore">忽略一次</string>
     <string name="update_time">更新时间：</string>
     <string name="update_commit">提交信息：</string>
+    <string name="setting_history_no_expiration_hint">永不过期（≤ 0）</string>
 </resources>

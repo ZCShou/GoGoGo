@@ -84,7 +84,29 @@ public class FragmentSettings extends PreferenceFragmentCompat {
         }
 
         EditTextPreference pfPosHisValid = findPreference("setting_history_expiration");
-        setupDecimalEditTextPreference(pfPosHisValid);
+        if (pfPosHisValid != null) {
+            pfPosHisValid.setSummaryProvider((Preference.SummaryProvider<EditTextPreference>) EditTextPreference::getText);
+            pfPosHisValid.setOnBindEditTextListener(editText -> {
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+                editText.setSelection(editText.length());
+            });
+            // 当用户设置为永不过期（≤ 0）时弹出警告
+            pfPosHisValid.setOnPreferenceChangeListener((pref, newValue) -> {
+                if (newValue.toString().trim().isEmpty()) {
+                    GoUtils.DisplayToast(this.getContext(), getResources().getString(R.string.app_error_input_null));
+                    return false;
+                }
+                try {
+                    if (Double.parseDouble(newValue.toString()) <= 0) {
+                        GoUtils.DisplayToast(this.getContext(), getResources().getString(R.string.history_expiration_never_warn));
+                    }
+                } catch (NumberFormatException e) {
+                    GoUtils.DisplayToast(this.getContext(), getResources().getString(R.string.app_error_input));
+                    return false;
+                }
+                return true;
+            });
+        }
 
         // 设置版本号
         String verName;

@@ -170,15 +170,21 @@ public class HistoryActivity extends BaseActivity {
     private void recordArchive() {
         double limits;
         try {
-            limits = Double.parseDouble(sharedPreferences.getString("setting_pos_history", getResources().getString(R.string.history_expiration)));
+            limits = Double.parseDouble(sharedPreferences.getString("setting_history_expiration", getResources().getString(R.string.history_expiration)));
         } catch (NumberFormatException e) {  // GOOD: The exception is caught.
-            limits = 7;
+            limits = 30;
         }
-        final long weekSecond = (long) (limits * 24 * 60 * 60);
+
+        // limits <= 0 表示永不过期
+        if (limits <= 0) {
+            return;
+        }
+
+        final long expireSecond = (long) (limits * 24 * 60 * 60);
 
         try {
             mHistoryLocationDB.delete(DataBaseHistoryLocation.TABLE_NAME,
-                    DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " < ?", new String[] {Long.toString(System.currentTimeMillis() / 1000 - weekSecond)});
+                    DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " < ?", new String[] {Long.toString(System.currentTimeMillis() / 1000 - expireSecond)});
         } catch (Exception e) {
             Log.e("HistoryActivity", "ERROR - recordArchive");
         }

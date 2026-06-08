@@ -901,8 +901,35 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             // 搜索历史
             DataBaseHistorySearch dbHistory = new DataBaseHistorySearch(getApplicationContext());
             mSearchHistoryDB = dbHistory.getWritableDatabase();
+
+            // 清理过期历史记录（与 HistoryActivity.recordArchive 保持一致）
+            archiveHistoryLocation();
         } catch (Exception e) {
             XLog.e("ERROR: sqlite init error");
+        }
+    }
+
+    // 清理超过有效期的历史定位记录
+    private void archiveHistoryLocation() {
+        double limits;
+        try {
+            limits = Double.parseDouble(sharedPreferences.getString("setting_history_expiration", getResources().getString(R.string.history_expiration)));
+        } catch (NumberFormatException e) {
+            limits = 30;
+        }
+
+        // limits <= 0 表示永不过期，不做清理
+        if (limits <= 0) {
+            return;
+        }
+
+        final long expireSecond = (long) (limits * 24 * 60 * 60);
+        try {
+            mLocationHistoryDB.delete(DataBaseHistoryLocation.TABLE_NAME,
+                    DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " < ?",
+                    new String[]{Long.toString(System.currentTimeMillis() / 1000 - expireSecond)});
+        } catch (Exception e) {
+            XLog.e("ERROR: archiveHistoryLocation");
         }
     }
 
