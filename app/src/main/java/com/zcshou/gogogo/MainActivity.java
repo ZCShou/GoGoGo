@@ -145,6 +145,11 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private float mCurrentDirection = 0.0f;
     private boolean isFirstLoc = true; // 是否首次定位
     private boolean isMockServStart = false;
+    private boolean mRestoringPosition = false; // 是否正在恢复真实位置，阻止回调覆盖指示图标
+    private double mLastRealLat = 0.0;  // 进入模拟前缓存的真实位置，用于停止模拟后恢复地图
+    private double mLastRealLon = 0.0;
+    private double mMockLat = 0.0;      // 停止模拟时保存的模拟位置，用于判断回调是否仍为模拟数据
+    private double mMockLon = 0.0;
     private ServiceGo.ServiceGoBinder mServiceBinder;
     private ServiceConnection mConnection;
     private FloatingActionButton mButtonStart;
@@ -581,8 +586,31 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     }
 
                     mCurrentCity = bdLocation.getCity();
+
+                    // 正在恢复真实位置时，需要判断回调数据是否仍为模拟残留
+                    if (mRestoringPosition) {
+                        double cbLat = bdLocation.getLatitude();
+                        double cbLon = bdLocation.getLongitude();
+                        // 计算回调位置与模拟位置的距离（粗略判断，1度纬度 ≈ 111km）
+                        double dLat = cbLat - mMockLat;
+                        double dLon = cbLon - mMockLon;
+                        double dist = Math.sqrt(dLat * dLat + dLon * dLon) * 111000; // 米
+                        if (dist < 100) {
+                            // 仍在模拟位置附近，说明是残留数据，跳过
+                            return;
+                        }
+                        // 已远离模拟位置，说明 GPS 已回到真实定位，解除恢复模式
+                        mRestoringPosition = false;
+                    }
+
                     mCurrentLat = bdLocation.getLatitude();
                     mCurrentLon = bdLocation.getLongitude();
+                    // 非模拟状态下缓存真实位置，用于停止模拟后恢复地图
+                    if (!isMockServStart) {
+                        mLastRealLat = mCurrentLat;
+                        mLastRealLon = mCurrentLon;
+                    }
+
                     MyLocationData locData = new MyLocationData.Builder()
                             .accuracy(bdLocation.getRadius())
                             .direction(mCurrentDirection)// 此处设置开发者获取到的方向信息，顺时针0-360
@@ -755,15 +783,26 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mBaiduMap.clear();
         mMarkLatLngMap = null;
 
+        // 优先使用缓存的真实位置，避免使用模拟期间被污染的 mCurrentLat/Lon
+        double lat = (mLastRealLat != 0.0) ? mLastRealLat : mCurrentLat;
+        double lon = (mLastRealLon != 0.0) ? mLastRealLon : mCurrentLon;
+
+        // 保存当前模拟位置，用于后续回调判断数据是否仍为模拟残留
+        mMockLat = mCurrentLat;
+        mMockLon = mCurrentLon;
+
+        // 进入恢复模式，阻止后续回调中的 setMyLocationData 覆盖指示图标
+        mRestoringPosition = true;
+
         MyLocationData locData = new MyLocationData.Builder()
-                .latitude(mCurrentLat)
-                .longitude(mCurrentLon)
+                .latitude(lat)
+                .longitude(lon)
                 .direction(mCurrentDirection)
                 .build();
         mBaiduMap.setMyLocationData(locData);
 
         MapStatus.Builder builder = new MapStatus.Builder();
-        builder.target(new LatLng(mCurrentLat, mCurrentLon)).zoom(18.0f);
+        builder.target(new LatLng(lat, lon)).zoom(18.0f);
         mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
     }
 
@@ -806,6 +845,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     }
 
     private void startGoLocation() {
+        // 新一轮模拟开始，清除上次停止模拟时的恢复标志，否则回调会跳过新的模拟位置数据
+        mRestoringPosition = false;
+
         Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
         bindService(serviceGoIntent, mConnection, BIND_AUTO_CREATE);    // 绑定服务和活动，之后活动就可以去调服务的方法了
         double[] latLng = MapUtils.bd2wgs(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
@@ -847,6 +889,10 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         if (isMockServStart) {
             if (mMarkLatLngMap == null) {
                 stopGoLocation();
+                resetMap();
+                if (mLocClient != null) {
+                    mLocClient.requestLocation();  // 触发 SDK 获取真实位置，回调中会更新 mLastRealLat/Lon
+                }
                 Snackbar.make(v, "模拟位置已终止", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 mButtonStart.setImageResource(R.drawable.ic_position);
