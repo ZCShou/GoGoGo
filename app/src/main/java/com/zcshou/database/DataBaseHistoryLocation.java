@@ -66,4 +66,16 @@ public class DataBaseHistoryLocation extends SQLiteOpenHelper {
             XLog.e("DATABASE: update error");
         }
     }
+
+    // 更新历史记录的时间戳和名称（用于从历史记录中重新选择位置时，仅更新时间）
+    public static void updateHistoryTimestamp(SQLiteDatabase sqLiteDatabase, String locID, String location, long timestamp) {
+        try {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(DB_COLUMN_LOCATION, location);
+            contentValues.put(DB_COLUMN_TIMESTAMP, timestamp);
+            sqLiteDatabase.update(TABLE_NAME, contentValues, DB_COLUMN_ID + " = ?", new String[]{locID});
+        } catch (Exception e) {
+            XLog.e("DATABASE: update timestamp error");
+        }
+    }
 }

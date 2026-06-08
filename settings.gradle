@@ -1,1 +1,37 @@
+// 修改项目依赖的仓库地址
+gradle.settingsEvaluated { settings ->
+    settings.pluginManagement {
+        repositories {
+            maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' } // 腾讯镜像
+            maven { url 'https://maven.aliyun.com/repository/public' }
+            maven { url 'https://maven.aliyun.com/repository/google' }
+            maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+            maven { url 'https://jitpack.io' }
+            google()  // 阿里云对于有些库会有丢失，加入进行兜底
+            mavenCentral()
+            gradlePluginPortal()
+        }
+    }
+    settings.dependencyResolutionManagement {
+        /**
+         * FAIL_ON_PROJECT_REPOS:  如果设置此模式，则在项目中直接或通过插件直接声明的任何存储库都将触发构建错误
+         * PREFER_PROJECT:         如果设置此模式，则在项目上声明的任何存储库会覆盖设置中声明的存储库
+         * PREFER_SETTINGS：       如果设置此模式，则项目中使用的存储库只会以设置中声明的为准
+         */
+        repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+
+        repositories {
+            mavenLocal()
+            maven { url 'https://maven.aliyun.com/repository/public' } // central 和 jcenter 的聚合仓
+            maven { url 'https://maven.aliyun.com/repository/google' }
+            maven { url 'https://jitpack.io' }
+            maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }   // 腾讯镜像
+            google()  // 阿里云对于有些库会有丢失，加入进行兜底
+            mavenCentral()
+        }
+    }
+}
+
+rootProject.name = "Shadow"
+
 include ':app'

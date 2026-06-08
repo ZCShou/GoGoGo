@@ -55,6 +55,11 @@ public class WelcomeActivity extends AppCompatActivity {
         startBtn.setOnClickListener(v -> startMainActivity());
 
         checkAgreementAndPrivacy();
+
+        // 已经同意过协议和隐私政策，直接进入主界面
+        if (mAgreement && mPrivacy) {
+            startMainActivity();
+        }
     }
 
     @Override
@@ -87,6 +92,10 @@ public class WelcomeActivity extends AppCompatActivity {
                 }
             }
             isPermission = true;
+            // 已同意协议且所有权限已授予，自动进入主界面
+            if (mAgreement && mPrivacy) {
+                startMainActivity();
+            }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
