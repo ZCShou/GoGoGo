@@ -129,6 +129,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private static BaiduMap mBaiduMap = null;
     private static LatLng mMarkLatLngMap = new LatLng(36.547743718042415, 117.07018449827267); // 当前标记的地图点
     private static String mMarkName = null;
+    private static int mMarkHistoryId = -1;     // 从历史记录中选择的位置 ID，-1 表示非历史记录
     private GeoCoder mGeoCoder;
     private SensorManager mSensorManager;
     private Sensor mSensorAccelerometer;
@@ -762,6 +763,17 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
     // 在地图上显示位置
     public static boolean showLocation(String name, String bd09Longitude, String bd09Latitude) {
+        mMarkHistoryId = -1;    // 非历史记录来源，重置
+        return showLocationInternal(name, bd09Longitude, bd09Latitude);
+    }
+
+    // 从历史记录中选择位置（携带历史记录 ID，点击 faBtnStart 时将更新该条记录的时间戳而非新增）
+    public static boolean showLocation(int historyId, String name, String bd09Longitude, String bd09Latitude) {
+        mMarkHistoryId = historyId;
+        return showLocationInternal(name, bd09Longitude, bd09Latitude);
+    }
+
+    private static boolean showLocationInternal(String name, String bd09Longitude, String bd09Latitude) {
         boolean ret = true;
 
         try {
@@ -940,7 +952,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
                 contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
 
-                DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
+                saveOrUpdateHistoryLocation(contentValues);
             }
 
             @Override
@@ -961,7 +973,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
-                            DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
+                            saveOrUpdateHistoryLocation(contentValues);
                         } else {
                             ContentValues contentValues = new ContentValues();
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, mMarkName == null ? getRetJson.getString("message"): mMarkName);
@@ -970,7 +982,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
                             contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
-                            DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
+                            saveOrUpdateHistoryLocation(contentValues);
                         }
                     } catch (JSONException e) {
                         XLog.e("JSON: resolve json error");
@@ -982,11 +994,25 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
                         contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
-                        DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
+                        saveOrUpdateHistoryLocation(contentValues);
                     }
                 }
             }
         });
+    }
+
+    // 保存或更新历史记录：如果来源是历史记录（mMarkHistoryId > 0），则更新时间戳；否则新增
+    private void saveOrUpdateHistoryLocation(ContentValues contentValues) {
+        if (mMarkHistoryId > 0) {
+            String name = contentValues.getAsString(DataBaseHistoryLocation.DB_COLUMN_LOCATION);
+            Long timestamp = contentValues.getAsLong(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP);
+            DataBaseHistoryLocation.updateHistoryTimestamp(mLocationHistoryDB,
+                    String.valueOf(mMarkHistoryId), name != null ? name : "",
+                    timestamp != null ? timestamp : System.currentTimeMillis() / 1000);
+            mMarkHistoryId = -1;
+        } else {
+            DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
+        }
     }
 
     /*============================== SearchView 相关 ==============================*/
