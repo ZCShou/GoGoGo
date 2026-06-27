@@ -58,6 +58,14 @@ public class ServiceGo extends Service {
     private NoteActionReceiver mActReceiver;
     // 摇杆相关
     private JoyStick mJoyStick;
+    // adb 远程设位通道：通过 am broadcast 注入坐标
+    // 用法: adb shell am broadcast -a com.zcshou.gogogo.action.SET_LOCATION \
+    //         --ed lat 31.2304 --ed lng 121.4737 [--ed alt 10]
+    public static final String ACTION_SET_LOCATION = "com.zcshou.gogogo.action.SET_LOCATION";
+    public static final String EXTRA_LAT = "lat";
+    public static final String EXTRA_LNG = "lng";
+    public static final String EXTRA_ALT = "alt";
+    private AdbLocationReceiver mAdbReceiver;
 
     private final ServiceGoBinder mBinder = new ServiceGoBinder();
 
@@ -83,6 +91,8 @@ public class ServiceGo extends Service {
         initNotification();
 
         initJoyStick();
+
+        initAdbReceiver();
     }
 
     @Override
@@ -108,6 +118,13 @@ public class ServiceGo extends Service {
         removeTestProviderGPS();
 
         unregisterReceiver(mActReceiver);
+        if (mAdbReceiver != null) {
+            try {
+                unregisterReceiver(mAdbReceiver);
+            } catch (IllegalArgumentException e) {
+                XLog.e("SERVICEGO: ERROR - unregister mAdbReceiver");
+            }
+        }
         stopForeground(STOP_FOREGROUND_REMOVE);
 
         super.onDestroy();
@@ -304,6 +321,37 @@ public class ServiceGo extends Service {
             mLocManager.setTestProviderLocation(LocationManager.NETWORK_PROVIDER, loc);
         } catch (Exception e) {
             XLog.e("SERVICEGO: ERROR - setLocationNetwork");
+        }
+    }
+
+    private void initAdbReceiver() {
+        mAdbReceiver = new AdbLocationReceiver();
+        IntentFilter filter = new IntentFilter(ACTION_SET_LOCATION);
+        // target=32, 暂不需要 RECEIVER_EXPORTED 显式 flag；后续升 33+ 再加
+        registerReceiver(mAdbReceiver, filter);
+    }
+
+    public class AdbLocationReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent == null || !ACTION_SET_LOCATION.equals(intent.getAction())) {
+                return;
+            }
+            // lat/lng 必填；alt 可缺省，沿用当前值
+            if (!intent.hasExtra(EXTRA_LAT) || !intent.hasExtra(EXTRA_LNG)) {
+                XLog.e("SERVICEGO: ADB - missing lat or lng extra");
+                return;
+            }
+            double lat = intent.getDoubleExtra(EXTRA_LAT, mCurLat);
+            double lng = intent.getDoubleExtra(EXTRA_LNG, mCurLng);
+            double alt = intent.getDoubleExtra(EXTRA_ALT, mCurAlt);
+            if (lat < -90.0 || lat > 90.0 || lng < -180.0 || lng > 180.0) {
+                XLog.e("SERVICEGO: ADB - invalid lat/lng " + lat + "," + lng);
+                return;
+            }
+            XLog.d("SERVICEGO: ADB - setPosition lng=" + lng + " lat=" + lat + " alt=" + alt);
+            // 复用 UI 路径：会同步推送给 GPS/NETWORK provider 并刷新摇杆当前位
+            mBinder.setPosition(lng, lat, alt);
         }
     }
 
