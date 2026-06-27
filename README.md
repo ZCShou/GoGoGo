@@ -52,6 +52,7 @@
 3. 历史记录
 4. 位置搜索
 5. 直接输入坐标
+6. 通过 adb 远程设置坐标（无需操作 UI，适合脚本与自动化场景，命令示例见下文「通过 adb 设置坐标」一节）
 
 ## 截图
 ![joystick.jpg](./docs/images/joystick.jpg)
@@ -62,6 +63,37 @@
 1. 下载 APK 直接安装
 2. 启动影梭，赋予相关权限
 3. 单击地图位置，然后点击启动按钮
+
+## 通过 adb 设置坐标
+&emsp;&emsp;在按上述步骤启动定位服务（点击启动按钮、通知栏出现影梭常驻通知）之后，可以通过 adb 直接注入经纬度，方便脚本化、自动化等场景使用。GPS 与 NETWORK 两个 provider 会在 100ms 内同步刷新，摇杆的当前位也会一并更新。
+
+命令格式：
+
+```bash
+adb shell am broadcast -p com.zcshou.gogogo \
+    -a com.zcshou.gogogo.action.SET_LOCATION \
+    --ed lat <纬度> --ed lng <经度> [--ed alt <海拔>]
+```
+
+参数说明：
+
+- `lat` / `lng`：必填，WGS84 经纬度，类型为 `double`，因此 adb 端必须使用 `--ed`（extra double），写成 `--ef` 或 `--ei` 会被忽略
+- `alt`：可选，海拔（米），缺省时沿用当前值
+- `-p com.zcshou.gogogo`：显式指定包名，避免在 Android 13+ 上被隐式广播限制拦截
+
+示例（注入上海外滩坐标）：
+
+```bash
+adb shell am broadcast -p com.zcshou.gogogo \
+    -a com.zcshou.gogogo.action.SET_LOCATION \
+    --ed lat 31.2304 --ed lng 121.4737 --ed alt 10
+```
+
+注意：
+
+- 服务必须先通过 APP UI 启动一次，receiver 才会注册；服务被销毁后该通道随之失效
+- 必须在系统设置 → 开发者选项中将"选择模拟位置应用"设为本 APP，否则系统不会接受 mock 位置
+- 经纬度的合法范围会做基础校验（`lat ∈ [-90, 90]`，`lng ∈ [-180, 180]`），越界将被忽略并在日志中提示
 
 ## 文档
 &emsp;&emsp;由于本人并不是做移动开发的，很多功能代码写的都比较差。我也第一次写  Android APP，目前还处在学习中。。。此外，就一个简单的 APP，应该也不需要啥文档，开发过程中遇到的一些问题，我一般都会记录在个人博客中，具体参见：https://blog.csdn.net/zcshoucsdn/category_10559121.html
