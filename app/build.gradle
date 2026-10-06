@@ -4,6 +4,12 @@ plugins {
     id "com.google.android.libraries.mapsplatform.secrets-gradle-plugin"
 }
 
+def getGitCommitHash() {
+    return providers.exec {
+        commandLine 'git', 'rev-parse', '--short', 'HEAD'
+    }.standardOutput.asText.get().trim()
+}
+
 android {
     ndkVersion = '26.2.11394342'
     compileSdk = 32
