@@ -28,6 +28,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.zcshou.script.ScriptParser;
@@ -51,7 +52,8 @@ import java.util.Set;
 /**
  * 脚本模式：管理脚本并启动“按脚本预设自动移动”的模拟位置。
  *
- * <p>列表里点 ▶ 开始播放（播放后自动退回地图），点条目或铅笔进入编辑页；
+ * <p>列表里点 ▶ 开始播放（播放后自动退回地图），正在播放的那条按钮变成暂停 / 继续，
+ * 播放状态条上也有同样的切换按钮；点条目或铅笔进入编辑页；
  * 删除走工具栏按钮：点一次进入勾选模式，勾选后再次点删除确认。
  * 工具栏还提供脚本的导入 / 导出。</p>
  */
@@ -83,6 +85,12 @@ public class ScriptActivity extends BaseActivity {
     /** 播放中切换走 / 跑 / 骑的下拉（只在有脚本播放时显示） */
     private Spinner mLiveModeSpinner;
     private View mLiveModeBar;
+    /** 操作条上的“暂停 / 继续播放”按钮（跟着播放状态切换文案与图标） */
+    private MaterialButton mPauseResumeButton;
+    /** 当前脚本是否处于暂停中（由服务端状态回调 / 绑定时同步更新） */
+    private volatile boolean mScriptPaused;
+    /** 已经点过“暂停 / 继续”、但服务连接还没回来时记下的目标状态，连上后补执行一次 */
+    private Boolean mPendingPauseRequest;
     /** 当前生效的移动状态（服务回调 / 绑定时同步过来，用于忽略 setSelection 的回声） */
     private ScriptWaypoint.Mode mEffectiveMode = ScriptWaypoint.Mode.WALK;
 
@@ -107,6 +115,19 @@ public class ScriptActivity extends BaseActivity {
                     mStore.setRunningScriptId(null);
                 }
             }
+
+            // 挂起的“暂停 / 继续”请求连上后补执行一次（点按钮时服务还没绑上）
+            if (mPendingPauseRequest != null) {
+                boolean wantPause = mPendingPauseRequest;
+                mPendingPauseRequest = null;
+                if (wantPause) {
+                    mServiceBinder.pauseScript();
+                } else {
+                    mServiceBinder.resumeScript();
+                }
+            }
+            // 暂停状态以服务端为准（暂停也可能是在通知栏 / 主界面发起的）
+            mScriptPaused = mServiceBinder.isScriptPaused();
 
             ScriptWaypoint.Mode mode = mServiceBinder.getLiveMode();
             if (mode == null) {
@@ -142,12 +163,26 @@ public class ScriptActivity extends BaseActivity {
         public void onScriptFinish(ScriptRoute route) {
             // 跑完即结束：别再让列表行显示“正在播放”
             mPlayingScriptId = null;
+            mScriptPaused = false;
             notifyAdapter();
         }
 
         @Override
         public void onScriptStopped() {
             mPlayingScriptId = null;
+            mScriptPaused = false;
+            notifyAdapter();
+        }
+
+        @Override
+        public void onScriptPaused() {
+            mScriptPaused = true;
+            notifyAdapter();
+        }
+
+        @Override
+        public void onScriptResumed() {
+            mScriptPaused = false;
             notifyAdapter();
         }
     };
@@ -195,6 +230,10 @@ public class ScriptActivity extends BaseActivity {
     private void initLiveModeBar() {
         mLiveModeBar = findViewById(R.id.script_mode_bar);
         mLiveModeSpinner = findViewById(R.id.script_live_mode);
+        mPauseResumeButton = findViewById(R.id.script_pause_resume);
+        if (mPauseResumeButton != null) {
+            mPauseResumeButton.setOnClickListener(v -> togglePause());
+        }
         if (mLiveModeSpinner == null) {
             return;
         }
@@ -255,6 +294,12 @@ public class ScriptActivity extends BaseActivity {
                 mLiveModeSpinner.setSelection(position);
             }
         }
+
+        if (mPauseResumeButton != null) {
+            // 暂停中按钮变成“继续播放”，图标 暂停 ⇄ 播放
+            mPauseResumeButton.setText(mScriptPaused ? R.string.script_resume : R.string.script_pause);
+            mPauseResumeButton.setIconResource(mScriptPaused ? R.drawable.ic_play : R.drawable.ic_pause);
+        }
     }
 
     @Override
@@ -291,6 +336,7 @@ public class ScriptActivity extends BaseActivity {
     protected void onStop() {
         // 解绑后不会再有连接回调，挂起的“补启动”请求无处落地，先作废
         mPendingStartId = null;
+        mPendingPauseRequest = null;
 
         if (mBound && mServiceBinder != null) {
             try {
@@ -564,6 +610,8 @@ public class ScriptActivity extends BaseActivity {
             startForegroundService(intent);
             mPlayingScriptId = route.id;
             mPlayingIndex = 0;
+            // 新开一条：本地先按“播放中”显示，连上后由服务端状态校准
+            mScriptPaused = false;
             notifyAdapter();
 
             // 已经绑定着就立刻校验一次；还没绑上就立刻绑定，连接回调里兜底补启动，
@@ -602,6 +650,10 @@ public class ScriptActivity extends BaseActivity {
             boolean playingSame = mServiceBinder.isScriptPlaying()
                     && scriptId.equals(mServiceBinder.getRunningScriptId());
             if (playingSame) {
+                // 暂停中又点了一次 ▶：当作继续播放，而不是重新对齐轨迹
+                if (mServiceBinder.isScriptPaused() && mServiceBinder.resumeScript()) {
+                    mScriptPaused = false;
+                }
                 mPlayingScriptId = scriptId;
                 return;
             }
@@ -609,9 +661,46 @@ public class ScriptActivity extends BaseActivity {
             boolean ok = mServiceBinder.startScript(scriptId);
             if (ok) {
                 mPlayingScriptId = scriptId;
+                mScriptPaused = false;
             } else {
                 GoUtils.DisplayToast(this, getResources().getString(R.string.script_start_fail));
             }
+        } catch (Exception e) {
+            // 忽略服务异常
+        }
+    }
+
+    /**
+     * 暂停 / 继续播放当前脚本。
+     *
+     * <p>暂停 = 位置停在原地、进度保留；继续 = 从暂停处原地接着走（不瞬移、不跳段）。
+     * 服务还没绑上时先记住请求，连上后在 onServiceConnected 里补执行，
+     * 避免“点了一下没反应”。</p>
+     */
+    private void togglePause() {
+        if (mServiceBinder == null) {
+            mPendingPauseRequest = !mScriptPaused;
+            bindServiceIfNeeded();
+            return;
+        }
+
+        try {
+            if (mScriptPaused) {
+                boolean ok = mServiceBinder.resumeScript();
+                if (ok) {
+                    mScriptPaused = false;
+                }
+                GoUtils.DisplayToast(this, getResources().getString(
+                        ok ? R.string.script_resumed_toast : R.string.script_resume_fail));
+            } else {
+                boolean ok = mServiceBinder.pauseScript();
+                if (ok) {
+                    mScriptPaused = true;
+                }
+                GoUtils.DisplayToast(this, getResources().getString(
+                        ok ? R.string.script_paused_toast : R.string.script_pause_fail));
+            }
+            notifyAdapter();
         } catch (Exception e) {
             // 忽略服务异常
         }
@@ -637,6 +726,7 @@ public class ScriptActivity extends BaseActivity {
         }
 
         mPlayingScriptId = null;
+        mScriptPaused = false;
         notifyAdapter();
     }
 
@@ -722,8 +812,10 @@ public class ScriptActivity extends BaseActivity {
             if (playing) {
                 status.setVisibility(View.VISIBLE);
                 int index = Math.min(mPlayingIndex + 1, Math.max(1, route.size()));
-                // 展示服务端真正生效的状态（播放中手动切换过的也反映出来）
-                status.setText(getResources().getString(R.string.script_playing, index, route.size(),
+                // 展示服务端真正生效的状态（播放中手动切换过的也反映出来），暂停中单独提示
+                status.setText(getResources().getString(
+                        mScriptPaused ? R.string.script_paused_status : R.string.script_playing,
+                        index, route.size(),
                         modeLabel(mEffectiveMode != null ? mEffectiveMode : mode)));
             } else {
                 status.setVisibility(View.GONE);
@@ -732,7 +824,18 @@ public class ScriptActivity extends BaseActivity {
 
             // 铅笔按钮：显式的编辑入口（点条目本身也能进编辑页）
             edit.setOnClickListener(v -> openEditor(route));
-            start.setOnClickListener(v -> startPlay(route));
+            if (playing) {
+                // 正在跑的这条：按钮变成“暂停 / 继续”，就地切换，不重新启动脚本
+                start.setImageResource(mScriptPaused ? R.drawable.ic_play : R.drawable.ic_pause);
+                start.setContentDescription(getResources().getString(
+                        mScriptPaused ? R.string.script_resume : R.string.script_pause));
+                start.setOnClickListener(v -> togglePause());
+            } else {
+                // 复用行会被反复绑定，图标必须每次显式重置，否则会残留上一行的暂停图标
+                start.setImageResource(R.drawable.ic_script_play);
+                start.setContentDescription(getResources().getString(R.string.script_start));
+                start.setOnClickListener(v -> startPlay(route));
+            }
 
             return view;
         }

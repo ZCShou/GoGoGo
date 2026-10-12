@@ -81,6 +81,7 @@ import com.zcshou.service.ServiceGo;
 import com.zcshou.database.DataBaseHistoryLocation;
 import com.zcshou.database.DataBaseHistorySearch;
 import com.zcshou.script.ScriptParser;
+import com.zcshou.script.ScriptPlayer;
 import com.zcshou.script.ScriptRoute;
 import com.zcshou.script.ScriptStore;
 import com.zcshou.script.ScriptWaypoint;
@@ -164,6 +165,15 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private String mPendingScriptId;
     /** 已经发出“停止移动”、但服务连接还没回来时的挂起标记，连上后再补一次停止 */
     private boolean mPendingStop;
+    /**
+     * 脚本是否处于暂停中（由服务端状态回调 / 每次同步更新）。
+     *
+     * <p>暂停与播放共用“正在播放”的本地缓存 {@link #mRunningScriptId}，
+     * 单独记一个标记才能把“暂停 / 继续”按钮切到正确一侧。</p>
+     */
+    private volatile boolean mScriptPaused;
+    /** 已经点过“暂停 / 继续”、但服务连接还没回来时记下的目标状态，连上后补执行一次 */
+    private Boolean mPendingPauseRequest;
     /** 左下角开关的状态：true = 点击移动，false = 摇杆移动（默认由“移动类型”设置决定） */
     private boolean mClickMoveEnabled;
     /** 左下角“点击移动 ⇄ 摇杆移动”开关，模拟位置运行期间才显示 */
@@ -194,6 +204,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private TextView mRouteHint;
     private Spinner mRouteModeSpinner;
     private MaterialButton mRouteGoButton;
+    /** 路线操作条上的“暂停 / 继续”按钮（路线没有在跑时隐藏） */
+    private MaterialButton mRoutePauseButton;
     /** 路线连线：点地图加路点时实时重画 */
     private Polyline mRouteLine;
     private final List<Marker> mRouteMarkers = new ArrayList<>();
@@ -218,6 +230,12 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private MaterialButton mClickMoveGoButton;
     /** 点击移动是否正在行进（由服务端到达回调驱动） */
     private volatile boolean mClickMoveRunning;
+    /** 点击移动是否暂停中（服务端状态为准，本界面切换后回读同步） */
+    private volatile boolean mClickMovePaused;
+    /** 点击移动操作条上的“暂停 / 继续”按钮（没在行走时隐藏） */
+    private MaterialButton mClickMovePauseButton;
+    /** 已经点过“暂停 / 继续”、但服务连接还没回来时记下的目标状态，连上后补执行一次 */
+    private Boolean mPendingClickPauseRequest;
     /*============================== 历史记录 相关 ==============================*/
     private SQLiteDatabase mLocationHistoryDB;
     private SQLiteDatabase mSearchHistoryDB;
@@ -405,6 +423,18 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         if (isMockServStart && mServiceBinder == null) {
             // 单点模拟在跑但还没绑上：先绑好，否则 FAB 首次按下只补绑、位置要第二次才生效
             bindServiceIfNeeded();
+        }
+
+        if (mServiceBinder != null) {
+            // 服务端只有一个监听槽位：进过脚本页后，监听会被那边覆盖、并在其 onStop 里清空，
+            // 此后通知栏 / 脚本页发起的暂停、继续都到不了主界面，路线条按钮会停在错误一侧。
+            // 回到主界面先把监听抢回来，再以服务端状态同步一次
+            try {
+                mServiceBinder.setScriptListener(mScriptListener);
+                syncStateWithService();
+            } catch (Exception e) {
+                XLog.e("ERROR: re-register script listener", e);
+            }
         }
         updateScriptButton();
 
@@ -1211,6 +1241,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             // 跑完 = 结束：本地也按“没在播”处理，路线条直接回到“开始移动”、
             // 传送/点击移动不再被“播放中”拦截，模拟位置可以立刻继续
             mRunningScriptId = null;
+            mScriptPaused = false;
             runOnUiThread(() -> {
                 updateScriptButton();
                 GoUtils.DisplayToast(MainActivity.this, getResources().getString(R.string.script_finished));
@@ -1220,6 +1251,19 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         @Override
         public void onScriptStopped() {
             mRunningScriptId = null;
+            mScriptPaused = false;
+            runOnUiThread(MainActivity.this::updateScriptButton);
+        }
+
+        @Override
+        public void onScriptPaused() {
+            mScriptPaused = true;
+            runOnUiThread(MainActivity.this::updateScriptButton);
+        }
+
+        @Override
+        public void onScriptResumed() {
+            mScriptPaused = false;
             runOnUiThread(MainActivity.this::updateScriptButton);
         }
     };
@@ -1305,6 +1349,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             try {
                 mServiceBinder.stopScript();
                 mRunningScriptId = null;
+                mScriptPaused = false;
                 updateScriptButton();
                 Snackbar.make(v, getResources().getString(
                                 finished ? R.string.script_finished : R.string.script_stopped),
@@ -1338,6 +1383,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mRouteBar = findViewById(R.id.route_bar);
         mRouteHint = findViewById(R.id.route_hint);
         mRouteGoButton = findViewById(R.id.route_go);
+        mRoutePauseButton = findViewById(R.id.route_pause);
 
         mRouteModeSpinner = findViewById(R.id.route_mode);
         if (mRouteModeSpinner != null) {
@@ -1390,6 +1436,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     startMapRoute();
                 }
             });
+        }
+        if (mRoutePauseButton != null) {
+            mRoutePauseButton.setOnClickListener(v -> toggleMapRoutePause());
         }
 
         // 连线图层：先放进地图，选点过程中不断更新坐标列表
@@ -1523,7 +1572,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 R.string.route_point_title, this::updateRouteUi);
     }
 
-    /** 刷新操作条：已选点数 + 主按钮是“开始移动”还是“停止移动” */
+    /** 刷新操作条：已选点数 + 主按钮是“开始移动”还是“停止移动”，以及暂停 / 继续按钮的状态 */
     private void updateRouteUi() {
         if (mRouteHint != null) {
             int count = mRoutePoints.size();
@@ -1538,6 +1587,52 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             // 只在 XML 里写死一个图标的话，文案变成“停止移动”时图标还指着移动，会误导
             mRouteGoButton.setText(playing ? R.string.route_stop : R.string.route_go);
             mRouteGoButton.setIconResource(playing ? R.drawable.ic_close : R.drawable.ic_move);
+        }
+
+        if (mRoutePauseButton != null) {
+            // 暂停按钮只在这条路线跑着时出现；暂停中换成“继续”（图标 暂停 ⇄ 播放）
+            boolean active = isMapRoutePlaying();
+            mRoutePauseButton.setVisibility(active ? View.VISIBLE : View.GONE);
+            if (active) {
+                mRoutePauseButton.setText(mScriptPaused ? R.string.route_resume : R.string.route_pause);
+                mRoutePauseButton.setIconResource(mScriptPaused ? R.drawable.ic_play : R.drawable.ic_pause);
+            }
+        }
+    }
+
+    /**
+     * 路线操作条上的“暂停 / 继续”切换。
+     *
+     * <p>暂停 = 位置停在原地、进度保留；继续 = 从暂停处原地接着走（不会瞬移、不会跳段）。
+     * 服务还没绑上时先记住请求，连上后在 {@link #syncStateWithService()} 里补执行，
+     * 避免“点了一下没反应”。</p>
+     */
+    private void toggleMapRoutePause() {
+        if (mServiceBinder == null) {
+            mPendingPauseRequest = !mScriptPaused;
+            bindServiceIfNeeded();
+            return;
+        }
+
+        try {
+            if (mScriptPaused) {
+                boolean ok = mServiceBinder.resumeScript();
+                if (ok) {
+                    mScriptPaused = false;
+                }
+                GoUtils.DisplayToast(this, getResources().getString(
+                        ok ? R.string.script_resumed_toast : R.string.script_resume_fail));
+            } else {
+                boolean ok = mServiceBinder.pauseScript();
+                if (ok) {
+                    mScriptPaused = true;
+                }
+                GoUtils.DisplayToast(this, getResources().getString(
+                        ok ? R.string.script_paused_toast : R.string.script_pause_fail));
+            }
+            updateRouteUi();
+        } catch (Exception e) {
+            XLog.e("ERROR: toggleMapRoutePause", e);
         }
     }
 
@@ -1619,6 +1714,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             }
             startForegroundService(intent);
             mRunningScriptId = route.id;
+            mScriptPaused = false;
             updateScriptButton();
             // 服务已经在跑时立刻校验一次：服务端没在播就用 binder 补启动
             ensureScriptPlaying(route.id);
@@ -1664,6 +1760,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         }
 
         mRunningScriptId = null;
+        mScriptPaused = false;
         updateScriptButton();
         GoUtils.DisplayToast(this, getResources().getString(R.string.script_stopped));
     }
@@ -1697,6 +1794,11 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             boolean playingSame = mServiceBinder.isScriptPlaying()
                     && scriptId.equals(mServiceBinder.getRunningScriptId());
             if (playingSame) {
+                // 暂停中又点了一次“开始”：当作继续播放，而不是重新对齐轨迹
+                if (mServiceBinder.isScriptPaused() && mServiceBinder.resumeScript()) {
+                    mScriptPaused = false;
+                    updateRouteUi();
+                }
                 mRunningScriptId = scriptId;
                 return;
             }
@@ -1704,6 +1806,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             boolean ok = mServiceBinder.startScript(scriptId);
             if (ok) {
                 mRunningScriptId = scriptId;
+                mScriptPaused = false;
             } else {
                 GoUtils.DisplayToast(this, getResources().getString(R.string.script_start_fail));
             }
@@ -1736,6 +1839,32 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     new ScriptStore(MainActivity.this).setRunningScriptId(null);
                 }
             }
+
+            // 挂起的“暂停 / 继续”排在启动、停止之后落地：脚本还没启动就先执行暂停，
+            // 请求会被直接吞掉，表现就是“点开始又点暂停，脚本照常播放”
+            if (mPendingPauseRequest != null) {
+                boolean wantPause = mPendingPauseRequest;
+                mPendingPauseRequest = null;
+                if (wantPause) {
+                    mServiceBinder.pauseScript();
+                } else {
+                    mServiceBinder.resumeScript();
+                }
+            }
+            // 点击行走的挂起暂停同理：脚本启动会作废点击目标，也必须排在启动之后
+            if (mPendingClickPauseRequest != null) {
+                boolean wantPause = mPendingClickPauseRequest;
+                mPendingClickPauseRequest = null;
+                if (wantPause) {
+                    mServiceBinder.pauseClickMove();
+                } else {
+                    mServiceBinder.resumeClickMove();
+                }
+            }
+
+            // 两套“暂停”状态都以服务端为准（可能是在通知栏 / 脚本页发起的）
+            mScriptPaused = mServiceBinder.isScriptPaused();
+            mClickMovePaused = mServiceBinder.isClickMovePaused();
         } catch (Exception e) {
             XLog.e("ERROR: syncStateWithService", e);
         }
@@ -1834,6 +1963,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         // 解绑后不会再有连接回调，挂起的开始 / 停止请求无处落地，先作废
         mPendingScriptId = null;
         mPendingStop = false;
+        mPendingPauseRequest = null;
+        mPendingClickPauseRequest = null;
 
         if (!mBoundToService && !isMockServStart) {
             return;
@@ -1933,6 +2064,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             }
         }
 
+        // 服务端切换模式会作废目标并复位“暂停中”，本地跟着来
+        mClickMovePaused = false;
+
         // 开关状态决定“目标点操作条”是否出现（切到点击移动才显示，切回摇杆就收起）
         refreshClickMoveSwitch();
         updateClickMoveUi();
@@ -1960,6 +2094,10 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mClickMoveBar = findViewById(R.id.click_move_bar);
         mClickMoveHint = findViewById(R.id.click_move_hint);
         mClickMoveGoButton = findViewById(R.id.click_move_go);
+        mClickMovePauseButton = findViewById(R.id.click_move_pause);
+        if (mClickMovePauseButton != null) {
+            mClickMovePauseButton.setOnClickListener(v -> toggleClickMovePause());
+        }
 
         View undo = findViewById(R.id.click_move_undo);
         if (undo != null) {
@@ -2068,6 +2206,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         try {
             if (mServiceBinder.appendClickTarget(target.lng, target.lat)) {
                 mClickMoveRunning = true;
+                // 暂停状态以服务端为准：到站接下一个目标的瞬间可能与“暂停”发生竞态
+                mClickMovePaused = mServiceBinder.isClickMovePaused();
             } else {
                 // 服务端拒绝（脚本抢走了位置或开关没开）：不要卡在“假运行”状态
                 mClickMoveRunning = false;
@@ -2090,6 +2230,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             if (mClickMovePoints.isEmpty()) {
                 // 走完了：队列空了，行进结束。先改状态再重画，按钮才能正确显示“开始行走”
                 mClickMoveRunning = false;
+                // 服务端到达目标时会把“暂停中”一并复位（没有目标可暂停），本地跟着回读
+                mClickMovePaused = false;
                 redrawClickMove();
                 GoUtils.DisplayToast(MainActivity.this,
                         getResources().getString(R.string.click_move_finished));
@@ -2110,6 +2252,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
      */
     private void cancelServiceClickTarget() {
         mClickMoveRunning = false;
+        // 服务端 clearClickTargets 会连“暂停中”一起复位，本地照着来
+        mClickMovePaused = false;
 
         if (mServiceBinder != null) {
             try {
@@ -2155,17 +2299,70 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     }
 
     /**
+     * 点击行走的预计里程：从当前位置按队列顺序走完全部待走目标的路径长度。
+     *
+     * <p>只在操作条刷新时重算（加点 / 撤回 / 清空 / 到站 / 暂停切换），作为“预计”值展示，
+     * 不追求逐帧精确。当前位置取服务端注入端的坐标（人物此刻真正所在的位置）；
+     * 服务没连上时退化成只累计目标之间的路径，缺“当前位置 → 第一个目标”这一截。</p>
+     */
+    private double clickMoveEstimatedDistance() {
+        if (mClickMovePoints.isEmpty()) {
+            return 0;
+        }
+
+        double lng;
+        double lat;
+        double[] position = null;
+        if (mServiceBinder != null) {
+            try {
+                position = mServiceBinder.getCurrentPosition();
+            } catch (Exception e) {
+                XLog.e("ERROR: getCurrentPosition", e);
+            }
+        }
+
+        if (position != null && position.length >= 2) {
+            lng = position[0];
+            lat = position[1];
+        } else {
+            // 服务没连上：从队头目标起算
+            ScriptWaypoint first = mClickMovePoints.get(0);
+            lng = first.lng;
+            lat = first.lat;
+        }
+
+        double total = 0;
+        for (ScriptWaypoint point : mClickMovePoints) {
+            total += ScriptPlayer.distanceMeters(lng, lat, point.lng, point.lat);
+            lng = point.lng;
+            lat = point.lat;
+        }
+        return total;
+    }
+
+    /**
      * 刷新点击移动相关的按钮与提示文案。
      *
      * <p>点击移动模式下点地图连续添加目标，这条操作条负责撤回 / 清空 / 开始行走，
-     * 与脚本路线的选点操作方式保持一致。</p>
+     * 与脚本路线的选点操作方式保持一致；提示行同时给出剩余目标数与预计里程。</p>
      */
     private void updateClickMoveUi() {
         if (mClickMoveHint != null) {
             int count = mClickMovePoints.size();
-            mClickMoveHint.setText(count == 0
-                    ? getResources().getString(R.string.click_move_hint_empty)
-                    : getResources().getString(R.string.click_move_hint_count, count));
+            if (count == 0) {
+                mClickMoveHint.setText(getResources().getString(R.string.click_move_hint_empty));
+            } else {
+                // 预计里程：当前位置 → 队列里每个目标依次相连的路径长度
+                String distance = ScriptParser.formatDistance(clickMoveEstimatedDistance());
+                // 暂停中把状态写进提示行：位置停在原地，别让用户以为还在走
+                if (mClickMovePaused) {
+                    mClickMoveHint.setText(getResources().getString(
+                            R.string.click_move_hint_paused, count, distance));
+                } else {
+                    mClickMoveHint.setText(getResources().getString(
+                            R.string.click_move_hint_count, count, distance));
+                }
+            }
         }
 
         if (mClickMoveGoButton != null) {
@@ -2175,6 +2372,50 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     ? R.string.click_move_stop : R.string.click_move_go);
             mClickMoveGoButton.setIconResource(running
                     ? R.drawable.ic_close : R.drawable.ic_move);
+        }
+
+        if (mClickMovePauseButton != null) {
+            // 暂停按钮只在真的在行走时出现；暂停中换成“继续”（图标 暂停 ⇄ 播放）
+            boolean walking = mClickMoveRunning;
+            mClickMovePauseButton.setVisibility(walking ? View.VISIBLE : View.GONE);
+            if (walking) {
+                mClickMovePauseButton.setText(mClickMovePaused
+                        ? R.string.click_move_resume : R.string.click_move_pause);
+                mClickMovePauseButton.setIconResource(mClickMovePaused
+                        ? R.drawable.ic_play : R.drawable.ic_pause);
+            }
+        }
+    }
+
+    /**
+     * 点击移动操作条上的“暂停 / 继续”切换。
+     *
+     * <p>暂停 = 位置停在原地、当前目标与朝向保留；继续 = 从暂停处朝同一目标接着走
+     * （与“停止行走”放弃当前目标不同）。服务还没绑上时先记住请求，
+     * 连上后在 {@link #syncStateWithService()} 里补执行，避免“点了一下没反应”。</p>
+     */
+    private void toggleClickMovePause() {
+        if (mServiceBinder == null) {
+            mPendingClickPauseRequest = !mClickMovePaused;
+            bindServiceIfNeeded();
+            return;
+        }
+
+        try {
+            if (mClickMovePaused) {
+                boolean ok = mServiceBinder.resumeClickMove();
+                GoUtils.DisplayToast(this, getResources().getString(
+                        ok ? R.string.click_move_resumed_toast : R.string.click_move_resume_fail));
+            } else {
+                boolean ok = mServiceBinder.pauseClickMove();
+                GoUtils.DisplayToast(this, getResources().getString(
+                        ok ? R.string.click_move_paused_toast : R.string.click_move_pause_fail));
+            }
+            // 以服务端为准回读（请求可能因为“没在朝目标走”等原因没生效）
+            mClickMovePaused = mServiceBinder.isClickMovePaused();
+            updateClickMoveUi();
+        } catch (Exception e) {
+            XLog.e("ERROR: toggleClickMovePause", e);
         }
     }
 
@@ -2212,10 +2453,13 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         doGoLocationAction(v);
     }
 
-    /** 脚本是否正在播放（服务没绑定时以持久状态为准，跑完时服务端会把它清掉） */
+    /** 脚本是否正在播放或暂停中（服务没绑定时以持久状态为准，跑完时服务端会把它清掉） */
     private boolean isScriptPlaying() {
         if (mServiceBinder != null) {
-            return mServiceBinder.getScriptState() == ServiceGo.SCRIPT_STATE_PLAYING;
+            int state = mServiceBinder.getScriptState();
+            // 暂停也算“脚本占着位置”：传送 / 终止同样会打断它，先弹确认
+            return state == ServiceGo.SCRIPT_STATE_PLAYING
+                    || state == ServiceGo.SCRIPT_STATE_PAUSED;
         }
         return new ScriptStore(this).getRunningScriptId() != null;
     }
