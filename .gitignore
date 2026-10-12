@@ -47,3 +47,18 @@ captures/
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
+
+# Eclipse / Buildship (project uses Gradle; these are IDE-generated)
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# Java heap dumps
+*.hprof
+
+# OS files
+.DS_Store
+Thumbs.db
