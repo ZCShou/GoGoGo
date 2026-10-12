@@ -406,6 +406,29 @@
                         app:strokeWidth="0dp" />
 
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/click_move_pause"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:minHeight="48dp"
+                        android:minWidth="0dp"
+                        android:paddingEnd="4dp"
+                        android:paddingStart="4dp"
+                        android:text="@string/click_move_pause"
+                        android:textColor="@color/m3_on_secondary_container"
+                        android:textSize="14sp"
+                        android:visibility="gone"
+                        app:backgroundTint="@color/m3_secondary_container"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_pause"
+                        app:iconGravity="textStart"
+                        app:iconPadding="6dp"
+                        app:iconSize="16dp"
+                        app:iconTint="@color/m3_on_secondary_container"
+                        app:strokeWidth="0dp" />
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/click_move_go"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"

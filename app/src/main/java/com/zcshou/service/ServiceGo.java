@@ -101,6 +101,8 @@ public class ServiceGo extends Service {
     private volatile boolean mClickMoveEnabled;
     /** 有一个未到达的行走目标 */
     private volatile boolean mHasClickTarget;
+    /** 点击行走是否暂停中：位置停在原地，目标保留，继续时朝同一目标接着走 */
+    private volatile boolean mClickMovePaused;
     private volatile double mClickTargetLng;
     private volatile double mClickTargetLat;
     /** 上一次朝目标推进的时刻（毫秒），按真实间隔步进 */
@@ -322,12 +324,12 @@ public class ServiceGo extends Service {
      * 文案也换成“已暂停”——通知栏是脚本在后台跑时唯一够得着的控制入口。</p>
      */
     private Notification buildNotification() {
-        //准备intent
+        //准备intent（广播都限定在本应用内，避免同名 action 被别的应用抢先接收）
         Intent clickIntent = new Intent(this, MainActivity.class);
         PendingIntent clickPI = PendingIntent.getActivity(this, 1, clickIntent, PendingIntent.FLAG_IMMUTABLE);
-        Intent showIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW);
+        Intent showIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW).setPackage(getPackageName());
         PendingIntent showPendingPI = PendingIntent.getBroadcast(this, 0, showIntent, PendingIntent.FLAG_IMMUTABLE);
-        Intent hideIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE);
+        Intent hideIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE).setPackage(getPackageName());
         PendingIntent hidePendingPI = PendingIntent.getBroadcast(this, 0, hideIntent, PendingIntent.FLAG_IMMUTABLE);
 
         boolean scriptActive = mScriptState == SCRIPT_STATE_PLAYING || mScriptState == SCRIPT_STATE_PAUSED;
@@ -349,7 +351,8 @@ public class ServiceGo extends Service {
         if (scriptActive) {
             // 同一个按钮按状态切换动作与图标：播放中 = 暂停，暂停中 = 继续
             Intent pauseIntent = new Intent(scriptPaused
-                    ? SERVICE_GO_NOTE_ACTION_SCRIPT_RESUME : SERVICE_GO_NOTE_ACTION_SCRIPT_PAUSE);
+                    ? SERVICE_GO_NOTE_ACTION_SCRIPT_RESUME : SERVICE_GO_NOTE_ACTION_SCRIPT_PAUSE)
+                    .setPackage(getPackageName());
             PendingIntent pausePendingPI = PendingIntent.getBroadcast(this, 2, pauseIntent, PendingIntent.FLAG_IMMUTABLE);
             builder.addAction(new NotificationCompat.Action(
                     scriptPaused ? R.drawable.ic_play : R.drawable.ic_pause,
@@ -415,6 +418,7 @@ public class ServiceGo extends Service {
                     mCurBea = DEFAULT_BEA;
                     // 传送到了新位置，进行中的点击移动目标作废
                     mHasClickTarget = false;
+                    mClickMovePaused = false;
                     saveLastPosition();
                 }
             });
@@ -518,6 +522,8 @@ public class ServiceGo extends Service {
     private void setClickMoveMode(boolean enabled) {
         mClickMoveEnabled = enabled;
         mHasClickTarget = false;
+        // 目标都作废了，“暂停中”自然也无从谈起，一并复位避免残留
+        mClickMovePaused = false;
 
         if (mJoyStick != null) {
             try {
@@ -527,6 +533,50 @@ public class ServiceGo extends Service {
                 XLog.e("SERVICEGO: ERROR - setClickMoveEnabled", e);
             }
         }
+    }
+
+    /**
+     * 暂停点击行走：位置停在原地，当前目标与朝向都保留。
+     *
+     * <p>暂停只是“不再朝目标推进”，与“停止行走”（放弃当前目标）不同：
+     * 继续时从原地朝同一个目标接着走。同时把注入速度记为 0，
+     * 避免上层应用看到“位置不动却还在移动”。</p>
+     *
+     * @return 是否进入暂停（没在朝目标走时返回 false）
+     */
+    public boolean pauseClickMove() {
+        if (!mClickMoveEnabled || !mHasClickTarget) {
+            return false;
+        }
+        if (mClickMovePaused) {
+            return true;
+        }
+
+        mClickMovePaused = true;
+        mSpeed = 0;
+
+        // 刚好在这一瞬间走到了目标（目标已作废）：没有可暂停的行走。
+        // 回退暂停标记，避免留下“暂停中但没有目标”的残留状态
+        if (!mHasClickTarget) {
+            mClickMovePaused = false;
+            return false;
+        }
+        return true;
+    }
+
+    /** 继续点击行走，从暂停处朝同一目标接着走；没有暂停中的行走时返回 false */
+    public boolean resumeClickMove() {
+        if (!mClickMovePaused) {
+            return false;
+        }
+
+        mClickMovePaused = false;
+        return true;
+    }
+
+    /** 点击行走是否处于暂停中（界面据此把“暂停 / 继续”按钮切到正确一侧） */
+    public boolean isClickMovePaused() {
+        return mClickMovePaused;
     }
 
     /**
@@ -563,6 +613,14 @@ public class ServiceGo extends Service {
         long now = System.currentTimeMillis();
         long last = mLastClickStepMs;
         mLastClickStepMs = now;
+
+        // 暂停中：位置停在原地，只把步进计时往前挪——否则恢复那一拍会按“暂停的时长”
+        // 算 dt，一步跨出去老远（骑行能一次跳 10 米）。目标与朝向都保留，
+        // 继续时从原地朝同一个目标接着走
+        if (mClickMovePaused) {
+            return;
+        }
+
         double dt = Math.min(1.0D, Math.max(0.0D, (now - last) / 1000.0D));
         if (dt <= 0) {
             return;
@@ -582,6 +640,8 @@ public class ServiceGo extends Service {
             mCurLng = mClickTargetLng;
             mCurLat = mClickTargetLat;
             mHasClickTarget = false;
+            // 没有目标可暂停了（也顺带消掉“暂停与到达同时发生”的竞态残留）
+            mClickMovePaused = false;
         } else {
             // 一步的位移很小，平面近似的误差可以忽略
             double ratio = step / distance;
@@ -837,6 +897,7 @@ public class ServiceGo extends Service {
         mScriptStore.setRunningScriptId(route.id);
         // 脚本开始接管位置：作废进行中的点击移动目标
         mHasClickTarget = false;
+        mClickMovePaused = false;
 
         PreferenceManager.getDefaultSharedPreferences(this).edit()
                 .putString(KEY_LAST_SCRIPT_ID, route.id)
@@ -894,7 +955,12 @@ public class ServiceGo extends Service {
             return false;
         }
 
-        mScriptPlayer.pause();
+        // 没能真正进入暂停 = 这一拍刚好跑到终点（或已在暂停）：
+        // 不能顺手把 FINISHED / 残留状态改写成“暂停中”，否则位置会被永久锁住
+        if (!mScriptPlayer.pause() && !mScriptPlayer.isPaused()) {
+            return false;
+        }
+
         mScriptState = SCRIPT_STATE_PAUSED;
         mSpeed = 0;
         refreshNotification();
@@ -1171,6 +1237,7 @@ public class ServiceGo extends Service {
                 stopScript();
             }
             mHasClickTarget = false;
+            mClickMovePaused = false;
 
             mLocHandler.removeMessages(HANDLER_MSG_ID);
             mCurLng = lng;
@@ -1221,6 +1288,21 @@ public class ServiceGo extends Service {
             ServiceGo.this.setClickMoveMode(enabled);
         }
 
+        /** 暂停点击行走（位置停在原地，目标保留）；没在朝目标走时返回 false */
+        public boolean pauseClickMove() {
+            return ServiceGo.this.pauseClickMove();
+        }
+
+        /** 继续点击行走，从暂停处朝同一目标接着走；没有暂停中的行走时返回 false */
+        public boolean resumeClickMove() {
+            return ServiceGo.this.resumeClickMove();
+        }
+
+        /** 点击行走是否处于暂停中 */
+        public boolean isClickMovePaused() {
+            return mClickMovePaused;
+        }
+
         /** 注册点击移动“到达一个目标”的回调（定位线程触发） */
         public void setClickMoveListener(ClickMoveListener listener) {
             mClickMoveListener = listener;
@@ -1257,6 +1339,7 @@ public class ServiceGo extends Service {
         /** 清空所有还未到达的目标（撤回 / 清空 / 停止时用） */
         public void clearClickTargets() {
             mHasClickTarget = false;
+            mClickMovePaused = false;
         }
 
         /**

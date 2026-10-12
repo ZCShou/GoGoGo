@@ -290,6 +290,13 @@
     <string name="click_move_point_title">目标 %1$d</string>
     <string name="click_move_go">开始行走</string>
     <string name="click_move_stop">停止行走</string>
+    <string name="click_move_pause">暂停</string>
+    <string name="click_move_resume">继续</string>
+    <string name="click_move_hint_paused">已暂停行走，位置停在原地 · 还有 %1$d 个目标待走</string>
+    <string name="click_move_paused_toast">行走已暂停，位置停在原地</string>
+    <string name="click_move_resumed_toast">已继续朝目标行走</string>
+    <string name="click_move_pause_fail">当前没有在朝目标行走</string>
+    <string name="click_move_resume_fail">当前没有暂停中的行走</string>
     <string name="click_move_empty">还没有待走的目标点</string>
     <string name="click_move_finished">已走完全部目标</string>
 </resources>

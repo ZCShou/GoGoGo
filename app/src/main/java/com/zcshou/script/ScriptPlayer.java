@@ -216,15 +216,19 @@ public class ScriptPlayer {
      * <p>暂停不等于停止：路线、进度、手动切换过的状态全部保留，
      * 只是不再按时间推进；恢复时从暂停的位置原地接着走。</p>
      *
-     * <p>没在播放、已到终点或已经暂停过时为空操作。</p>
+     * <p>没在播放或已到终点时<b>不会</b>进入暂停——调用方（ServiceGo）靠返回值区分
+     * “真暂停了”和“这一拍刚好跑完”，否则 FINISHED 状态会被误改成“暂停中”。</p>
+     *
+     * @return 是否进入暂停
      */
-    public synchronized void pause() {
+    public synchronized boolean pause() {
         if (!mPlaying || mRoute == null || mEndReached || mPaused) {
-            return;
+            return false;
         }
 
         mPaused = true;
         mPausedRealtime = System.currentTimeMillis();
+        return true;
     }
 
     /**
@@ -242,6 +246,15 @@ public class ScriptPlayer {
 
         mStartRealtime += System.currentTimeMillis() - mPausedRealtime;
         mPaused = false;
+
+        // 单点脚本位置永远不变：恢复后坐标不动，位置回调不会再触发（moved=false），
+        // 注入速度会一直停在暂停时写下的 0，这里按该点的状态强制补发一次
+        List<ScriptWaypoint> points = mRoute.points;
+        if (points != null && points.size() == 1) {
+            ScriptWaypoint only = points.get(0);
+            updatePosition(only.lng, only.lat, only.alt, liveMode(only), liveSpeed(only), mBearing, true);
+        }
+
         return true;
     }
 
