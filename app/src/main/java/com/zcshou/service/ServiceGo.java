@@ -69,6 +69,8 @@ public class ServiceGo extends Service {
     public static final int SCRIPT_STATE_IDLE = 0;
     public static final int SCRIPT_STATE_PLAYING = 1;
     public static final int SCRIPT_STATE_FINISHED = 2;
+    /** 暂停中：位置停在原地、进度保留，随时可以继续播放 */
+    public static final int SCRIPT_STATE_PAUSED = 3;
     private volatile int mScriptState = SCRIPT_STATE_IDLE;
     private LocationManager mLocManager;
     private HandlerThread mLocHandlerThread;
@@ -78,8 +80,13 @@ public class ServiceGo extends Service {
     private static final int SERVICE_GO_NOTE_ID = 1;
     private static final String SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW = "ShowJoyStick";
     private static final String SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE = "HideJoyStick";
+    /** 通知栏“暂停 / 继续”动作（脚本播放中才挂这个按钮） */
+    private static final String SERVICE_GO_NOTE_ACTION_SCRIPT_PAUSE = "PauseScript";
+    private static final String SERVICE_GO_NOTE_ACTION_SCRIPT_RESUME = "ResumeScript";
     private static final String SERVICE_GO_NOTE_CHANNEL_ID = "SERVICE_GO_NOTE";
     private NoteActionReceiver mActReceiver;
+    /** 通知栏管理器：状态变化时刷新文案与“暂停 / 继续”按钮 */
+    private NotificationManager mNoteManager;
     // 摇杆相关
     private JoyStick mJoyStick;
     // 脚本相关
@@ -106,6 +113,12 @@ public class ServiceGo extends Service {
         void onScriptFinish(ScriptRoute route);
 
         void onScriptStopped();
+
+        /** 进入暂停（位置停在原地、进度保留），界面据此把“暂停 / 继续”切到另一侧 */
+        void onScriptPaused();
+
+        /** 从暂停处继续播放 */
+        void onScriptResumed();
     }
 
     /**
@@ -281,43 +294,83 @@ public class ServiceGo extends Service {
             IntentFilter filter = new IntentFilter();
             filter.addAction(SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW);
             filter.addAction(SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE);
+            filter.addAction(SERVICE_GO_NOTE_ACTION_SCRIPT_PAUSE);
+            filter.addAction(SERVICE_GO_NOTE_ACTION_SCRIPT_RESUME);
             registerReceiver(mActReceiver, filter);
 
             // 渠道名会原样显示在系统“通知设置”里，必须是给用户看的文字
             String channelName = getResources().getString(R.string.app_note_channel_name);
             NotificationChannel mChannel = new NotificationChannel(SERVICE_GO_NOTE_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_DEFAULT);
-            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            mNoteManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-            if (notificationManager != null) {
-                notificationManager.createNotificationChannel(mChannel);
+            if (mNoteManager != null) {
+                mNoteManager.createNotificationChannel(mChannel);
             }
 
-            //准备intent
-            Intent clickIntent = new Intent(this, MainActivity.class);
-            PendingIntent clickPI = PendingIntent.getActivity(this, 1, clickIntent, PendingIntent.FLAG_IMMUTABLE);
-            Intent showIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW);
-            PendingIntent showPendingPI = PendingIntent.getBroadcast(this, 0, showIntent, PendingIntent.FLAG_IMMUTABLE);
-            Intent hideIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE);
-            PendingIntent hidePendingPI = PendingIntent.getBroadcast(this, 0, hideIntent, PendingIntent.FLAG_IMMUTABLE);
-
-            Notification notification = new NotificationCompat.Builder(this, SERVICE_GO_NOTE_CHANNEL_ID)
-                    .setChannelId(SERVICE_GO_NOTE_CHANNEL_ID)
-                    .setContentTitle(getResources().getString(R.string.app_name))
-                    .setContentText(getResources().getString(R.string.app_service_tips))
-                    .setContentIntent(clickPI)
-                    .addAction(new NotificationCompat.Action(R.drawable.ic_position, getResources().getString(R.string.note_show), showPendingPI))
-                    .addAction(new NotificationCompat.Action(R.drawable.ic_fly, getResources().getString(R.string.note_hide), hidePendingPI))
-                    // 通知小图标不能再用 R.mipmap.ic_launcher：自适应图标在通知栏只取前景层，
-                    // 而新图标的前景是透明的（整张图在背景层），会显示成空白。
-                    // 这里直接用图钉矢量，和原版通知图标的轮廓保持一致。
-                    .setSmallIcon(R.drawable.ic_launcher_foreground)
-                    .build();
-
-            startForeground(SERVICE_GO_NOTE_ID, notification);
+            startForeground(SERVICE_GO_NOTE_ID, buildNotification());
         } catch (Throwable e) {
             // 前台服务起不来时，系统会在 5 秒后直接杀掉进程，这里主动结束服务更安全
             XLog.e("SERVICEGO: ERROR - initNotification", e);
             stopSelf();
+        }
+    }
+
+    /**
+     * 按当前脚本状态构建通知。
+     *
+     * <p>脚本播放中会多挂一个“暂停”按钮，暂停后同一个按钮变成“继续”、
+     * 文案也换成“已暂停”——通知栏是脚本在后台跑时唯一够得着的控制入口。</p>
+     */
+    private Notification buildNotification() {
+        //准备intent
+        Intent clickIntent = new Intent(this, MainActivity.class);
+        PendingIntent clickPI = PendingIntent.getActivity(this, 1, clickIntent, PendingIntent.FLAG_IMMUTABLE);
+        Intent showIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW);
+        PendingIntent showPendingPI = PendingIntent.getBroadcast(this, 0, showIntent, PendingIntent.FLAG_IMMUTABLE);
+        Intent hideIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE);
+        PendingIntent hidePendingPI = PendingIntent.getBroadcast(this, 0, hideIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        boolean scriptActive = mScriptState == SCRIPT_STATE_PLAYING || mScriptState == SCRIPT_STATE_PAUSED;
+        boolean scriptPaused = mScriptState == SCRIPT_STATE_PAUSED;
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, SERVICE_GO_NOTE_CHANNEL_ID)
+                .setChannelId(SERVICE_GO_NOTE_CHANNEL_ID)
+                .setContentTitle(getResources().getString(R.string.app_name))
+                .setContentText(getResources().getString(
+                        scriptPaused ? R.string.note_script_paused : R.string.app_service_tips))
+                .setContentIntent(clickPI)
+                .addAction(new NotificationCompat.Action(R.drawable.ic_position, getResources().getString(R.string.note_show), showPendingPI))
+                .addAction(new NotificationCompat.Action(R.drawable.ic_fly, getResources().getString(R.string.note_hide), hidePendingPI))
+                // 通知小图标不能再用 R.mipmap.ic_launcher：自适应图标在通知栏只取前景层，
+                // 而新图标的前景是透明的（整张图在背景层），会显示成空白。
+                // 这里直接用图钉矢量，和原版通知图标的轮廓保持一致。
+                .setSmallIcon(R.drawable.ic_launcher_foreground);
+
+        if (scriptActive) {
+            // 同一个按钮按状态切换动作与图标：播放中 = 暂停，暂停中 = 继续
+            Intent pauseIntent = new Intent(scriptPaused
+                    ? SERVICE_GO_NOTE_ACTION_SCRIPT_RESUME : SERVICE_GO_NOTE_ACTION_SCRIPT_PAUSE);
+            PendingIntent pausePendingPI = PendingIntent.getBroadcast(this, 2, pauseIntent, PendingIntent.FLAG_IMMUTABLE);
+            builder.addAction(new NotificationCompat.Action(
+                    scriptPaused ? R.drawable.ic_play : R.drawable.ic_pause,
+                    getResources().getString(scriptPaused ? R.string.note_script_resume : R.string.note_script_pause),
+                    pausePendingPI));
+        }
+
+        return builder.build();
+    }
+
+    /** 状态变化后刷新通知（文案 + “暂停 / 继续”按钮），失败只记日志不影响播放 */
+    private void refreshNotification() {
+        try {
+            if (mNoteManager == null) {
+                mNoteManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            }
+            if (mNoteManager != null) {
+                mNoteManager.notify(SERVICE_GO_NOTE_ID, buildNotification());
+            }
+        } catch (Throwable e) {
+            XLog.e("SERVICEGO: ERROR - refreshNotification", e);
         }
     }
 
@@ -502,7 +555,8 @@ public class ServiceGo extends Service {
         if (!mClickMoveEnabled || !mHasClickTarget) {
             return;
         }
-        if (mScriptState == SCRIPT_STATE_PLAYING && mScriptPlayer != null && mScriptPlayer.isPlaying()) {
+        // 播放中与暂停中都由脚本占有位置：暂停只是“不推进”，点击移动同样不能插队
+        if (isScriptDrivingPosition()) {
             return;
         }
 
@@ -625,6 +679,8 @@ public class ServiceGo extends Service {
                 } catch (Exception e) {
                     XLog.e("SERVICEGO: ERROR - clear script state on finish");
                 }
+                // 跑完后通知栏撤掉“暂停”按钮，文案回到默认
+                refreshNotification();
                 if (mScriptListener != null) {
                     mScriptListener.onScriptFinish(route);
                 }
@@ -634,6 +690,7 @@ public class ServiceGo extends Service {
             public synchronized void onScriptError(String message) {
                 mScriptState = SCRIPT_STATE_IDLE;
                 XLog.e("SERVICEGO: script error - " + message);
+                refreshNotification();
                 if (mScriptListener != null) {
                     mScriptListener.onScriptStopped();
                 }
@@ -662,9 +719,11 @@ public class ServiceGo extends Service {
      *
      * <p>只看 mScriptState 会被“状态残留”骗到（状态是 PLAYING、播放器其实早已停了），
      * 表现为摇杆怎么推都没反应；双确认后，残留状态既锁不住摇杆，也会在下次启动时被纠正。</p>
+     *
+     * <p>暂停中也算接管：脚本只是不推进，位置仍归它保持，恢复时才能原地继续。</p>
      */
     private boolean isScriptDrivingPosition() {
-        return mScriptState == SCRIPT_STATE_PLAYING
+        return (mScriptState == SCRIPT_STATE_PLAYING || mScriptState == SCRIPT_STATE_PAUSED)
                 && mScriptPlayer != null
                 && mScriptPlayer.isPlaying();
     }
@@ -737,6 +796,7 @@ public class ServiceGo extends Service {
             // 加载失败也把状态拉回 IDLE：否则“状态停在 PLAYING 但播放器没在跑”的残留
             // 会同时锁死摇杆（被当成播放中忽略）并让界面的兜底启动误判“已在播”而跳过
             mScriptState = SCRIPT_STATE_IDLE;
+            refreshNotification();
             if (mScriptListener != null) {
                 mScriptListener.onScriptStopped();
             }
@@ -786,6 +846,9 @@ public class ServiceGo extends Service {
 
         // 脚本起点也记一份，服务重启后能回到轨迹附近
         saveLastPosition();
+
+        // 通知栏挂上“暂停”按钮
+        refreshNotification();
     }
 
     /** 停止脚本播放，回到手动控制（当前坐标保持不变） */
@@ -809,9 +872,71 @@ public class ServiceGo extends Service {
                 .remove(KEY_LAST_SCRIPT_ID)
                 .apply();
 
+        // 通知栏撤掉“暂停”按钮、文案回到默认
+        refreshNotification();
+
         if (hadScript && mScriptListener != null) {
             mScriptListener.onScriptStopped();
         }
+    }
+
+    /**
+     * 暂停脚本播放：位置停在原地，时间轴冻结，进度保留。
+     *
+     * <p>暂停期间脚本仍占有位置（{@link #isScriptDrivingPosition()} 同样把暂停算作接管），
+     * 摇杆 / 传送 / 点击移动保持被拦，恢复播放时才能从暂停处原地接着走。
+     * 同时把注入速度记为 0，避免上层应用看到“位置不动却还在移动”。</p>
+     *
+     * @return 是否进入暂停（没在播放脚本时返回 false）
+     */
+    public boolean pauseScript() {
+        if (mScriptState != SCRIPT_STATE_PLAYING || mScriptPlayer == null || !mScriptPlayer.isPlaying()) {
+            return false;
+        }
+
+        mScriptPlayer.pause();
+        mScriptState = SCRIPT_STATE_PAUSED;
+        mSpeed = 0;
+        refreshNotification();
+        XLog.i("SERVICEGO: script paused");
+
+        if (mScriptListener != null) {
+            mScriptListener.onScriptPaused();
+        }
+        return true;
+    }
+
+    /**
+     * 继续播放暂停中的脚本，从暂停的位置原地接着走。
+     *
+     * @return 是否恢复成功（没有脚本在暂停时返回 false）
+     */
+    public boolean resumeScript() {
+        if (mScriptState != SCRIPT_STATE_PAUSED || mScriptPlayer == null) {
+            return false;
+        }
+
+        // 恢复前照启动时一样把测试提供者 / 注入线程补齐（暂停期间可能被别的流程收走过）
+        ensureMockEnvironment();
+        if (!mScriptPlayer.resume()) {
+            // 播放器已不在暂停态（例如刚被 stop 过）：把残留的“暂停”状态纠正回 IDLE
+            XLog.e("SERVICEGO: resume requested but player is not paused");
+            mScriptState = SCRIPT_STATE_IDLE;
+            refreshNotification();
+            if (mScriptListener != null) {
+                mScriptListener.onScriptStopped();
+            }
+            return false;
+        }
+
+        mScriptState = SCRIPT_STATE_PLAYING;
+        refreshNotification();
+        XLog.i("SERVICEGO: script resumed");
+
+        if (mScriptListener != null) {
+            mScriptListener.onScriptResumed();
+        }
+        return true;
     }
 
     /**
@@ -1021,6 +1146,15 @@ public class ServiceGo extends Service {
                         mJoyStick.hide();
                     }
                 }
+
+                // 通知栏“暂停 / 继续”：后台跑脚本时唯一够得着的控制入口
+                if (action.equals(SERVICE_GO_NOTE_ACTION_SCRIPT_PAUSE)) {
+                    pauseScript();
+                }
+
+                if (action.equals(SERVICE_GO_NOTE_ACTION_SCRIPT_RESUME)) {
+                    resumeScript();
+                }
             }
         }
     }
@@ -1065,6 +1199,21 @@ public class ServiceGo extends Service {
         /** 停止脚本播放 */
         public void stopScript() {
             ServiceGo.this.stopScript();
+        }
+
+        /** 暂停脚本播放（位置停在原地，进度保留）；没在播放时返回 false */
+        public boolean pauseScript() {
+            return ServiceGo.this.pauseScript();
+        }
+
+        /** 继续播放暂停中的脚本；没有脚本在暂停时返回 false */
+        public boolean resumeScript() {
+            return ServiceGo.this.resumeScript();
+        }
+
+        /** 脚本是否处于暂停中（用于界面把“暂停 / 继续”按钮切到正确一侧） */
+        public boolean isScriptPaused() {
+            return mScriptState == SCRIPT_STATE_PAUSED;
         }
 
         /** 切换“点击移动 ⇄ 摇杆移动”（主界面左下角开关） */
@@ -1155,9 +1304,10 @@ public class ServiceGo extends Service {
             applyRealLocation(lng, lat);
         }
 
-        /** 当前正在播放的脚本 id；没在播放（含已跑完）时返回 null */
+        /** 当前正在播放的脚本 id；没在播放（含已跑完、已停止）时返回 null，暂停中照常返回 */
         public String getRunningScriptId() {
-            if (mScriptState != SCRIPT_STATE_PLAYING || mScriptRoute == null) {
+            if ((mScriptState != SCRIPT_STATE_PLAYING && mScriptState != SCRIPT_STATE_PAUSED)
+                    || mScriptRoute == null) {
                 return null;
             }
             return mScriptRoute.id;

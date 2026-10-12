@@ -11,6 +11,10 @@ import java.util.List;
  *
  * <p>start / stop 可能在主线程调用，而 onTick 在定位线程调用，所以这几个入口都做成同步方法，
  * 回调也统一由引擎自己加锁，避免“停止播放”和“推进位置”交叉执行。</p>
+ *
+ * <p>支持暂停 / 继续：暂停期间时间轴整体冻结（onTick 直接空转），
+ * 继续时把暂停的时长从起始时刻里补回去，因此恢复后从暂停处原地接着走，
+ * 既不会跳过路段，也不会瞬移回别处。</p>
  */
 public class ScriptPlayer {
     /** 地球平均半径（米） */
@@ -26,6 +30,10 @@ public class ScriptPlayer {
     private ScriptRoute mRoute;
     private boolean mPlaying;
     private boolean mEndReached;
+    /** 是否处于暂停中：暂停期间 onTick 空转，位置停在原地 */
+    private boolean mPaused;
+    /** 进入暂停的时刻（毫秒），继续播放时把这段时长从时间轴里补回去 */
+    private long mPausedRealtime;
 
     /** 开始播放的时刻（毫秒，用来把等待时间和移动时间统一成一条时间轴） */
     private long mStartRealtime;
@@ -124,6 +132,7 @@ public class ScriptPlayer {
         mLoop = route.isLoop();
         mEndReached = false;
         mHasPosition = false;
+        mPaused = false;
         mOverrideMode = null;
         mOverrideSpeed = 0;
         mElapsedInSegment = 0;
@@ -193,11 +202,52 @@ public class ScriptPlayer {
     public synchronized void stop() {
         mPlaying = false;
         mEndReached = false;
+        mPaused = false;
         mRoute = null;
         mOverrideMode = null;
         mOverrideSpeed = 0;
         mElapsedInSegment = 0;
         mConsumedSeconds = 0;
+    }
+
+    /**
+     * 暂停播放：位置停在原地，时间轴冻结。
+     *
+     * <p>暂停不等于停止：路线、进度、手动切换过的状态全部保留，
+     * 只是不再按时间推进；恢复时从暂停的位置原地接着走。</p>
+     *
+     * <p>没在播放、已到终点或已经暂停过时为空操作。</p>
+     */
+    public synchronized void pause() {
+        if (!mPlaying || mRoute == null || mEndReached || mPaused) {
+            return;
+        }
+
+        mPaused = true;
+        mPausedRealtime = System.currentTimeMillis();
+    }
+
+    /**
+     * 继续播放暂停中的脚本。
+     *
+     * <p>把暂停的时长加回起始时刻，等价于“这段时间里时钟没走”，
+     * 因此恢复后 elapsed 从暂停处继续，不会跳过任何路段。</p>
+     *
+     * @return 是否恢复成功（没在暂停时返回 false）
+     */
+    public synchronized boolean resume() {
+        if (!mPlaying || mRoute == null || mEndReached || !mPaused) {
+            return false;
+        }
+
+        mStartRealtime += System.currentTimeMillis() - mPausedRealtime;
+        mPaused = false;
+        return true;
+    }
+
+    /** 是否处于暂停中（与 {@link #isPlaying()} 互补：暂停时仍在播放，只是不推进） */
+    public synchronized boolean isPaused() {
+        return mPaused;
     }
 
     /**
@@ -235,10 +285,12 @@ public class ScriptPlayer {
         mOverrideSpeed = speed;
 
         // 新模型下 v0 = v1 = 新速度，所以“已走 covered 米”等价于新时间轴上的 covered / speed 秒。
-        // 时间轴 = 原始时钟 - 已消费时间，所以要把 mConsumedSeconds 一起加回去
+        // 时间轴 = 原始时钟 - 已消费时间，所以要把 mConsumedSeconds 一起加回去。
+        // 暂停中改状态时，时钟按“停在暂停那一刻”算：暂停的时间不参与推进，
+        // 这样继续播放时 elapsed 正好从切换时的进度接着走
         double elapsed = Math.min(segment, Math.max(0, covered)) / speed;
-        mStartRealtime = System.currentTimeMillis()
-                - (long) Math.round((elapsed + mConsumedSeconds) * 1000.0);
+        long now = mPaused ? mPausedRealtime : System.currentTimeMillis();
+        mStartRealtime = now - (long) Math.round((elapsed + mConsumedSeconds) * 1000.0);
         mElapsedInSegment = elapsed;
 
         return true;
@@ -256,7 +308,7 @@ public class ScriptPlayer {
      * （包括停留时间，也不需要额外计时器）。</p>
      */
     public synchronized boolean onTick() {
-        if (!mPlaying || mRoute == null || mEndReached) {
+        if (!mPlaying || mRoute == null || mEndReached || mPaused) {
             return false;
         }
 

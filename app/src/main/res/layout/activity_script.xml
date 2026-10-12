@@ -58,6 +58,28 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
+
+            <!-- 暂停 / 继续播放：播放中常驻，暂停后同一个按钮变成“继续播放” -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/script_pause_resume"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:minHeight="40dp"
+                android:minWidth="0dp"
+                android:paddingEnd="8dp"
+                android:paddingStart="8dp"
+                android:text="@string/script_pause"
+                android:textColor="@color/m3_on_secondary_container"
+                android:textSize="13sp"
+                app:backgroundTint="@color/m3_secondary_container"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_pause"
+                app:iconGravity="textStart"
+                app:iconPadding="4dp"
+                app:iconSize="14dp"
+                app:iconTint="@color/m3_on_secondary_container"
+                app:strokeWidth="0dp" />
         </LinearLayout>
 
         <TextView

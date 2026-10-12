@@ -164,6 +164,15 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private String mPendingScriptId;
     /** 已经发出“停止移动”、但服务连接还没回来时的挂起标记，连上后再补一次停止 */
     private boolean mPendingStop;
+    /**
+     * 脚本是否处于暂停中（由服务端状态回调 / 每次同步更新）。
+     *
+     * <p>暂停与播放共用“正在播放”的本地缓存 {@link #mRunningScriptId}，
+     * 单独记一个标记才能把“暂停 / 继续”按钮切到正确一侧。</p>
+     */
+    private volatile boolean mScriptPaused;
+    /** 已经点过“暂停 / 继续”、但服务连接还没回来时记下的目标状态，连上后补执行一次 */
+    private Boolean mPendingPauseRequest;
     /** 左下角开关的状态：true = 点击移动，false = 摇杆移动（默认由“移动类型”设置决定） */
     private boolean mClickMoveEnabled;
     /** 左下角“点击移动 ⇄ 摇杆移动”开关，模拟位置运行期间才显示 */
@@ -194,6 +203,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private TextView mRouteHint;
     private Spinner mRouteModeSpinner;
     private MaterialButton mRouteGoButton;
+    /** 路线操作条上的“暂停 / 继续”按钮（路线没有在跑时隐藏） */
+    private MaterialButton mRoutePauseButton;
     /** 路线连线：点地图加路点时实时重画 */
     private Polyline mRouteLine;
     private final List<Marker> mRouteMarkers = new ArrayList<>();
@@ -1211,6 +1222,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             // 跑完 = 结束：本地也按“没在播”处理，路线条直接回到“开始移动”、
             // 传送/点击移动不再被“播放中”拦截，模拟位置可以立刻继续
             mRunningScriptId = null;
+            mScriptPaused = false;
             runOnUiThread(() -> {
                 updateScriptButton();
                 GoUtils.DisplayToast(MainActivity.this, getResources().getString(R.string.script_finished));
@@ -1220,6 +1232,19 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         @Override
         public void onScriptStopped() {
             mRunningScriptId = null;
+            mScriptPaused = false;
+            runOnUiThread(MainActivity.this::updateScriptButton);
+        }
+
+        @Override
+        public void onScriptPaused() {
+            mScriptPaused = true;
+            runOnUiThread(MainActivity.this::updateScriptButton);
+        }
+
+        @Override
+        public void onScriptResumed() {
+            mScriptPaused = false;
             runOnUiThread(MainActivity.this::updateScriptButton);
         }
     };
@@ -1305,6 +1330,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             try {
                 mServiceBinder.stopScript();
                 mRunningScriptId = null;
+                mScriptPaused = false;
                 updateScriptButton();
                 Snackbar.make(v, getResources().getString(
                                 finished ? R.string.script_finished : R.string.script_stopped),
@@ -1338,6 +1364,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mRouteBar = findViewById(R.id.route_bar);
         mRouteHint = findViewById(R.id.route_hint);
         mRouteGoButton = findViewById(R.id.route_go);
+        mRoutePauseButton = findViewById(R.id.route_pause);
 
         mRouteModeSpinner = findViewById(R.id.route_mode);
         if (mRouteModeSpinner != null) {
@@ -1390,6 +1417,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     startMapRoute();
                 }
             });
+        }
+        if (mRoutePauseButton != null) {
+            mRoutePauseButton.setOnClickListener(v -> toggleMapRoutePause());
         }
 
         // 连线图层：先放进地图，选点过程中不断更新坐标列表
@@ -1523,7 +1553,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 R.string.route_point_title, this::updateRouteUi);
     }
 
-    /** 刷新操作条：已选点数 + 主按钮是“开始移动”还是“停止移动” */
+    /** 刷新操作条：已选点数 + 主按钮是“开始移动”还是“停止移动”，以及暂停 / 继续按钮的状态 */
     private void updateRouteUi() {
         if (mRouteHint != null) {
             int count = mRoutePoints.size();
@@ -1538,6 +1568,52 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             // 只在 XML 里写死一个图标的话，文案变成“停止移动”时图标还指着移动，会误导
             mRouteGoButton.setText(playing ? R.string.route_stop : R.string.route_go);
             mRouteGoButton.setIconResource(playing ? R.drawable.ic_close : R.drawable.ic_move);
+        }
+
+        if (mRoutePauseButton != null) {
+            // 暂停按钮只在这条路线跑着时出现；暂停中换成“继续”（图标 暂停 ⇄ 播放）
+            boolean active = isMapRoutePlaying();
+            mRoutePauseButton.setVisibility(active ? View.VISIBLE : View.GONE);
+            if (active) {
+                mRoutePauseButton.setText(mScriptPaused ? R.string.route_resume : R.string.route_pause);
+                mRoutePauseButton.setIconResource(mScriptPaused ? R.drawable.ic_play : R.drawable.ic_pause);
+            }
+        }
+    }
+
+    /**
+     * 路线操作条上的“暂停 / 继续”切换。
+     *
+     * <p>暂停 = 位置停在原地、进度保留；继续 = 从暂停处原地接着走（不会瞬移、不会跳段）。
+     * 服务还没绑上时先记住请求，连上后在 {@link #syncStateWithService()} 里补执行，
+     * 避免“点了一下没反应”。</p>
+     */
+    private void toggleMapRoutePause() {
+        if (mServiceBinder == null) {
+            mPendingPauseRequest = !mScriptPaused;
+            bindServiceIfNeeded();
+            return;
+        }
+
+        try {
+            if (mScriptPaused) {
+                boolean ok = mServiceBinder.resumeScript();
+                if (ok) {
+                    mScriptPaused = false;
+                }
+                GoUtils.DisplayToast(this, getResources().getString(
+                        ok ? R.string.script_resumed_toast : R.string.script_resume_fail));
+            } else {
+                boolean ok = mServiceBinder.pauseScript();
+                if (ok) {
+                    mScriptPaused = true;
+                }
+                GoUtils.DisplayToast(this, getResources().getString(
+                        ok ? R.string.script_paused_toast : R.string.script_pause_fail));
+            }
+            updateRouteUi();
+        } catch (Exception e) {
+            XLog.e("ERROR: toggleMapRoutePause", e);
         }
     }
 
@@ -1619,6 +1695,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             }
             startForegroundService(intent);
             mRunningScriptId = route.id;
+            mScriptPaused = false;
             updateScriptButton();
             // 服务已经在跑时立刻校验一次：服务端没在播就用 binder 补启动
             ensureScriptPlaying(route.id);
@@ -1664,6 +1741,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         }
 
         mRunningScriptId = null;
+        mScriptPaused = false;
         updateScriptButton();
         GoUtils.DisplayToast(this, getResources().getString(R.string.script_stopped));
     }
@@ -1697,6 +1775,11 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             boolean playingSame = mServiceBinder.isScriptPlaying()
                     && scriptId.equals(mServiceBinder.getRunningScriptId());
             if (playingSame) {
+                // 暂停中又点了一次“开始”：当作继续播放，而不是重新对齐轨迹
+                if (mServiceBinder.isScriptPaused() && mServiceBinder.resumeScript()) {
+                    mScriptPaused = false;
+                    updateRouteUi();
+                }
                 mRunningScriptId = scriptId;
                 return;
             }
@@ -1704,6 +1787,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             boolean ok = mServiceBinder.startScript(scriptId);
             if (ok) {
                 mRunningScriptId = scriptId;
+                mScriptPaused = false;
             } else {
                 GoUtils.DisplayToast(this, getResources().getString(R.string.script_start_fail));
             }
@@ -1719,6 +1803,17 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         }
 
         try {
+            // 挂起的“暂停 / 继续”请求连上后先落地（点按钮时服务还没绑上）
+            if (mPendingPauseRequest != null) {
+                boolean wantPause = mPendingPauseRequest;
+                mPendingPauseRequest = null;
+                if (wantPause) {
+                    mServiceBinder.pauseScript();
+                } else {
+                    mServiceBinder.resumeScript();
+                }
+            }
+
             if (mPendingStop) {
                 mPendingStop = false;
                 mServiceBinder.stopScript();
@@ -1736,6 +1831,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     new ScriptStore(MainActivity.this).setRunningScriptId(null);
                 }
             }
+
+            // 暂停状态同样以服务端为准（暂停可能是在通知栏 / 脚本页发起的）
+            mScriptPaused = mServiceBinder.isScriptPaused();
         } catch (Exception e) {
             XLog.e("ERROR: syncStateWithService", e);
         }
@@ -1834,6 +1932,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         // 解绑后不会再有连接回调，挂起的开始 / 停止请求无处落地，先作废
         mPendingScriptId = null;
         mPendingStop = false;
+        mPendingPauseRequest = null;
 
         if (!mBoundToService && !isMockServStart) {
             return;
@@ -2212,10 +2311,13 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         doGoLocationAction(v);
     }
 
-    /** 脚本是否正在播放（服务没绑定时以持久状态为准，跑完时服务端会把它清掉） */
+    /** 脚本是否正在播放或暂停中（服务没绑定时以持久状态为准，跑完时服务端会把它清掉） */
     private boolean isScriptPlaying() {
         if (mServiceBinder != null) {
-            return mServiceBinder.getScriptState() == ServiceGo.SCRIPT_STATE_PLAYING;
+            int state = mServiceBinder.getScriptState();
+            // 暂停也算“脚本占着位置”：传送 / 终止同样会打断它，先弹确认
+            return state == ServiceGo.SCRIPT_STATE_PLAYING
+                    || state == ServiceGo.SCRIPT_STATE_PAUSED;
         }
         return new ScriptStore(this).getRunningScriptId() != null;
     }
