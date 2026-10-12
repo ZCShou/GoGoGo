@@ -81,6 +81,7 @@ import com.zcshou.service.ServiceGo;
 import com.zcshou.database.DataBaseHistoryLocation;
 import com.zcshou.database.DataBaseHistorySearch;
 import com.zcshou.script.ScriptParser;
+import com.zcshou.script.ScriptPlayer;
 import com.zcshou.script.ScriptRoute;
 import com.zcshou.script.ScriptStore;
 import com.zcshou.script.ScriptWaypoint;
@@ -2298,21 +2299,69 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     }
 
     /**
+     * 点击行走的预计里程：从当前位置按队列顺序走完全部待走目标的路径长度。
+     *
+     * <p>只在操作条刷新时重算（加点 / 撤回 / 清空 / 到站 / 暂停切换），作为“预计”值展示，
+     * 不追求逐帧精确。当前位置取服务端注入端的坐标（人物此刻真正所在的位置）；
+     * 服务没连上时退化成只累计目标之间的路径，缺“当前位置 → 第一个目标”这一截。</p>
+     */
+    private double clickMoveEstimatedDistance() {
+        if (mClickMovePoints.isEmpty()) {
+            return 0;
+        }
+
+        double lng;
+        double lat;
+        double[] position = null;
+        if (mServiceBinder != null) {
+            try {
+                position = mServiceBinder.getCurrentPosition();
+            } catch (Exception e) {
+                XLog.e("ERROR: getCurrentPosition", e);
+            }
+        }
+
+        if (position != null && position.length >= 2) {
+            lng = position[0];
+            lat = position[1];
+        } else {
+            // 服务没连上：从队头目标起算
+            ScriptWaypoint first = mClickMovePoints.get(0);
+            lng = first.lng;
+            lat = first.lat;
+        }
+
+        double total = 0;
+        for (ScriptWaypoint point : mClickMovePoints) {
+            total += ScriptPlayer.distanceMeters(lng, lat, point.lng, point.lat);
+            lng = point.lng;
+            lat = point.lat;
+        }
+        return total;
+    }
+
+    /**
      * 刷新点击移动相关的按钮与提示文案。
      *
      * <p>点击移动模式下点地图连续添加目标，这条操作条负责撤回 / 清空 / 开始行走，
-     * 与脚本路线的选点操作方式保持一致。</p>
+     * 与脚本路线的选点操作方式保持一致；提示行同时给出剩余目标数与预计里程。</p>
      */
     private void updateClickMoveUi() {
         if (mClickMoveHint != null) {
             int count = mClickMovePoints.size();
-            // 暂停中把状态写进提示行：位置停在原地，别让用户以为还在走
-            if (mClickMovePaused) {
-                mClickMoveHint.setText(getResources().getString(R.string.click_move_hint_paused, count));
+            if (count == 0) {
+                mClickMoveHint.setText(getResources().getString(R.string.click_move_hint_empty));
             } else {
-                mClickMoveHint.setText(count == 0
-                        ? getResources().getString(R.string.click_move_hint_empty)
-                        : getResources().getString(R.string.click_move_hint_count, count));
+                // 预计里程：当前位置 → 队列里每个目标依次相连的路径长度
+                String distance = ScriptParser.formatDistance(clickMoveEstimatedDistance());
+                // 暂停中把状态写进提示行：位置停在原地，别让用户以为还在走
+                if (mClickMovePaused) {
+                    mClickMoveHint.setText(getResources().getString(
+                            R.string.click_move_hint_paused, count, distance));
+                } else {
+                    mClickMoveHint.setText(getResources().getString(
+                            R.string.click_move_hint_count, count, distance));
+                }
             }
         }
 

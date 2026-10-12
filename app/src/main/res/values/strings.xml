@@ -286,13 +286,13 @@
 
     <!-- 点击移动：连续添加目标点 + 行进轨迹 -->
     <string name="click_move_hint_empty">点击地图添加目标，可连续添加多个</string>
-    <string name="click_move_hint_count">还有 %1$d 个目标待走 · 点地图继续添加</string>
+    <string name="click_move_hint_count">还有 %1$d 个目标待走 · 预计 %2$s · 点地图继续添加</string>
     <string name="click_move_point_title">目标 %1$d</string>
     <string name="click_move_go">开始行走</string>
     <string name="click_move_stop">停止行走</string>
     <string name="click_move_pause">暂停</string>
     <string name="click_move_resume">继续</string>
-    <string name="click_move_hint_paused">已暂停行走，位置停在原地 · 还有 %1$d 个目标待走</string>
+    <string name="click_move_hint_paused">已暂停行走，位置停在原地 · 还有 %1$d 个目标待走 · 预计 %2$s</string>
     <string name="click_move_paused_toast">行走已暂停，位置停在原地</string>
     <string name="click_move_resumed_toast">已继续朝目标行走</string>
     <string name="click_move_pause_fail">当前没有在朝目标行走</string>

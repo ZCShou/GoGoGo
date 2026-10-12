@@ -1418,6 +1418,16 @@ public class ServiceGo extends Service {
                 mJoyStick.setCurrentPosition(mCurLng, mCurLat, mCurAlt);
             }
         }
+
+        /**
+         * 当前模拟位置（经度、纬度，WGS-84）。
+         *
+         * <p>界面用它估算点击行走的“预计里程”：注入端每拍都在推进这个坐标，
+         * 所以读到的就是人物此刻真正所在的位置。</p>
+         */
+        public double[] getCurrentPosition() {
+            return new double[] {mCurLng, mCurLat};
+        }
     }
 }
 
