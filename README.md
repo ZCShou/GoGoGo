@@ -1,107 +1,83 @@
-<p align="center">
-<img src="./docs/images/LOGO.png" height="80"/>
-</p>
+# 影梭
 
-<div align="center">
+影梭（VirtGO）是一款 Android 位置模拟应用，支持地图选点、位置搜索、坐标输入、线路移动和悬浮摇杆，并提供位置与线路的收藏、历史记录和 GPX 导入导出。“影”寓意位置的影子，“梭”寓意在位置与线路之间穿梭。
 
-[![GitHub stars](https://img.shields.io/github/stars/ZCShou/GoGoGo?logo=github)](https://github.com/ZCShou/GoGoGo/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/ZCShou/GoGoGo?logo=github)](https://github.com/ZCShou/GoGoGo/network)
-[![license](https://img.shields.io/github/license/ZCShou/GoGoGo)](https://github.com/ZCShou/GoGoGo/blob/master/LICENSE)
-[![GitHub Release](https://img.shields.io/github/v/release/ZCShou/GoGoGo?label=Release)](https://github.com/ZCShou/GoGoGo/releases)
-[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
-</div>
-<div align="center">
+[查看发布版本](https://github.com/ZCShou/GoGoGo/releases) · [问题反馈](https://github.com/ZCShou/GoGoGo/issues)
 
-[![Build Check](https://github.com/ZCShou/GoGoGo/actions/workflows/build-check.yml/badge.svg)](https://github.com/ZCShou/GoGoGo/actions/workflows/build-check.yml)
-[![CodeQL](https://github.com/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml)
-</div>
+## 1. 功能
 
-<div align="center">
-影梭 - 用于 Android 8.0+ 的无需 ROOT 权限的虚拟定位 APP
-</div>
+影梭将位置选择、线路编辑与运行控制集中在一个应用中，既能固定到一个位置，也能沿线路或通过摇杆连续移动。本页介绍当前维护版本的功能；下载历史版本时，请同时查看对应 Release 的功能与系统要求。
 
-## 简介
-&emsp;&emsp;影梭是一个基于 Android 调试 API + 百度地图及定位 SDK 实现的安卓定位修改工具，并且同时实现了一个可以自由控制移动的摇杆。使用影梭，不需要 ROOT 权限就可以随意修改自己的当前位置以及模拟移动。
+![影梭的位置、线路与运行控制功能](images/feature-overview.png)
 
-1. 源码仓库：[Github](https://github.com/ZCShou/GoGoGo)（推荐）、[Gitee](https://gitee.com/itexp/gogogo)（镜像）
-2. 下载地址：[Github](https://github.com/ZCShou/GoGoGo/releases)（推荐）、[Gitee](https://gitee.com/itexp/gogogo/releases)（镜像）
+### 1.1 位置选择与模拟
 
-## 警告一
-&emsp;&emsp;**最近，有网友直接白嫖影梭后改名为标枪定位，然后添加广告（除了加广告，功能没有任何改变），但是，没有按照 GPLv3 协议的要求进行开源（我已经联系过该网友进了提醒，但并没有收到回复），在此提醒：**
-1. **开源 ≠ 白嫖，请遵循开源协议**
-2. **GPL 的法律效力在国内相关诉讼案例很多，请自行搜索，权衡利弊。影梭保留追究相关侵权人员法律责任的所有权利！**
-3. **开源不易，且行且珍惜**
+在位置页点击地图、搜索地点，或直接输入经纬度，选择目标后启动位置模拟。地图支持普通、卫星和夜间显示，便于在不同环境下查看位置。
 
-## 警告二
-&emsp;&emsp;**最近，有很多人将影梭用在校园运动类 APP（包括但不限于闪动校园、TakeTwo、运动世界校园等）中作弊，开发者也收到了很多人提问为何影梭定位并不起作用或者寻求对影梭的改进，在此提醒：**
-1. **影梭不支持任何校园运动类 APP 的作弊行为**
-2. **影梭开发者也不赞同采用任何形式在校园运动中作弊**
+- 在地图上选择位置，查看坐标与地点信息。
+- 通过地点搜索或坐标输入定位到目标位置。
+- 保存常用地点，查看和重新选择位置历史。
+- 启动、停止位置模拟，并在运行通知中查看服务状态。
 
-## 背景
-&emsp;&emsp;之前在玩一款 VR 游戏：一起来捉妖。为了省事，就想有没有可以更改位置的 APP。经过一番摸索发现确实有不少可以修改位置的 APP。但是，绝大多数这种 APP 都是收费的，而且贼贵！
+### 1.2 线路编辑与移动
 
-&emsp;&emsp;我比较感兴趣的是这样的技术是如何实现的，因此，决定研究研究自己写一个！现在游戏已经弃坑了，但是技术不能丢。因此，将研究结果开源出来方便大家一起学习！但是请注意（重要的事情说三遍！否则后果自负）：
+在线路页依次选择多个位置形成线路，保存后可从历史记录中重新选择和编辑。运行时按线路节点模拟连续移动，而不只改变一个固定坐标。
 
-1. 该 APP 仅仅是为了学习 Android + 百度地图的实现方法，请勿用于游戏作弊！
-2. 该 APP 仅仅是为了学习 Android + 百度地图的实现方法，请勿用于游戏作弊！
-3. 该 APP 仅仅是为了学习 Android + 百度地图的实现方法，请勿用于游戏作弊！
+- 添加、调整和删除线路节点，查看线路距离与时长。
+- 命名和保存线路，管理线路历史及收藏。
+- 导入、导出 GPX 文件，复用已有地点和线路数据。
+- 根据运动参数控制线路移动速度及位置更新行为。
 
-## 功能
-1. 定位修改
-2. 摇杆控制移动
-3. 历史记录
-4. 位置搜索
-5. 直接输入坐标
+线路从节点选择开始，经过保存和选择后再启动移动。下图说明功能流程，并非实际地图或运行轨迹截图。
 
-## 截图
-![joystick.jpg](./docs/images/joystick.jpg)
-![search_history.jpg](./docs/images/search_history.jpg)
-![map.jpg](./docs/images/map.jpg)
+![影梭线路编辑与移动流程](images/route-workflow.png)
 
-## 用法
-1. 下载 APK 直接安装
-2. 启动影梭，赋予相关权限
-3. 单击地图位置，然后点击启动按钮
+### 1.3 悬浮摇杆
 
-## 文档
-&emsp;&emsp;由于本人并不是做移动开发的，很多功能代码写的都比较差。我也第一次写  Android APP，目前还处在学习中。。。此外，就一个简单的 APP，应该也不需要啥文档，开发过程中遇到的一些问题，我一般都会记录在个人博客中，具体参见：https://blog.csdn.net/zcshoucsdn/category_10559121.html
+取得悬浮窗权限后，可以通过悬浮摇杆控制移动方向，在查看其他页面时继续调整模拟位置。摇杆支持圆形和按钮两种样式，以及不同显示尺寸。
 
-&emsp;&emsp;如果有疑问可以直接搜索 ISSUE 或者 在上面直接提交问题。
+- 切换步行、跑步、骑行速度模式，并调整各模式速度。
+- 显示或隐藏摇杆，控制其样式和尺寸。
+- 在系统允许的后台条件下维持位置模拟服务。
 
-## 参考
-&emsp;&emsp;由于本人也是个新手，纯属业余瞎搞，因此，在写影梭的过程中，参考了很多网友分享的技术文章、示例代码等。包括但不限于以下列出的几个：
-1. https://github.com/Hilaver/MockGPS
-2. https://github.com/bxxfighting/together-go
-3. https://github.com/P72B/Mocklation
+### 1.4 收藏与参数设置
 
-&emsp;&emsp;还有些 CSDN 上的文章，目前不记得地址了，如果您发现其中有直接引用或借鉴您的地方，请与我联系，我会再第一时间进行处理，谢谢！
+常用位置和线路可通过收藏、分组及置顶进行整理。运动设置用于调整速度、海拔、方向、卫星数量、定位精度及更新间隔；参数是否被其他应用采用，仍取决于系统与目标应用的处理方式。
 
-## FAQ
-Q：为何不支持 Android 8.0 以下版本？
+### 1.5 独立安装实例
 
-A：因为手里没有机器无法进行适配。。。
+影梭可在满足应用内账号与会员条件时创建自身的独立安装实例，设置独立的应用名称、包名和地图配置，用于分别管理不同的配置与数据。该功能创建的是影梭自身的分身，不是任意第三方应用的多开容器。
 
-Q：为何定位不是很稳定，偶尔会飘回真实位置？
+创建和安装过程会检查包信息、签名与授权状态。地图配置应与实例的实际包名和签名对应，具体要求以应用内提示为准。
 
-A：这是是由于实现原理导致的，Android 调试 API 固有的问题。确切的说，应该是由于手机本身还开启了其他定位方式（例如，基站定位、wifi定位等）导致的
+## 2. 安装与启动
 
-Q：是否支持鸿蒙系统？
+当前维护版本面向 Android 10 及以上系统，正式发布包使用 ARM64（`arm64-v8a`）架构。历史发布版本的系统要求可能不同，下载时以对应版本说明为准。
 
-A：经过测试，影梭可以在鸿蒙系统上正常运行。
+### 2.1 取得应用
 
-Q：为何在微信等腾讯系应用上定位不起作用？
+从 [GitHub Releases](https://github.com/ZCShou/GoGoGo/releases) 选择需要的版本，在 Assets 中下载 APK 并安装。应用内“关于影梭”可查看当前版本和检查更新。
 
-A：建议去问一下腾讯。
+### 2.2 配置权限
 
-Q：编译时 java 报错？
+位置模拟通过 Android 的模拟位置接口工作，通常不需要 Root。首次使用时，需要按应用提示授予定位权限，并在系统开发者选项中将影梭选为“模拟位置信息应用”；使用摇杆还需要允许悬浮窗。
 
-A：Gradle 使用的 java 版本与 Android Studio 使用的不一致。Gradle 默认会在环境变量中搜索 JAVA_HOME 来确定 Java 位置。
+![影梭首次使用的权限与启动步骤](images/quick-start.png)
 
-## 如何贡献
-1. FORK -> PR
-2. 加入影梭开发，共同完善
+完成配置后，回到影梭选择一个位置或线路并启动。模拟位置应用的设置入口、后台运行与电池管理规则会随手机系统不同而变化。
 
-## 许可证
-GPL-3.0-only © ZCShou
+### 2.3 运行条件
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo?ref=badge_large&issueType=license)
+后台持续运行、通知和定位权限会影响模拟服务的可用性。部分模拟及独立实例能力需要满足应用内显示的账号与会员条件；具体套餐和权限范围以当前版本界面为准。
+
+## 3. 使用与反馈
+
+位置模拟适合应用开发、地图与定位流程验证等场景。设置模拟位置不代表所有应用都会采纳相同结果，系统定位策略、坐标系、缓存和目标应用自身逻辑都可能影响显示。
+
+### 3.1 定位结果检查
+
+遇到位置偏差或未生效时，先检查模拟位置应用设置、定位权限和后台运行状态，再停止并重新启动模拟，在目标应用中刷新位置。地图显示坐标与系统位置坐标可能使用不同坐标系，不宜只比较界面上的数字判断是否出错。
+
+### 3.2 问题反馈
+
+通过 [GitHub Issues](https://github.com/ZCShou/GoGoGo/issues) 或应用内“帮助与反馈”提交问题时，请提供影梭版本、手机型号、Android 版本、使用的位置或线路模式、权限状态与复现步骤。分享地图、线路文件或截图前，请检查是否包含家庭地址等个人信息。
