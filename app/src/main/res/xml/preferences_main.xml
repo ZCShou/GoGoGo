@@ -79,6 +79,7 @@
             app:defaultValue="false"
             app:iconSpaceReserved="false"/>
         <EditTextPreference
+            app:dialogMessage="@string/setting_history_no_expiration_hint"
             app:key="setting_history_expiration"
             app:title="@string/setting_history_expiration"
             app:defaultValue="@string/history_expiration"

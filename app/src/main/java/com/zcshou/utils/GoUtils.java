@@ -81,9 +81,18 @@ public class GoUtils {
     }
 
     //判断GPS是否打开
+    @SuppressWarnings("deprecation")
     public static  boolean isGpsOpened(Context context) {
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // API 28+ 使用 isLocationEnabled，检查系统级定位开关，避免 Provider 状态缓存问题
+            return locationManager.isLocationEnabled();
+        } else {
+            // API 27 回退：直接读取系统设置中的定位模式
+            int locationMode = Settings.Secure.getInt(context.getContentResolver(),
+                    Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF);
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+        }
     }
 
     // 判断是否已在开发者选项中开启模拟位置权限（注意下面临时添加 @SuppressLint("wrongconstant") 以处理 addTestProvider 参数值的 lint 错误）

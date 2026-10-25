@@ -34,11 +34,11 @@
         android:textAlignment="center"
         android:layout_gravity="center"/>
 
-    <ListView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/record_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone">
-    </ListView>
+    </androidx.recyclerview.widget.RecyclerView>
 
 </LinearLayout>

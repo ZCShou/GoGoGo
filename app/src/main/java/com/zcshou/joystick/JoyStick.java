@@ -23,6 +23,8 @@ import android.widget.TextView;
 import android.widget.SearchView;
 
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.MapPoi;
@@ -35,7 +37,8 @@ import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.zcshou.database.DataBaseHistoryLocation;
-import com.zcshou.gogogo.HistoryActivity;
+import com.zcshou.gogogo.HistoryAdapter;
+import com.zcshou.gogogo.HistoryItem;
 import com.zcshou.gogogo.MainActivity;
 import com.zcshou.gogogo.R;
 import com.zcshou.utils.GoUtils;
@@ -80,10 +83,10 @@ public class JoyStick extends View {
     private final SharedPreferences sharedPreferences;
     /* 历史记录悬浮窗相关 */
     private FrameLayout mHistoryLayout;
-    private final List<Map<String, Object>> mAllRecord = new ArrayList<> ();
+    private final List<HistoryItem> mAllItems = new ArrayList<>();
     private TextView noRecordText;
-    private ListView mRecordListView;
-    /* 地图悬浮窗相关 */
+    private RecyclerView mRecordListView;
+    private HistoryAdapter mHistoryAdapter;
     private FrameLayout mMapLayout;
     private MapView mMapView;
     private BaiduMap mBaiduMap;
@@ -687,31 +690,23 @@ public class JoyStick extends View {
 
             @Override
             public boolean onQueryTextChange(String newText) {// 当搜索内容改变时触发该方法
-                if (TextUtils.isEmpty(newText)) {
-                    showHistory(mAllRecord);
-                } else {
-                    List<Map<String, Object>> searchRet = new ArrayList<>();
-                    for (int i = 0; i < mAllRecord.size(); i++){
-                        if (mAllRecord.get(i).toString().indexOf(newText) > 0){
-                            searchRet.add(mAllRecord.get(i));
-                        }
-                    }
-
-                    if (searchRet.size() > 0) {
-                        showHistory(searchRet);
-                    } else {
+                if (mHistoryAdapter != null) {
+                    mHistoryAdapter.filter(newText);
+                    if (!TextUtils.isEmpty(newText) && mHistoryAdapter.isFilteredEmpty()) {
                         GoUtils.DisplayToast(mContext, getResources().getString(R.string.app_search_null));
-                        showHistory(mAllRecord);
+                        mHistoryAdapter.filter(""); // 无结果时回退到全部
                     }
                 }
-
                 return false;
             }
         });
 
         noRecordText = mHistoryLayout.findViewById(R.id.joystick_his_record_no_textview);
         mRecordListView = mHistoryLayout.findViewById(R.id.joystick_his_record_list_view);
-        mRecordListView.setOnItemClickListener((adapterView, view, i, l) -> {
+        mRecordListView.setLayoutManager(new LinearLayoutManager(mContext));
+
+        mHistoryAdapter = new HistoryAdapter();
+        mHistoryAdapter.setOnItemClickListener(item -> {
             // 关闭时清除焦点
             mWindowParamCurrent.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -722,29 +717,25 @@ public class JoyStick extends View {
             mSearchView.onActionViewCollapsed();
             tips.setVisibility(VISIBLE);
 
-            // wgs84坐标
-            String wgs84LatLng = (String) ((TextView) view.findViewById(R.id.WGSLatLngText)).getText();
-            wgs84LatLng = wgs84LatLng.substring(wgs84LatLng.indexOf('[') + 1, wgs84LatLng.indexOf(']'));
-            String[] wgs84latLngStr = wgs84LatLng.split(" ");
+            // 从 HistoryItem 直接获取坐标，无需从 TextView 解析
+            String wgs84LatLngText = item.getWgsLatLngText();
+            wgs84LatLngText = wgs84LatLngText.substring(wgs84LatLngText.indexOf('[') + 1, wgs84LatLngText.indexOf(']'));
+            String[] wgs84latLngStr = wgs84LatLngText.split(" ");
             String wgs84Longitude = wgs84latLngStr[0].substring(wgs84latLngStr[0].indexOf(':') + 1);
             String wgs84Latitude = wgs84latLngStr[1].substring(wgs84latLngStr[1].indexOf(':') + 1);
 
             mListener.onPositionInfo(Double.parseDouble(wgs84Longitude), Double.parseDouble(wgs84Latitude), mAltitude);
 
-            // 注意这里在选择位置之后需要刷新地图
-            String bdLatLng = (String) ((TextView) view.findViewById(R.id.BDLatLngText)).getText();
-            bdLatLng = bdLatLng.substring(bdLatLng.indexOf('[') + 1, bdLatLng.indexOf(']'));
-            String[] bdLatLngStr = bdLatLng.split(" ");
-            String bdLongitude = bdLatLngStr[0].substring(bdLatLngStr[0].indexOf(':') + 1);
-            String bdLatitude = bdLatLngStr[1].substring(bdLatLngStr[1].indexOf(':') + 1);
-            mCurMapLngLat = new LatLng(Double.parseDouble(bdLatitude), Double.parseDouble(bdLongitude));
+            // 更新地图中心
+            mCurMapLngLat = new LatLng(item.getBdLatitude(), item.getBdLongitude());
 
             GoUtils.DisplayToast(mContext, getResources().getString(R.string.app_location_ok));
         });
 
-        fetchAllRecord();
+        mRecordListView.setAdapter(mHistoryAdapter);
 
-        showHistory(mAllRecord);
+        fetchAllRecord();
+        updateHistoryView();
 
         ImageButton btnClose = mHistoryLayout.findViewById(R.id.joystick_his_close);
         btnClose.setOnClickListener(v -> {
@@ -774,7 +765,6 @@ public class JoyStick extends View {
                     null, null, DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP + " DESC", null);
 
             while (cursor.moveToNext()) {
-                Map<String, Object> item = new HashMap<>();
                 int ID = cursor.getInt(0);
                 String Location = cursor.getString(1);
                 String Longitude = cursor.getString(2);
@@ -791,12 +781,13 @@ public class JoyStick extends View {
                 double doubleLatitude = bigDecimalLatitude.setScale(11, RoundingMode.HALF_UP).doubleValue();
                 double doubleBDLongitude = bigDecimalBDLongitude.setScale(11, RoundingMode.HALF_UP).doubleValue();
                 double doubleBDLatitude = bigDecimalBDLatitude.setScale(11, RoundingMode.HALF_UP).doubleValue();
-                item.put(HistoryActivity.KEY_ID, Integer.toString(ID));
-                item.put(HistoryActivity.KEY_LOCATION, Location);
-                item.put(HistoryActivity.KEY_TIME, GoUtils.timeStamp2Date(Long.toString(TimeStamp)));
-                item.put(HistoryActivity.KEY_LNG_LAT_WGS, "[经度:" + doubleLongitude + " 纬度:" + doubleLatitude + "]");
-                item.put(HistoryActivity.KEY_LNG_LAT_CUSTOM, "[经度:" + doubleBDLongitude + " 纬度:" + doubleBDLatitude + "]");
-                mAllRecord.add(item);
+
+                String timeStr = GoUtils.timeStamp2Date(Long.toString(TimeStamp));
+                String wgsLatLng = "[经度:" + doubleLongitude + " 纬度:" + doubleLatitude + "]";
+                String bdLatLng = "[经度:" + doubleBDLongitude + " 纬度:" + doubleBDLatitude + "]";
+
+                mAllItems.add(new HistoryItem(ID, Location, timeStr,
+                        wgsLatLng, bdLatLng, doubleBDLongitude, doubleBDLatitude));
             }
             cursor.close();
             mHistoryLocationDB.close();
@@ -805,25 +796,14 @@ public class JoyStick extends View {
         }
     }
 
-    private void showHistory(List<Map<String, Object>> list) {
-        if (list.size() == 0) {
+    private void updateHistoryView() {
+        if (mAllItems.isEmpty()) {
             mRecordListView.setVisibility(View.GONE);
             noRecordText.setVisibility(View.VISIBLE);
         } else {
             noRecordText.setVisibility(View.GONE);
             mRecordListView.setVisibility(View.VISIBLE);
-
-            try {
-                SimpleAdapter simAdapt = new SimpleAdapter(
-                        mContext,
-                        list,
-                        R.layout.history_item,
-                        new String[]{HistoryActivity.KEY_ID, HistoryActivity.KEY_LOCATION, HistoryActivity.KEY_TIME, HistoryActivity.KEY_LNG_LAT_WGS, HistoryActivity.KEY_LNG_LAT_CUSTOM}, // 与下面数组元素要一一对应
-                        new int[]{R.id.LocationID, R.id.LocationText, R.id.TimeText, R.id.WGSLatLngText, R.id.BDLatLngText});
-                mRecordListView.setAdapter(simAdapt);
-            } catch (Exception e) {
-                Log.e("JOYSTICK", "ERROR - showHistory");
-            }
+            mHistoryAdapter.setData(mAllItems);
         }
     }
 }

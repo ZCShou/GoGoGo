@@ -1,34 +1,14 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.12.1'
         // 谷歌官方推荐的用于隐藏地图 KEY 的插件 https://developers.google.com/maps/documentation/places/android-sdk/secrets-gradle-plugin?hl=zh-cn
-        classpath("com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1")
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+        classpath "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1"
     }
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    gradle.projectsEvaluated {
-        tasks.withType(JavaCompile).tap {
-            configureEach { // 用于显示过时 API 的详细信息
-                options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-            }
-        }
-    }
+plugins {
+    id 'com.android.application' version '8.12.1' apply false
 }
 
 tasks.register('clean', Delete) {
