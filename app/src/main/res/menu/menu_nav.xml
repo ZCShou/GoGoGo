@@ -18,6 +18,10 @@
                     android:icon="@drawable/ic_menu_settings"
                     android:title="@string/nav_menu_settings" />
                 <item
+                    android:id="@+id/nav_overlays"
+                    android:icon="@drawable/ic_menu_overlays"
+                    android:title="@string/nav_menu_overlays" />
+                <item
                     android:id="@+id/nav_dev"
                     android:icon="@drawable/ic_menu_dev"
                     android:title="@string/nav_menu_dev" />
