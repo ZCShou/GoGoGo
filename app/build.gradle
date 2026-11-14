@@ -4,6 +4,18 @@ plugins {
     id "com.google.android.libraries.mapsplatform.secrets-gradle-plugin"
 }
 
+def releaseVersionName = project.findProperty('releaseVersionName')?.toString()
+def releaseVersionCode = 1123
+if (releaseVersionName != null) {
+    def versionMatcher = releaseVersionName =~ /^(\d+)\.(\d+)\.(\d+)$/
+    if (!versionMatcher.matches()) {
+        throw new GradleException("Invalid releaseVersionName '${releaseVersionName}', expected X.Y.Z")
+    }
+    releaseVersionCode = (versionMatcher[0][1] as int) * 1000 + (versionMatcher[0][2] as int) * 10 + (versionMatcher[0][3] as int)
+} else {
+    releaseVersionName = '1.12.3'
+}
+
 android {
     ndkVersion = '26.2.11394342'
     compileSdk = 32
@@ -30,8 +42,8 @@ android {
         minSdkVersion 27
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 32
-        versionCode 1123
-        versionName '1.12.3' // https://semver.org/lang/zh-CN/
+        versionCode releaseVersionCode
+        versionName releaseVersionName // https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         resourceConfigurations += ['zh', 'zh-rCN', 'en', 'en-rUS']
         ndk {

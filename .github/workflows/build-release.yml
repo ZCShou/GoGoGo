@@ -27,7 +27,19 @@ jobs:
 
       - name: Get Tag
         id: var
-        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF#refs/*/}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            VERSION="${TAG#ReleaseV}"
+            VERSION="${VERSION#v}"
+            if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::Tag '$TAG' does not contain a valid X.Y.Z version"
+              exit 1
+            fi
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          fi
 
       # 创建 local.properties 文件
       - name: Create local.properties
@@ -38,7 +50,32 @@ jobs:
           EOF
 
       - name: Build APK
-        run: bash ./gradlew assembleRelease
+        env:
+          VERSION: ${{ steps.var.outputs.version }}
+        run: |
+          if [[ -n "$VERSION" ]]; then
+            bash ./gradlew assembleRelease -PreleaseVersionName="$VERSION"
+          else
+            bash ./gradlew assembleRelease
+          fi
+
+      - name: Verify APK Version
+        if: steps.var.outputs.version != ''
+        shell: bash
+        env:
+          VERSION: ${{ steps.var.outputs.version }}
+        run: |
+          APK=$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)
+          if [[ -z "$APK" ]]; then
+            echo "::error::Release APK not found"
+            exit 1
+          fi
+          BUILD_TOOL_VERSION=$(ls /usr/local/lib/android/sdk/build-tools/ | sort -V | tail -n 1)
+          ACTUAL_VERSION=$(/usr/local/lib/android/sdk/build-tools/$BUILD_TOOL_VERSION/aapt2 dump badging "$APK" | sed -n "s/.* versionName='\([^']*\)'.*/\1/p" | head -n 1)
+          if [[ "$ACTUAL_VERSION" != "$VERSION" ]]; then
+            echo "::error::APK versionName '$ACTUAL_VERSION' does not match tag version '$VERSION'"
+            exit 1
+          fi
 
       - name: Get Build Tool Version
         shell: bash
